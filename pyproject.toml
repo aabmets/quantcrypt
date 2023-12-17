@@ -1,0 +1,96 @@
+[tool.poetry]
+name = "quantcrypt"
+version = "0.0.1"
+description = "Cross-platform Python library for Post-Quantum Cryptography using prebuilt PQClean binaries"
+authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
+repository = "https://github.com/aabmets/quantcrypt"
+license = "MIT"
+readme = "README.md"
+keywords = ["toolbox", "cross-language", "utility", "scripts", "software", "development"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: OS Independent",
+    "Programming Language :: C",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries"
+]
+packages = [
+    { include = "quantcrypt" }
+]
+
+[tool.poetry.scripts]
+kupydo = "quantcrypt.internal.cli.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+orjson = "^3.9.10"
+dotmap = "^1.3.30"
+argon2-cffi = "^23.1.0"
+pycryptodomex = "^3.19.0"
+pydantic-settings = "^2.1.0"
+pydantic = "^2.5.2"
+rich = "^13.7.0"
+typer = {extras = ["all"], version = "^0.9.0"}
+
+[tool.poetry.group.dev.dependencies]
+devtools-cli = "^0.12.0"
+coverage = "^7.3.3"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.12.0"
+pytest-xdist = {extras = ["psutil"], version = "^3.5.0"}
+
+[tool.pytest.ini_options]
+console_output_style = "count"
+filterwarnings = ["ignore::DeprecationWarning"]
+testpaths = ["tests"]
+addopts = [
+    "--cov=quantcrypt",
+    "--cov-report=html",
+    "--no-cov-on-fail",
+    "--import-mode=append",
+#    "--numprocesses=logical",
+#    "--maxprocesses=4",
+#    "--dist=worksteal"
+]
+pythonpath = [
+    ".",
+    "./quantcrypt",
+    "./quantcrypt/internal"
+]
+
+[tool.coverage.run]
+branch = true
+source = ["quantcrypt/*"]
+
+[tool.coverage.report]
+#fail_under = 90
+skip_empty = true
+ignore_errors = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@abstractmethod"
+]
+
+[tool.coverage.html]
+directory = ".htmlcov"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

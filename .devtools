@@ -1,0 +1,29 @@
+{
+  "license_cmd": {
+    "header": {
+      "title": "MIT License",
+      "year": "2024",
+      "holder": "Mattias Aabmets",
+      "spdx_id": "MIT",
+      "spaces": 3,
+      "oss": true
+    },
+    "paths": [
+      "quantcrypt",
+      "scripts"
+    ],
+    "file_name": "mit.json"
+  },
+  "version_cmd": {
+    "app_version": "0.0.1",
+    "components": [
+      {
+        "name": "lib",
+        "target": "quantcrypt",
+        "ignore": [],
+        "hash": "d7797b28b16d0f15112e414bdeebb4d2"
+      }
+    ],
+    "only_config": false
+  }
+}
