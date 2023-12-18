@@ -17,7 +17,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: OS Independent",
     "Programming Language :: C",
-    "Programming Language :: C++",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -37,6 +36,7 @@ kupydo = "quantcrypt.internal.cli.main:app"
 python = "^3.10"
 orjson = "^3.9.10"
 dotmap = "^1.3.30"
+setuptools = "^69.0.2"
 argon2-cffi = "^23.1.0"
 pycryptodomex = "^3.19.0"
 pydantic-settings = "^2.1.0"
