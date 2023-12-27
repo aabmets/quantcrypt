@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "quantcrypt"
 version = "0.0.1"
-description = "Cross-platform Python library for Post-Quantum Cryptography using prebuilt PQClean binaries"
+description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries of algorithms defined in the CNSA Suite"
 authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
 repository = "https://github.com/aabmets/quantcrypt"
 license = "MIT"
@@ -36,17 +36,18 @@ kupydo = "quantcrypt.internal.cli.main:app"
 python = "^3.10"
 orjson = "^3.9.10"
 dotmap = "^1.3.30"
-setuptools = "^69.0.2"
 argon2-cffi = "^23.1.0"
 pycryptodomex = "^3.19.0"
-pydantic-settings = "^2.1.0"
-pydantic = "^2.5.2"
+pydantic = "^2.5.3"
 rich = "^13.7.0"
 typer = {extras = ["all"], version = "^0.9.0"}
 
 [tool.poetry.group.dev.dependencies]
-devtools-cli = "^0.12.0"
-coverage = "^7.3.3"
+cffi = "^1.16.0"
+pyyaml = "^6.0.1"
+setuptools = "^69.0.3"
+devtools-cli = "^0.12.1"
+coverage = "^7.3.4"
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.12.0"

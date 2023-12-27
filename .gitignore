@@ -232,3 +232,7 @@ fabric.properties
 
 # General exclude folder
 .exclude
+
+# Compile targets in scripts folder
+scripts/
+!scripts/compile.py
