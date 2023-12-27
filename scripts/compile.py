@@ -144,13 +144,12 @@ def find_pqclean_dir() -> Path:
 		if path.is_dir():
 			return path
 		current_path = current_path.parent
-	raise RuntimeError("Must find pqclean dir!")
+	raise RuntimeError("Must find pqclean dir!")  # pragma: no cover
 
 
-@lru_cache(maxsize=1)
-def common_files() -> list[str]:
+def get_common_files() -> tuple[str, list[str]]:
 	path = find_pqclean_dir() / 'common'
-	return [
+	return path.as_posix(), [
 		file.as_posix() for file in path.rglob("**/*")
 		if file.is_file() and file.name.endswith(".c")
 	]
@@ -158,8 +157,7 @@ def common_files() -> list[str]:
 
 def main():
 	opsys = platform.system()
-	pqclean = find_pqclean_dir()
-	common_dir = pqclean / "common"
+	com_dir, com_files = get_common_files()
 
 	compiler_args = list()
 	linker_args = list()
@@ -182,8 +180,8 @@ def main():
 			ffi.set_source(
 				module_name=f"{opsys}.{algo.name}",
 				source=f'#include "{algo.header_file}"',
-				sources=[*common_files(), *algo.variant_files],
-				include_dirs=[common_dir.as_posix()],
+				sources=[*com_files, *algo.variant_files],
+				include_dirs=[com_dir],
 				extra_compile_args=compiler_args,
 				extra_link_args=linker_args,
 				libraries=libraries,
