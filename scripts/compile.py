@@ -180,10 +180,15 @@ def main():
 
 		match opsys:
 			case "Linux" | "Darwin":
-				compiler_args.extend(["-O3", "-std=c99"])
+				compiler_args.extend([
+					"-s", "-flto", "-std=c99",
+					"-0s", "-ffunction-sections",
+					"-O3", "-fdata-sections",
+				])
 				if variant == Variant.AVX2:
 					compiler_args.extend([
-						"-mavx2", "-maes", "-mbmi2", "-mpopcnt"
+						"-mavx2", "-maes",
+						"-mbmi2", "-mpopcnt"
 					])
 			case "Windows":
 				compiler_args.extend(["/O2", "/MD", "/nologo"])
