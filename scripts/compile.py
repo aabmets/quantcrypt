@@ -205,8 +205,9 @@ def main():
 			ffi.compile(verbose=True)
 
 	src_dir = Path(__file__).with_name("bin")
-	for file in src_dir.rglob("*.c"):
-		file.unlink(missing_ok=True)
+	for path in src_dir.rglob("*.*"):
+		if path.is_file() and path.suffix not in [".pyd", ".so"]:
+			path.unlink(missing_ok=True)
 
 	dst_dir = find_abs_path("quantcrypt/internal")
 	shutil.rmtree(dst_dir / "bin", ignore_errors=True)
