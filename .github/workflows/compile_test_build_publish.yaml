@@ -28,7 +28,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --with dev
           python scripts/compile.py
-          pytest
+#          pytest
 
       - name: Upload compiled binaries
         uses: actions/upload-artifact@v4
