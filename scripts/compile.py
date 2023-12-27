@@ -178,7 +178,7 @@ def main():
 			ffi = FFI()
 			ffi.cdef(algo.ffi_cdefs)
 			ffi.set_source(
-				module_name=f"{opsys}.{algo.name}",
+				module_name=f"{opsys}.{variant.value}.{algo.name}",
 				source=f'#include "{algo.header_file}"',
 				sources=[*com_files, *algo.variant_files],
 				include_dirs=[com_dir],
