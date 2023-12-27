@@ -182,7 +182,7 @@ def main():
 			case "Linux" | "Darwin":
 				compiler_args.extend([
 					"-s", "-flto", "-std=c99",
-					"-0s", "-ffunction-sections",
+					"-Os", "-ffunction-sections",
 					"-O3", "-fdata-sections",
 				])
 				if variant == Variant.AVX2:
