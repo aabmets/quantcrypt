@@ -28,7 +28,7 @@ jobs:
           poetry config virtualenvs.create false
           poetry install --with dev
           python scripts/compile.py
-          ls -R
+          ls -R quantcrypt/internal/bin
 #          pytest
 #
 #      - name: Upload compiled binaries

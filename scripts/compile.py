@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+import os
 import yaml
 import shutil
 import textwrap
@@ -161,6 +162,7 @@ def get_common_files() -> tuple[str, list[str]]:
 def main():
 	opsys = platform.system()
 	com_dir, com_files = get_common_files()
+	os.chdir(Path(__file__).parent)
 
 	compiler_args = list()
 	linker_args = list()
@@ -195,9 +197,9 @@ def main():
 	for file in src_dir.rglob("*.c"):
 		file.unlink(missing_ok=True)
 
-	# dst_dir = find_abs_path("quantcrypt/internal")
-	# shutil.rmtree(dst_dir / "bin")
-	# shutil.move(src_dir, dst_dir)
+	dst_dir = find_abs_path("quantcrypt/internal")
+	shutil.rmtree(dst_dir / "bin")
+	shutil.move(src_dir, dst_dir)
 
 
 if __name__ == '__main__':
