@@ -22,8 +22,8 @@ from functools import lru_cache
 
 
 class UnsupportedPlatformError(Exception):
-	def __init__(self, os: str):
-		super().__init__(f"Operating system '{os}' not supported!")
+	def __init__(self, opsys: str):
+		super().__init__(f"Operating system '{opsys}' not supported!")
 
 
 class Variant(Enum):
@@ -151,17 +151,21 @@ def find_abs_path(rel_path: str, from_file: str = __file__) -> Path:
 	raise RuntimeError(f"Cannot find '{rel_path}' in repo!")
 
 
-def get_common_files() -> tuple[str, list[str]]:
+def get_common_files(variant: Variant) -> tuple[str, list[str]]:
 	path = find_abs_path(rel_path="pqclean/common")
-	return path.as_posix(), [
-		file.as_posix() for file in path.rglob("**/*")
-		if file.is_file() and file.name.endswith(".c")
-	]
+	common, keccak = list(), list()
+
+	for file in path.rglob("**/*"):
+		if file.is_file() and file.suffix == '.c':
+			files = keccak if 'keccak4x' in file.as_posix() else common
+			files.append(file.as_posix())
+
+	common.extend(keccak if variant == Variant.AVX2 else [])
+	return path.as_posix(), common
 
 
 def main():
 	opsys = platform.system()
-	com_dir, com_files = get_common_files()
 	os.chdir(Path(__file__).parent)
 
 	compiler_args = list()
@@ -169,16 +173,18 @@ def main():
 	libraries = list()
 
 	for variant in [Variant.CLEAN, Variant.AVX2]:
-		eis = ''.join([
-			'' if opsys == "Windows" else "-m",
-			"AVX" if opsys == "Windows" else "avx",
-			'2' if variant == Variant.AVX2 else ''
-		])
+		com_dir, com_files = get_common_files(variant)
 		match opsys:
 			case "Linux" | "Darwin":
-				compiler_args.extend(["-O3", "-std=c99", eis])
+				compiler_args.extend(["-O3", "-std=c99"])
+				if variant == Variant.AVX2:
+					compiler_args.extend([
+						"-mavx2", "-maes", "-mbmi2", "-mpopcnt"
+					])
 			case "Windows":
-				compiler_args.extend(["/O2", "/MD", f"/arch:{eis}", "/nologo"])
+				compiler_args.extend(["/O2", "/MD", "/nologo"])
+				if variant == Variant.AVX2:
+					compiler_args.append("/arch:AVX2")
 				linker_args.append("/NODEFAULTLIB:MSVCRTD")
 				libraries.append("advapi32")
 			case _:
