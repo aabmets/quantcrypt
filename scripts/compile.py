@@ -168,17 +168,22 @@ def main():
 	linker_args = list()
 	libraries = list()
 
-	match opsys:
-		case "Linux" | "Darwin":
-			compiler_args += ["-O3", "-std=c99"]
-		case "Windows":
-			compiler_args += ["/O2", "/nologo"]
-			linker_args.append("/NODEFAULTLIB:MSVCRTD")
-			libraries.append("advapi32")
-		case _:
-			raise UnsupportedPlatformError(opsys)
-
 	for variant in [Variant.CLEAN, Variant.AVX2]:
+		eis = ''.join([
+			'' if opsys == "Windows" else "-m",
+			"AVX" if opsys == "Windows" else "avx",
+			'2' if variant == Variant.AVX2 else ''
+		])
+		match opsys:
+			case "Linux" | "Darwin":
+				compiler_args.extend(["-O3", "-std=c99", eis])
+			case "Windows":
+				compiler_args.extend(["/O2", "/MD", f"/arch:{eis}", "/nologo"])
+				linker_args.append("/NODEFAULTLIB:MSVCRTD")
+				libraries.append("advapi32")
+			case _:
+				raise UnsupportedPlatformError(opsys)
+
 		for algo in get_supported_algorithms(variant):
 			ffi = FFI()
 			ffi.cdef(algo.ffi_cdefs)
@@ -198,7 +203,7 @@ def main():
 		file.unlink(missing_ok=True)
 
 	dst_dir = find_abs_path("quantcrypt/internal")
-	shutil.rmtree(dst_dir / "bin")
+	shutil.rmtree(dst_dir / "bin", ignore_errors=True)
 	shutil.move(src_dir, dst_dir)
 
 
