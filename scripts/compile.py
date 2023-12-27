@@ -22,8 +22,8 @@ from functools import lru_cache
 
 
 class UnsupportedPlatformError(Exception):
-	def __init__(self, opsys: str):
-		super().__init__(f"Operating system '{opsys}' not supported!")
+	def __init__(self):
+		super().__init__(f"Operating system '{platform.system()}' not supported!")
 
 
 class Variant(Enum):
@@ -40,19 +40,22 @@ class BaseAlgorithm:
 		return DotMap(obj)
 
 	@classmethod
-	def assert_platform_support(cls, algo_path: Path, variant: Variant):
-		meta_file = algo_path.with_name("META.yml")
+	def assert_platform_support(cls, variant_path: Path, variant: Variant):
+		if variant == Variant.CLEAN:
+			return
+		meta_file = variant_path.with_name("META.yml")
 		metadata = cls.read_metadata_file(meta_file)
-		for impl in metadata.implementations:
-			if impl.name != variant.value:
-				continue
-			sup_pfs = impl.get("supported_platforms", [])
-			for spf in sup_pfs:
-				if spf.architecture != 'x86_64':
-					continue
-				opsys = platform.system()
-				if opsys not in spf.operating_systems:
-					raise UnsupportedPlatformError(opsys)
+		impl = [
+			impl for impl in metadata.implementations
+			if impl.name == Variant.AVX2.value
+		][0]
+		spf = [
+			spf for spf in impl.supported_platforms
+			if spf.architecture == "x86_64"
+		][0]
+		if ops := spf.get("operating_systems", []):
+			if platform.system() not in ops:
+				raise UnsupportedPlatformError
 
 	def __init__(self, name: str, variant: Variant, subdir: str, ffi_cdefs: str):
 		pqclean = find_abs_path(rel_path='pqclean')
@@ -165,15 +168,16 @@ def get_common_files(variant: Variant) -> tuple[str, list[str]]:
 
 
 def main():
-	opsys = platform.system()
 	os.chdir(Path(__file__).parent)
-
-	compiler_args = list()
-	linker_args = list()
-	libraries = list()
+	opsys = platform.system()
 
 	for variant in [Variant.CLEAN, Variant.AVX2]:
 		com_dir, com_files = get_common_files(variant)
+
+		compiler_args = list()
+		linker_args = list()
+		libraries = list()
+
 		match opsys:
 			case "Linux" | "Darwin":
 				compiler_args.extend(["-O3", "-std=c99"])
@@ -188,7 +192,7 @@ def main():
 				linker_args.append("/NODEFAULTLIB:MSVCRTD")
 				libraries.append("advapi32")
 			case _:
-				raise UnsupportedPlatformError(opsys)
+				raise UnsupportedPlatformError
 
 		for algo in get_supported_algorithms(variant):
 			ffi = FFI()
