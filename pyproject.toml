@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantcrypt"
-version = "0.0.1"
+version = "0.0.2"
 description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries of algorithms defined in the CNSA Suite"
 authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
 repository = "https://github.com/aabmets/quantcrypt"

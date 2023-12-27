@@ -32,7 +32,7 @@ jobs:
       - name: Upload compiled binaries
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-binaries
+          name: _bin-${{ matrix.os }}
           path: quantcrypt/internal/bin
           retention-days: 1
 
@@ -44,15 +44,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Clean bin directory
+        run: rm -rf quantcrypt/internal/bin/*
+
       - name: Download all compiled binaries
         uses: actions/download-artifact@v4
         with:
           path: quantcrypt/internal/bin
           merge-multiple: true
-
-      - name: Check merged binaries
-        run: |
-          ls -R quantcrypt/internal/bin
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -67,26 +66,26 @@ jobs:
       - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
-          name: package
+          name: pypi-package
           path: dist
-#
-#  publish:
-#    needs: build
-#    runs-on: ubuntu-latest
-#
-#    environment:
-#      name: release
-#      url: https://pypi.org/project/quantcrypt/
-#
-#    permissions:
-#      id-token: write
-#
-#    steps:
-#      - name: Download package artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: package
-#          path: dist
-#
-#      - name: Publish package to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: release
+      url: https://pypi.org/project/quantcrypt/
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pypi-package
+          path: dist
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
