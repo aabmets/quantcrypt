@@ -8,3 +8,9 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+from .internal.crypto.kem import KEM
+
+
+__all__ = [
+	"KEM"
+]

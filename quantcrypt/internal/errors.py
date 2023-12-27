@@ -9,10 +9,29 @@
 #   SPDX-License-Identifier: MIT
 #
 __all__ = [
-	"QuantCryptError"
+	"QuantCryptError",
+	"KeygenFailedError",
+	"EncapsFailedError",
+	"DecapsFailedError"
 ]
 
 
 class QuantCryptError(Exception):
 	"""Base class for all QuantCrypt errors."""
-	pass
+	def __init__(self, errmsg: str):
+		super().__init__(errmsg)
+
+
+class KeygenFailedError(QuantCryptError):
+	def __init__(self):
+		super().__init__("Kupydo KEM keygen failed.")
+
+
+class EncapsFailedError(QuantCryptError):
+	def __init__(self):
+		super().__init__("Kupydo KEM encaps failed.")
+
+
+class DecapsFailedError(QuantCryptError):
+	def __init__(self):
+		super().__init__("Kupydo KEM decaps failed.")
