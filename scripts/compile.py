@@ -195,9 +195,9 @@ def main():
 	for file in src_dir.rglob("*.c"):
 		file.unlink(missing_ok=True)
 
-	dst_dir = find_abs_path("quantcrypt/internal")
-	shutil.rmtree(dst_dir / "bin")
-	shutil.move(src_dir, dst_dir)
+	# dst_dir = find_abs_path("quantcrypt/internal")
+	# shutil.rmtree(dst_dir / "bin")
+	# shutil.move(src_dir, dst_dir)
 
 
 if __name__ == '__main__':
