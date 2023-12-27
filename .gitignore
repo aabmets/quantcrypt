@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# Must allow pqclean binaries
+!quantcrypt/internal/bin/**/*.pyd
+!quantcrypt/internal/bin/**/*.so
+
 # Distribution / packaging
 .Python
 build/
@@ -233,6 +237,6 @@ fabric.properties
 # General exclude folder
 .exclude
 
-# Compile targets in scripts folder
+# Only allow compile.py script
 scripts/
 !scripts/compile.py
