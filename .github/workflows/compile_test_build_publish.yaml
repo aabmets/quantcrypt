@@ -32,7 +32,7 @@ jobs:
       - name: Upload compiled binaries
         uses: actions/upload-artifact@v4
         with:
-          name: _bin-${{ matrix.os }}
+          name: bin-${{ matrix.os }}
           path: quantcrypt/internal/bin
           retention-days: 1
 
