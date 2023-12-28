@@ -17,12 +17,11 @@ from quantcrypt.errors import *
 from .common import *
 
 
-class KemParamSizes:
+class KemParamSizes(BaseParamSizes):
 	def __init__(self, lib: ModuleType, ns: str):
-		self.sk_size = getattr(lib, f"{ns}_CRYPTO_SECRETKEYBYTES")
-		self.pk_size = getattr(lib, f"{ns}_CRYPTO_PUBLICKEYBYTES")
 		self.ct_size = getattr(lib, f"{ns}_CRYPTO_CIPHERTEXTBYTES")
 		self.ss_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
+		super().__init__(lib, ns)
 
 
 class BaseKEM(BasePQCAlgorithm, ABC):

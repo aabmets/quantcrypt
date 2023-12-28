@@ -22,6 +22,7 @@ from quantcrypt.errors import *
 
 __all__ = [
 	"Variant",
+	"BaseParamSizes",
 	"BasePQCAlgorithm"
 ]
 
@@ -29,6 +30,12 @@ __all__ = [
 class Variant(Enum):
 	CLEAN = "clean"
 	AVX2 = "avx2"
+
+
+class BaseParamSizes:
+	def __init__(self, lib: ModuleType, ns: str):
+		self.sk_size = getattr(lib, f"{ns}_CRYPTO_SECRETKEYBYTES")
+		self.pk_size = getattr(lib, f"{ns}_CRYPTO_PUBLICKEYBYTES")
 
 
 class BasePQCAlgorithm(ABC):
@@ -41,7 +48,7 @@ class BasePQCAlgorithm(ABC):
 
 	@property
 	@abstractmethod
-	def param_sizes(self) -> object: ...
+	def param_sizes(self) -> BaseParamSizes: ...
 
 	@abstractmethod
 	def keygen(self) -> tuple[bytes, bytes]: ...
@@ -80,17 +87,17 @@ class BasePQCAlgorithm(ABC):
 			)
 
 	def _keygen(self, algo_type: Literal["kem", "sign"]) -> tuple[bytes, bytes]:
-		ffi, kbp = FFI(), self.param_sizes
-		public_key = ffi.new(f"uint8_t [{kbp.pk_size}]")
-		secret_key = ffi.new(f"uint8_t [{kbp.sk_size}]")
+		ffi, params = FFI(), self.param_sizes
+		public_key = ffi.new(f"uint8_t [{params.pk_size}]")
+		secret_key = ffi.new(f"uint8_t [{params.sk_size}]")
 
 		name = f"_crypto_{algo_type}_keypair"
 		func = getattr(self._lib, self._namespace + name)
 		if 0 != func(public_key, secret_key):
 			raise KeygenFailedError
 
-		pk = ffi.buffer(public_key, kbp.pk_size)
-		sk = ffi.buffer(secret_key, kbp.sk_size)
+		pk = ffi.buffer(public_key, params.pk_size)
+		sk = ffi.buffer(secret_key, params.sk_size)
 		return bytes(pk), bytes(sk)
 
 	@staticmethod
