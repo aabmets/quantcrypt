@@ -19,12 +19,18 @@ from dataclasses import dataclass
 from ..errors import QuantCryptError
 
 
+__all__ = [
+	"Variant",
+	"BasePQCAlgorithm"
+]
+
+
 class Variant(Enum):
 	CLEAN = "clean"
 	AVX2 = "avx2"
 
 
-class BasePubkeyAlgorithm(ABC):
+class BasePQCAlgorithm(ABC):
 	_lib: ModuleType
 	variant: Variant
 
@@ -56,16 +62,23 @@ class BasePubkeyAlgorithm(ABC):
 		elif not len(data) == exp_size:
 			raise QuantCryptError(f"{base} length {exp_size}")
 
-	def __init__(self):
+	def __init__(self, variant: Variant = None):
+		# variant is None -> auto-select mode
 		try:
-			self._lib = self._import(Variant.AVX2)
-			self.variant = Variant.AVX2
-		except ModuleNotFoundError:
-			try:
-				self._lib = self._import(Variant.CLEAN)
-				self.variant = Variant.CLEAN
-			except ModuleNotFoundError:
-				raise SystemExit(
-					"QuantCryptError: "
-					"Unable to continue due to missing binaries."
-				)
+			_var = variant or Variant.AVX2
+			self._lib = self._import(_var)
+			self.variant = _var
+		except ModuleNotFoundError as ex:
+			if variant is None:
+				try:
+					self._lib = self._import(Variant.CLEAN)
+					self.variant = Variant.CLEAN
+					return
+				except ModuleNotFoundError:
+					pass
+			elif variant == Variant.AVX2:
+				raise ex
+			raise SystemExit(
+				"Quantcrypt Fatal Error:\n"
+				"Unable to continue due to missing CLEAN binaries."
+			)
