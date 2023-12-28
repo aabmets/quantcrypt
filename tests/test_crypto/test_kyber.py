@@ -8,6 +8,7 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+import pytest
 from secrets import compare_digest
 from typing import Callable
 from quantcrypt import KEM
@@ -34,6 +35,17 @@ def test_kyber_attributes():
 
 	assert hasattr(kem, "name")
 	assert isinstance(kem.name, str)
+
+
+def test_kyber_variants():
+	kem = KEM.Kyber()
+	assert kem.variant == Variant.CLEAN
+
+	kem = KEM.Kyber(Variant.CLEAN)
+	assert kem.variant == Variant.CLEAN
+
+	with pytest.raises(ModuleNotFoundError):
+		KEM.Kyber(Variant.AVX2)
 
 
 def test_kyber_cryptography():
