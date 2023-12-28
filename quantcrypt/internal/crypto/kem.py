@@ -10,71 +10,68 @@
 #
 from abc import ABC
 from cffi import FFI
-from dataclasses import dataclass
-from .common import Variant, BasePQCAlgorithm
-from ..errors import *
+from types import ModuleType
+from functools import lru_cache
+from pydantic import validate_call
+from quantcrypt.errors import *
+from .common import *
 
 
-@dataclass
-class KemByteParams:
-	sk_size: int
-	pk_size: int
-	ct_size: int
-	ss_size: int
+class KemParamSizes:
+	def __init__(self, lib: ModuleType, ns: str):
+		self.sk_size = getattr(lib, f"{ns}_CRYPTO_SECRETKEYBYTES")
+		self.pk_size = getattr(lib, f"{ns}_CRYPTO_PUBLICKEYBYTES")
+		self.ct_size = getattr(lib, f"{ns}_CRYPTO_CIPHERTEXTBYTES")
+		self.ss_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
 
 
 class BaseKEM(BasePQCAlgorithm, ABC):
 	@property
-	def params(self):
-		root = f"{self._namespace}_CRYPTO"
-		return KemByteParams(
-			sk_size=getattr(self._lib, f"{root}_SECRETKEYBYTES"),
-			pk_size=getattr(self._lib, f"{root}_PUBLICKEYBYTES"),
-			ct_size=getattr(self._lib, f"{root}_CIPHERTEXTBYTES"),
-			ss_size=getattr(self._lib, f"{root}_BYTES")
-		)
+	@lru_cache
+	def param_sizes(self) -> KemParamSizes:
+		return KemParamSizes(self._lib, self._namespace)
 
 	def keygen(self) -> tuple[bytes, bytes]:
-		ffi, kbp = FFI(), self.params
-		public_key = ffi.new(f"uint8_t [{kbp.pk_size}]")
-		secret_key = ffi.new(f"uint8_t [{kbp.sk_size}]")
-
-		func = getattr(self._lib, self._namespace + "_crypto_kem_keypair")
-		if 0 != func(public_key, secret_key):
-			raise KeygenFailedError
-
-		pk = ffi.buffer(public_key, kbp.pk_size)
-		sk = ffi.buffer(secret_key, kbp.sk_size)
-		return bytes(pk), bytes(sk)
+		return self._keygen("kem")
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
-		self._validate(public_key, self.params.pk_size, "public_key")
+		params = self.param_sizes
+		pk_anno = self._bytes_anno(equal_to=params.pk_size)
 
-		ffi = FFI()
-		cipher_text = ffi.new(f"uint8_t [{self.params.ct_size}]")
-		shared_secret = ffi.new(f"uint8_t [{self.params.ss_size}]")
+		@validate_call(validate_return=True)
+		def _encaps(pk: pk_anno) -> tuple[bytes, bytes]:
+			ffi = FFI()
+			cipher_text = ffi.new(f"uint8_t [{params.ct_size}]")
+			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
-		func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
-		if 0 != func(cipher_text, shared_secret, public_key):
-			raise EncapsFailedError
+			func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
+			if 0 != func(cipher_text, shared_secret, pk):
+				raise EncapsFailedError
 
-		ct = ffi.buffer(cipher_text, self.params.ct_size)
-		ss = ffi.buffer(shared_secret, self.params.ss_size)
-		return bytes(ct), bytes(ss)
+			ct = ffi.buffer(cipher_text, params.ct_size)
+			ss = ffi.buffer(shared_secret, params.ss_size)
+			return bytes(ct), bytes(ss)
+
+		return _encaps(public_key)
 
 	def decaps(self, secret_key: bytes, cipher_text: bytes) -> bytes:
-		self._validate(secret_key, self.params.sk_size, "secret_key")
-		self._validate(cipher_text, self.params.ct_size, "cipher_text")
+		params = self.param_sizes
+		sk_anno = self._bytes_anno(equal_to=params.sk_size)
+		ct_anno = self._bytes_anno(equal_to=params.ct_size)
 
-		ffi = FFI()
-		shared_secret = ffi.new(f"uint8_t [{self.params.ss_size}]")
+		@validate_call(validate_return=True)
+		def _decaps(sk: sk_anno, ct: ct_anno) -> bytes:
+			ffi = FFI()
+			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
-		func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
-		if 0 != func(shared_secret, cipher_text, secret_key):
-			raise DecapsFailedError
+			func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
+			if 0 != func(shared_secret, ct, sk):
+				raise DecapsFailedError
 
-		ss = ffi.buffer(shared_secret, self.params.ss_size)
-		return bytes(ss)
+			ss = ffi.buffer(shared_secret, params.ss_size)
+			return bytes(ss)
+
+		return _decaps(secret_key, cipher_text)
 
 
 class KEM:

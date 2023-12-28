@@ -10,13 +10,14 @@
 #
 import platform
 import importlib
+from cffi import FFI
 from enum import Enum
-from typing import Any
 from types import ModuleType
-from abc import ABC, abstractmethod
+from pydantic import Field
 from functools import lru_cache
-from dataclasses import dataclass
-from ..errors import QuantCryptError
+from typing import Literal, Type, Annotated
+from abc import ABC, abstractmethod
+from quantcrypt.errors import *
 
 
 __all__ = [
@@ -40,7 +41,10 @@ class BasePQCAlgorithm(ABC):
 
 	@property
 	@abstractmethod
-	def params(self) -> dataclass: ...
+	def param_sizes(self) -> object: ...
+
+	@abstractmethod
+	def keygen(self) -> tuple[bytes, bytes]: ...
 
 	@property
 	def _namespace(self) -> str:
@@ -53,14 +57,6 @@ class BasePQCAlgorithm(ABC):
 			f"quantcrypt.internal.bin.{platform.system()}" +
 			f".{variant.value}.{self.name.replace('-', '_')}"
 		).lib
-
-	@staticmethod
-	def _validate(data: Any, exp_size: int, param_name: str) -> None:
-		base = f"{param_name} must be of"
-		if not isinstance(data, bytes):
-			raise QuantCryptError(f"{base} type 'bytes'")
-		elif not len(data) == exp_size:
-			raise QuantCryptError(f"{base} length {exp_size}")
 
 	def __init__(self, variant: Variant = None):
 		# variant is None -> auto-select mode
@@ -82,3 +78,25 @@ class BasePQCAlgorithm(ABC):
 				"Quantcrypt Fatal Error:\n"
 				"Unable to continue due to missing CLEAN binaries."
 			)
+
+	def _keygen(self, algo_type: Literal["kem", "sign"]) -> tuple[bytes, bytes]:
+		ffi, kbp = FFI(), self.param_sizes
+		public_key = ffi.new(f"uint8_t [{kbp.pk_size}]")
+		secret_key = ffi.new(f"uint8_t [{kbp.sk_size}]")
+
+		name = f"_crypto_{algo_type}_keypair"
+		func = getattr(self._lib, self._namespace + name)
+		if 0 != func(public_key, secret_key):
+			raise KeygenFailedError
+
+		pk = ffi.buffer(public_key, kbp.pk_size)
+		sk = ffi.buffer(secret_key, kbp.sk_size)
+		return bytes(pk), bytes(sk)
+
+	@staticmethod
+	def _bytes_anno(min_size: int = None, max_size: int = None, equal_to: int = None) -> Type[bytes]:
+		return Annotated[bytes, Field(
+			min_length=equal_to or min_size,
+			max_length=equal_to or max_size,
+			strict=True
+		)]

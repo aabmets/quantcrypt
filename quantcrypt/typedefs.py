@@ -9,10 +9,12 @@
 #   SPDX-License-Identifier: MIT
 #
 from quantcrypt.internal.crypto.common import Variant
-from quantcrypt.internal.crypto.kem import KemByteParams
+from quantcrypt.internal.crypto.kem import KemParamSizes
+from quantcrypt.internal.crypto.dss import DssParamSizes
 
 
 __all__ = [
 	"Variant",
-	"KemByteParams"
+	"KemParamSizes",
+	"DssParamSizes"
 ]
