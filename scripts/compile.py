@@ -171,9 +171,8 @@ def main():
 	os.chdir(Path(__file__).parent)
 	opsys = platform.system()
 
-	for variant in [Variant.CLEAN, Variant.AVX2]:
+	for variant in [Variant.CLEAN]:  # AVX2 currently not supported
 		com_dir, com_files = get_common_files(variant)
-
 		compiler_args = list()
 		linker_args = list()
 		libraries = list()
