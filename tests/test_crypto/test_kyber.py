@@ -9,20 +9,24 @@
 #   SPDX-License-Identifier: MIT
 #
 import pytest
-from secrets import compare_digest
 from typing import Callable
+from secrets import compare_digest
+from pydantic import ValidationError
+from quantcrypt.typedefs import *
 from quantcrypt import KEM
-from quantcrypt.utils import *
 
 
 def test_kyber_attributes():
 	kem = KEM.Kyber()
 
+	assert hasattr(kem, "name")
+	assert isinstance(kem.name, str)
+
 	assert hasattr(kem, "variant")
 	assert isinstance(kem.variant, Variant)
 
-	assert hasattr(kem, "params")
-	assert isinstance(kem.params, KemByteParams)
+	assert hasattr(kem, "param_sizes")
+	assert isinstance(kem.param_sizes, KemParamSizes)
 
 	assert hasattr(kem, "keygen")
 	assert isinstance(kem.keygen, Callable)
@@ -32,9 +36,6 @@ def test_kyber_attributes():
 
 	assert hasattr(kem, "decaps")
 	assert isinstance(kem.decaps, Callable)
-
-	assert hasattr(kem, "name")
-	assert isinstance(kem.name, str)
 
 
 def test_kyber_variants():
@@ -50,10 +51,45 @@ def test_kyber_variants():
 
 def test_kyber_cryptography():
 	kem = KEM.Kyber()
-
+	params = kem.param_sizes
 	public_key, secret_key = kem.keygen()
-	cipher_text, shared_secret = kem.encaps(public_key)
-	identical_shared_secret = kem.decaps(secret_key, cipher_text)
 
-	assert compare_digest(shared_secret, identical_shared_secret), \
-		"Kyber decaps did not produce identical shared secret"
+	assert isinstance(public_key, bytes)
+	assert len(public_key) == params.pk_size
+	assert isinstance(secret_key, bytes)
+	assert len(secret_key) == params.sk_size
+
+	cipher_text, shared_secret = kem.encaps(public_key)
+
+	assert isinstance(cipher_text, bytes)
+	assert len(cipher_text) == params.ct_size
+	assert isinstance(shared_secret, bytes)
+	assert len(shared_secret) == params.ss_size
+
+	decaps_shared_secret = kem.decaps(secret_key, cipher_text)
+
+	assert isinstance(decaps_shared_secret, bytes)
+	assert len(decaps_shared_secret) == params.ss_size
+	assert compare_digest(shared_secret, decaps_shared_secret)
+
+
+def test_kyber_invalid_inputs(
+		invalid_keys: Callable,
+		invalid_ciphertexts: Callable):
+
+	kem = KEM.Kyber()
+	public_key, secret_key = kem.keygen()
+
+	for ipk in invalid_keys(public_key):
+		with pytest.raises(ValidationError):
+			kem.encaps(ipk)
+
+	cipher_text, shared_secret = kem.encaps(public_key)
+
+	for isk in invalid_keys(secret_key):
+		with pytest.raises(ValidationError):
+			kem.decaps(isk, cipher_text)
+
+	for ict in invalid_ciphertexts(cipher_text):
+		with pytest.raises(ValidationError):
+			kem.decaps(secret_key, ict)
