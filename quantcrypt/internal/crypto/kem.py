@@ -26,7 +26,7 @@ class KemByteParams:
 class BaseKEM(BasePubkeyAlgorithm, ABC):
 	@property
 	def params(self):
-		root = f"{self.namespace}_CRYPTO"
+		root = f"{self._namespace}_CRYPTO"
 		return KemByteParams(
 			sk_size=getattr(self._lib, f"{root}_SECRETKEYBYTES"),
 			pk_size=getattr(self._lib, f"{root}_PUBLICKEYBYTES"),
@@ -39,7 +39,7 @@ class BaseKEM(BasePubkeyAlgorithm, ABC):
 		public_key = ffi.new(f"uint8_t [{kbp.pk_size}]")
 		secret_key = ffi.new(f"uint8_t [{kbp.sk_size}]")
 
-		func = getattr(self._lib, self.namespace + "_crypto_kem_keypair")
+		func = getattr(self._lib, self._namespace + "_crypto_kem_keypair")
 		if 0 != func(public_key, secret_key):
 			raise KeygenFailedError
 
@@ -48,13 +48,13 @@ class BaseKEM(BasePubkeyAlgorithm, ABC):
 		return bytes(pk), bytes(sk)
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
-		self.validate(public_key, self.params.pk_size, "public_key")
+		self._validate(public_key, self.params.pk_size, "public_key")
 
 		ffi = FFI()
 		cipher_text = ffi.new(f"uint8_t [{self.params.ct_size}]")
 		shared_secret = ffi.new(f"uint8_t [{self.params.ss_size}]")
 
-		func = getattr(self._lib, self.namespace + "_crypto_kem_enc")
+		func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
 		if 0 != func(cipher_text, shared_secret, public_key):
 			raise EncapsFailedError
 
@@ -63,13 +63,13 @@ class BaseKEM(BasePubkeyAlgorithm, ABC):
 		return bytes(ct), bytes(ss)
 
 	def decaps(self, secret_key: bytes, cipher_text: bytes) -> bytes:
-		self.validate(secret_key, self.params.sk_size, "secret_key")
-		self.validate(cipher_text, self.params.ct_size, "cipher_text")
+		self._validate(secret_key, self.params.sk_size, "secret_key")
+		self._validate(cipher_text, self.params.ct_size, "cipher_text")
 
 		ffi = FFI()
 		shared_secret = ffi.new(f"uint8_t [{self.params.ss_size}]")
 
-		func = getattr(self._lib, self.namespace + "_crypto_kem_dec")
+		func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
 		if 0 != func(shared_secret, cipher_text, secret_key):
 			raise DecapsFailedError
 
