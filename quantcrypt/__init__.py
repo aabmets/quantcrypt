@@ -9,8 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 from .internal.crypto.kem import KEM
+from .internal.crypto.dss import DSS
 
 
-__all__ = [
-	"KEM"
-]
+__all__ = ["KEM", "DSS"]
