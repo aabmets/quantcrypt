@@ -46,7 +46,7 @@ class BaseDSS(BasePQCAlgorithm, ABC):
 
 			func = getattr(self._lib, self._namespace + f"_crypto_sign_signature")
 			if 0 != func(sig_buf, sig_len, msg, len(msg), sk):
-				raise SignFailedError
+				raise DSSSignFailedError
 
 			sig_len = struct.unpack("Q", ffi.buffer(sig_len, 8))[0]
 			return bytes(ffi.buffer(sig_buf, sig_len))
@@ -64,7 +64,7 @@ class BaseDSS(BasePQCAlgorithm, ABC):
 			func = getattr(self._lib, self._namespace + f"_crypto_sign_verify")
 			result = func(sig, len(sig), msg, len(msg), pk)
 			if result != 0 and _raises:
-				raise VerifyFailedError
+				raise DSSVerifyFailedError
 			return result == 0
 
 		return _verify(public_key, message, signature, raises)

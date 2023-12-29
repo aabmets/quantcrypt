@@ -94,7 +94,7 @@ class BasePQCAlgorithm(ABC):
 		name = f"_crypto_{algo_type}_keypair"
 		func = getattr(self._lib, self._namespace + name)
 		if 0 != func(public_key, secret_key):
-			raise KeygenFailedError
+			raise PQAKeygenFailedError
 
 		pk = ffi.buffer(public_key, params.pk_size)
 		sk = ffi.buffer(secret_key, params.sk_size)

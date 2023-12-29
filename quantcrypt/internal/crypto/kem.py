@@ -45,7 +45,7 @@ class BaseKEM(BasePQCAlgorithm, ABC):
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
 			if 0 != func(cipher_text, shared_secret, pk):
-				raise EncapsFailedError
+				raise KEMEncapsFailedError
 
 			ct = ffi.buffer(cipher_text, params.ct_size)
 			ss = ffi.buffer(shared_secret, params.ss_size)
@@ -65,7 +65,7 @@ class BaseKEM(BasePQCAlgorithm, ABC):
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
 			if 0 != func(shared_secret, ct, sk):
-				raise DecapsFailedError
+				raise KEMDecapsFailedError
 
 			ss = ffi.buffer(shared_secret, params.ss_size)
 			return bytes(ss)

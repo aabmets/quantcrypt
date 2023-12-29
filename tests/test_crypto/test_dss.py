@@ -100,13 +100,13 @@ def fixture_invalid_inputs_tests(
 			with pytest.raises(ValidationError):
 				dss.verify(public_key, message, inv_sig)
 
-		with pytest.raises(VerifyFailedError):
+		with pytest.raises(DSSVerifyFailedError):
 			dss.verify(public_key[::-1], message, signature)
 
-		with pytest.raises(VerifyFailedError):
+		with pytest.raises(DSSVerifyFailedError):
 			dss.verify(public_key, message[::-1], signature)
 
-		with pytest.raises(VerifyFailedError):
+		with pytest.raises(DSSVerifyFailedError):
 			dss.verify(public_key, message, signature[::-1])
 
 	return closure

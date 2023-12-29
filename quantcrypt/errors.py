@@ -10,40 +10,70 @@
 #
 __all__ = [
 	"QuantCryptError",
-	"KeygenFailedError",
-	"EncapsFailedError",
-	"DecapsFailedError",
-	"SignFailedError",
-	"VerifyFailedError"
+	"PQAKeygenFailedError",
+	"KEMEncapsFailedError",
+	"KEMDecapsFailedError",
+	"DSSSignFailedError",
+	"DSSVerifyFailedError",
+	"KDFWeakPasswordError",
+	"KDFVerificationError",
+	"KDFInvalidHashError",
+	"KDFHashingError",
 ]
 
 
 class QuantCryptError(Exception):
 	"""Base class for all QuantCrypt errors."""
-	def __init__(self, errmsg: str):
-		super().__init__(errmsg)
 
 
-class KeygenFailedError(QuantCryptError):
+class PQAError(QuantCryptError):
+	"""Base class for all QuantCrypt PQA errors."""
+
+
+class PQAKeygenFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt KEM/DSS keygen failed.")
 
 
-class EncapsFailedError(QuantCryptError):
+class KEMEncapsFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt KEM encaps failed.")
 
 
-class DecapsFailedError(QuantCryptError):
+class KEMDecapsFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt KEM decaps failed.")
 
 
-class SignFailedError(QuantCryptError):
+class DSSSignFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt DSS sign failed.")
 
 
-class VerifyFailedError(QuantCryptError):
+class DSSVerifyFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt DSS verify failed.")
+
+
+class KDFError(QuantCryptError):
+	"""Base class for all QuantCrypt KDF errors."""
+
+
+class KDFWeakPasswordError(KDFError):
+	def __init__(self):
+		super().__init__("Weak passwords are not allowed.")
+
+
+class KDFVerificationError(KDFError):
+	def __init__(self):
+		super().__init__("KDF failed to verify the password against the provided public hash.")
+
+
+class KDFInvalidHashError(KDFError):
+	def __init__(self):
+		super().__init__("KDF was provided with an invalid hash for verification.")
+
+
+class KDFHashingError(KDFError):
+	def __init__(self):
+		super().__init__("KDF was unable to hash the password due to an internal error.")
