@@ -12,7 +12,7 @@ import pytest
 from typing import Callable, Type
 from pydantic import ValidationError
 from quantcrypt.internal.crypto.dss import BaseDSS
-from quantcrypt.typedefs import *
+from quantcrypt.utils import *
 from quantcrypt.errors import *
 from quantcrypt import DSS
 

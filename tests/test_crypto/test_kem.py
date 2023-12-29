@@ -13,7 +13,7 @@ from secrets import compare_digest
 from typing import Callable, Type
 from pydantic import ValidationError
 from quantcrypt.internal.crypto.kem import BaseKEM
-from quantcrypt.typedefs import *
+from quantcrypt.utils import *
 from quantcrypt import KEM
 
 

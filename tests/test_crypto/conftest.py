@@ -12,7 +12,7 @@ import pytest
 from typing import Callable, Type
 from functools import lru_cache
 from quantcrypt.internal.crypto.common import BasePQCAlgorithm
-from quantcrypt.typedefs import *
+from quantcrypt.utils import *
 
 
 @pytest.fixture(scope="package")
