@@ -10,6 +10,7 @@
 #
 from .internal.crypto.kem import KEM
 from .internal.crypto.dss import DSS
+from .internal.crypto.kdf import KDF
 
 
-__all__ = ["KEM", "DSS"]
+__all__ = ["KEM", "DSS", "KDF"]
