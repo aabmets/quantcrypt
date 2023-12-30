@@ -12,7 +12,7 @@ import timeit
 import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
-from quantcrypt.utils import Argon2Params
+from quantcrypt.utils import KDFParams
 from quantcrypt.errors import *
 from quantcrypt import KDF
 
@@ -37,7 +37,7 @@ def fixture_test_context() -> Callable:
 
 
 def test_argon2params_good_values():
-	Argon2Params(
+	KDFParams(
 		memory_cost=2**15,
 		parallelism=1,
 		time_cost=1,
@@ -48,7 +48,7 @@ def test_argon2params_good_values():
 
 def test_argon2params_bad_parallelism():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=0,  # less than 1
 			memory_cost=2**15,
 			time_cost=1,
@@ -59,7 +59,7 @@ def test_argon2params_bad_parallelism():
 
 def test_argon2params_too_weak_mem_cost():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**14,  # less than 2**15
 			time_cost=1,
@@ -70,7 +70,7 @@ def test_argon2params_too_weak_mem_cost():
 
 def test_argon2params_bad_mem_cost_number():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=3**15,  # not power of 2
 			time_cost=1,
@@ -81,7 +81,7 @@ def test_argon2params_bad_mem_cost_number():
 
 def test_argon2params_bad_time_cost():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**15,
 			time_cost=0,  # less than 1
@@ -92,7 +92,7 @@ def test_argon2params_bad_time_cost():
 
 def test_argon2params_too_short_hash_len():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**15,
 			time_cost=1,
@@ -103,7 +103,7 @@ def test_argon2params_too_short_hash_len():
 
 def test_argon2params_too_long_hash_len():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**15,
 			time_cost=1,
@@ -114,7 +114,7 @@ def test_argon2params_too_long_hash_len():
 
 def test_argon2params_too_short_salt_len():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**15,
 			time_cost=1,
@@ -125,7 +125,7 @@ def test_argon2params_too_short_salt_len():
 
 def test_argon2params_too_long_salt_len():
 	with pytest.raises(ValidationError):
-		Argon2Params(
+		KDFParams(
 			parallelism=1,
 			memory_cost=2**15,
 			time_cost=1,
@@ -160,21 +160,21 @@ def test_argon2_errors(good_pw: str, test_context: Callable):
 
 
 def test_argon2_overrides(good_pw: str):
-	ovr_s = Argon2Params(
+	ovr_s = KDFParams(
 		parallelism=8,
 		memory_cost=2 ** 15,  # smaller than ovr2
 		time_cost=1,
 		hash_len=16,
 		salt_len=16
 	)
-	ovr_ref = Argon2Params(
+	ovr_ref = KDFParams(
 		parallelism=8,
 		memory_cost=2**16,  # Reference
 		time_cost=1,
 		hash_len=16,
 		salt_len=16
 	)
-	ovr_l = Argon2Params(
+	ovr_l = KDFParams(
 		parallelism=8,
 		memory_cost=2**17,  # larger than ovr2
 		time_cost=1,
@@ -217,7 +217,7 @@ def test_argon2key_errors(good_pw: str, test_context: Callable):
 
 
 def test_argon2key_overrides(good_pw: str):
-	ovr1 = Argon2Params(
+	ovr1 = KDFParams(
 		parallelism=4,
 		memory_cost=2**15,
 		time_cost=1,
