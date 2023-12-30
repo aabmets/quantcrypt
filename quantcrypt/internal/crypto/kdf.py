@@ -8,67 +8,63 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from __future__ import annotations
 import base64
 import secrets
-from pydantic import (
-	model_validator,
-	validate_call,
-	BaseModel
-)
+from enum import Enum
 from zxcvbn import zxcvbn
+from dotmap import DotMap
+from typing import Annotated
 from argon2 import PasswordHasher
 from argon2 import exceptions as aex
+from pydantic import ConfigDict, Field, validate_call
 from abc import ABC, abstractmethod
 from quantcrypt.errors import *
 
 
-class Argon2Params(BaseModel):
-	parallelism: int
-	memory_cost: int
-	time_cost: int
-	hash_len: int
-	salt_len: int
+_validator = validate_call(config=ConfigDict(
+	arbitrary_types_allowed=True
+))
 
+
+class KDFMemCost(Enum):
+	MiB_32 = 2**15
+	MiB_64 = 2**16
+	MiB_128 = 2**17
+	MiB_256 = 2**18
+	MiB_512 = 2**19
+	GiB_1 = 2**20
+	GiB_2 = 2**21
+	GiB_4 = 2**22
+	GiB_8 = 2**23
+	GiB_16 = 2**24
+	GiB_32 = 2**25
+
+
+class Argon2Params(DotMap):
+	@validate_call
 	def __init__(
 			self,
-			parallelism: int,
-			memory_cost: int,
-			time_cost: int,
-			hash_len: int,
-			salt_len: int
+			memory_cost: KDFMemCost,
+			parallelism: Annotated[int, Field(gt=0)],
+			time_cost: Annotated[int, Field(gt=0)],
+			hash_len: Annotated[int, Field(ge=16, le=64)] = 32,
+			salt_len: Annotated[int, Field(ge=16, le=64)] = 32
 	):
-		"""Custom parameters for KDF Argon2 classes."""
-		kwargs = locals()
-		kwargs.pop('self')
-		super().__init__(**kwargs)
-
-	@model_validator(mode='after')
-	def validate_model(self) -> Argon2Params:
-		assert self.parallelism >= 1, \
-			"Parallelism cannot be 0 or negative."
-		assert self.memory_cost >= 1024, \
-			"Memory cost must be greater than or equal to 2**10 (1 MB)."
-		assert self.memory_cost <= 33554432, \
-			"Memory cost must be less than or equal to 2**25 (32 GB)."
-		assert (self.memory_cost & (self.memory_cost - 1)) == 0, \
-			"Memory cost value must be a power of 2."
-		assert self.time_cost >= 1, \
-			"Time cost cannot be 0 or negative."
-		assert self.hash_len >= 32, \
-			"Hash length must be at least 32."
-		assert self.salt_len >= 32, \
-			"Salt length must be at least 32."
-		return self
+		memory_cost = memory_cost.value
+		super().__init__({
+			k: v for k, v in locals().items()
+			if k not in ["self", "__class__"]
+		})
 
 
 class BaseArgon2(ABC):
+	_testing: bool = False
 	_engine: PasswordHasher
 	params: Argon2Params
 
 	@staticmethod
 	@abstractmethod
-	def _default_params(testing: bool) -> Argon2Params: ...
+	def _default_params() -> Argon2Params: ...
 
 	@staticmethod
 	def _assert_crack_resistance(password: str, min_years: int, data_key: str) -> None:
@@ -84,45 +80,46 @@ class BaseArgon2(ABC):
 			return data + '=' * (4 - remainder)
 		return data
 
-	def __init__(self, overrides: Argon2Params, testing: bool):
-		params = overrides or self._default_params(testing)
-		self._engine = PasswordHasher(**params.model_dump())
+	def __init__(self, overrides: Argon2Params | None):
+		params = overrides or self._default_params()
+		if not overrides and self._testing:
+			params.memory_cost = 2**10
+		self._engine = PasswordHasher(**params.toDict())
 		self.params = params
 
 
 class KDF:
-	class Argon2Hash(BaseArgon2):
+	class Argon2(BaseArgon2):
 		public_hash: str = None
 		rehashed: bool = False
 		verified: bool = False
 
 		@staticmethod
-		def _default_params(testing) -> Argon2Params:
-			# Using 512 MB of memory and 0.5 seconds
+		def _default_params() -> Argon2Params:
+			# Using 1 GiB of memory and approx 0.5 seconds
 			# on 12-th Gen Intel i7 at 2.2 GHz
 			return Argon2Params(
-				memory_cost=2**(10 if testing else 19),
+				memory_cost=KDFMemCost.GiB_1,
 				parallelism=8,
-				time_cost=6,
+				time_cost=3,
 				hash_len=32,
 				salt_len=32
 			)
 
-		@validate_call
+		@_validator
 		def __init__(
 				self,
 				password: str,
 				verif_hash: str = None,
 				*,
 				min_years: int = 1,
-				testing: bool = False,
 				params: Argon2Params = None
 		):
 			if not verif_hash and min_years > 0:
 				data_key = "online_no_throttling_10_per_second"
 				self._assert_crack_resistance(password, min_years, data_key)
 
-			super().__init__(params, testing)
+			super().__init__(params)
 			try:
 				if verif_hash is None:
 					self.public_hash = self._engine.hash(password)
@@ -140,37 +137,36 @@ class KDF:
 			except aex.HashingError:
 				raise KDFHashingError
 
-	class Argon2Secret(BaseArgon2):
+	class Argon2Key(BaseArgon2):
 		secret_key: bytes = None
 		public_salt: str = None
 
 		@staticmethod
-		def _default_params(testing) -> Argon2Params:
-			# Using 4 GB of memory and 3.3 seconds
+		def _default_params() -> Argon2Params:
+			# Using 4 GiB of memory and approx 3.0 seconds
 			# on 12-th Gen Intel i7 at 2.2 GHz
 			return Argon2Params(
-				memory_cost=2**(10 if testing else 22),
+				memory_cost=KDFMemCost.GiB_4,
 				parallelism=8,
-				time_cost=4,
+				time_cost=5,
 				hash_len=32,
 				salt_len=32
 			)
 
-		@validate_call
+		@_validator
 		def __init__(
 				self,
 				password: str,
 				public_salt: str = None,
 				*,
 				min_years: int = 10,
-				testing: bool = False,
 				params: Argon2Params = None
 		):
 			if not public_salt and min_years > 0:
 				data_key = "offline_slow_hashing_1e4_per_second"
 				self._assert_crack_resistance(password, min_years, data_key)
 
-			super().__init__(params, testing)
+			super().__init__(params)
 			try:
 				salt_bytes = (
 					secrets.token_bytes(32)

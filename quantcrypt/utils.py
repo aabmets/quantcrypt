@@ -11,12 +11,13 @@
 from quantcrypt.internal.crypto.common import Variant
 from quantcrypt.internal.crypto.kem import KemParamSizes
 from quantcrypt.internal.crypto.dss import DssParamSizes
-from quantcrypt.internal.crypto.kdf import Argon2Params
+from quantcrypt.internal.crypto.kdf import KDFMemCost, Argon2Params
 
 
 __all__ = [
 	"Variant",
 	"KemParamSizes",
 	"DssParamSizes",
+	"KDFMemCost",
 	"Argon2Params"
 ]
