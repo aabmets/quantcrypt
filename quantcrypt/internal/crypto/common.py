@@ -8,39 +8,50 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+import re
+import base64
 import platform
 import importlib
 from cffi import FFI
 from enum import Enum
 from types import ModuleType
-from pydantic import Field
 from functools import lru_cache
-from typing import Literal, Type, Annotated
+from pydantic import ConfigDict, Field, validate_call
+from typing import Literal, Type, Annotated, Callable
 from abc import ABC, abstractmethod
 from quantcrypt.errors import *
 
 
 __all__ = [
-	"Variant",
-	"BaseParamSizes",
-	"BasePQCAlgorithm"
+	"InputValidator",
+	"PQAVariant",
+	"BasePQAParamSizes",
+	"BasePQAlgorithm",
 ]
 
 
-class Variant(Enum):
+class InputValidator:
+	def __new__(cls) -> Callable:
+		return validate_call(config=ConfigDict(
+			arbitrary_types_allowed=True,
+			validate_return=True
+		))
+
+
+class PQAVariant(Enum):
 	CLEAN = "clean"
 	AVX2 = "avx2"
 
 
-class BaseParamSizes:
+class BasePQAParamSizes:
 	def __init__(self, lib: ModuleType, ns: str):
 		self.sk_size = getattr(lib, f"{ns}_CRYPTO_SECRETKEYBYTES")
 		self.pk_size = getattr(lib, f"{ns}_CRYPTO_PUBLICKEYBYTES")
 
 
-class BasePQCAlgorithm(ABC):
+class BasePQAlgorithm(ABC):
 	_lib: ModuleType
-	variant: Variant
+	variant: PQAVariant
 
 	@property
 	@abstractmethod
@@ -48,7 +59,7 @@ class BasePQCAlgorithm(ABC):
 
 	@property
 	@abstractmethod
-	def param_sizes(self) -> BaseParamSizes: ...
+	def param_sizes(self) -> BasePQAParamSizes: ...
 
 	@abstractmethod
 	def keygen(self) -> tuple[bytes, bytes]: ...
@@ -59,27 +70,27 @@ class BasePQCAlgorithm(ABC):
 		return f"PQCLEAN_{name}_{self.variant.name}"
 
 	@lru_cache
-	def _import(self, variant: Variant) -> ModuleType:
+	def _import(self, variant: PQAVariant) -> ModuleType:
 		return importlib.import_module(
 			f"quantcrypt.internal.bin.{platform.system()}" +
 			f".{variant.value}.{self.name.replace('-', '_')}"
 		).lib
 
-	def __init__(self, variant: Variant = None):
+	def __init__(self, variant: PQAVariant = None):
 		# variant is None -> auto-select mode
 		try:
-			_var = variant or Variant.AVX2
+			_var = variant or PQAVariant.AVX2
 			self._lib = self._import(_var)
 			self.variant = _var
 		except ModuleNotFoundError as ex:
 			if variant is None:
 				try:
-					self._lib = self._import(Variant.CLEAN)
-					self.variant = Variant.CLEAN
+					self._lib = self._import(PQAVariant.CLEAN)
+					self.variant = PQAVariant.CLEAN
 					return
 				except ModuleNotFoundError:
 					pass
-			elif variant == Variant.AVX2:
+			elif variant == PQAVariant.AVX2:
 				raise ex
 			raise SystemExit(
 				"Quantcrypt Fatal Error:\n"
@@ -107,3 +118,36 @@ class BasePQCAlgorithm(ABC):
 			max_length=equal_to or max_size,
 			strict=True
 		)]
+
+	def armor(self, key_bytes: bytes) -> str:
+		params = self.param_sizes
+		match len(key_bytes):
+			case params.sk_size:
+				key_type = "SECRET"
+			case params.pk_size:
+				key_type = "PUBLIC"
+			case _:
+				raise PQAInvalidInputError
+		key_str = base64.b64encode(key_bytes).decode('utf-8')
+		max_line_length = 64
+		lines = [
+			key_str[i:i + max_line_length]
+			for i in range(0, len(key_str), max_line_length)
+		]
+		algo_name = '_'.join(re.findall(
+			string=self.__class__.__name__,
+			pattern='.[^A-Z]*'
+		)).upper()
+		header = f"-----BEGIN {algo_name} {key_type} KEY-----\n"
+		footer = f"\n-----END {algo_name} {key_type} KEY-----"
+		return header + '\n'.join(lines) + footer
+
+	def dearmor(self, armored_key: str) -> bytes:
+		params = self.param_sizes
+		header_end = armored_key.find('\n') + 1
+		footer_start = armored_key.rfind('\n')
+		key_str = armored_key[header_end:footer_start].replace('\n', '')
+		key_bytes = base64.b64decode(key_str.encode('utf-8'))
+		if len(key_bytes) not in [params.sk_size, params.pk_size]:
+			raise PQAInvalidInputError
+		return key_bytes

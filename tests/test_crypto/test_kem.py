@@ -26,10 +26,10 @@ def fixture_attribute_tests():
 		assert isinstance(kem.name, str)
 
 		assert hasattr(kem, "variant")
-		assert isinstance(kem.variant, Variant)
+		assert isinstance(kem.variant, PQAVariant)
 
 		assert hasattr(kem, "param_sizes")
-		assert isinstance(kem.param_sizes, KemParamSizes)
+		assert isinstance(kem.param_sizes, KEMParamSizes)
 
 		assert hasattr(kem, "keygen")
 		assert isinstance(kem.keygen, Callable)

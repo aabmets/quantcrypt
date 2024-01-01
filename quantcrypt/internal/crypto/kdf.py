@@ -16,14 +16,10 @@ from dotmap import DotMap
 from typing import Annotated
 from argon2 import PasswordHasher
 from argon2 import exceptions as aex
-from pydantic import ConfigDict, Field, validate_call
+from pydantic import Field, validate_call
 from abc import ABC, abstractmethod
 from quantcrypt.errors import *
-
-
-_validator = validate_call(config=ConfigDict(
-	arbitrary_types_allowed=True
-))
+from .common import InputValidator
 
 
 class KDFMemCost(Enum):
@@ -118,7 +114,7 @@ class KDF:
 				salt_len=32
 			)
 
-		@_validator
+		@InputValidator()
 		def __init__(
 				self,
 				password: str,
@@ -193,7 +189,7 @@ class KDF:
 				salt_len=32
 			)
 
-		@_validator
+		@InputValidator()
 		def __init__(
 				self,
 				password: str,

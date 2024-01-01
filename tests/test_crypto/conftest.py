@@ -11,7 +11,7 @@
 import pytest
 from typing import Callable, Type
 from functools import lru_cache
-from quantcrypt.internal.crypto.common import BasePQCAlgorithm
+from quantcrypt.internal.crypto.common import BasePQAlgorithm
 from quantcrypt.utils import *
 
 
@@ -64,14 +64,14 @@ def invalid_ciphertexts() -> Callable:
 
 @pytest.fixture(scope="package")
 def pqc_variant_tests():
-	def closure(algo_cls: Type[BasePQCAlgorithm]):
+	def closure(algo_cls: Type[BasePQAlgorithm]):
 		obj = algo_cls()
-		assert obj.variant == Variant.CLEAN
+		assert obj.variant == PQAVariant.CLEAN
 
-		obj = algo_cls(Variant.CLEAN)
-		assert obj.variant == Variant.CLEAN
+		obj = algo_cls(PQAVariant.CLEAN)
+		assert obj.variant == PQAVariant.CLEAN
 
 		with pytest.raises(ModuleNotFoundError):
-			algo_cls(Variant.AVX2)
+			algo_cls(PQAVariant.AVX2)
 
 	return closure

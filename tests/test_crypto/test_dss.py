@@ -26,10 +26,10 @@ def fixture_attribute_tests():
 		assert isinstance(dss.name, str)
 
 		assert hasattr(dss, "variant")
-		assert isinstance(dss.variant, Variant)
+		assert isinstance(dss.variant, PQAVariant)
 
 		assert hasattr(dss, "param_sizes")
-		assert isinstance(dss.param_sizes, DssParamSizes)
+		assert isinstance(dss.param_sizes, DSSParamSizes)
 
 		assert hasattr(dss, "keygen")
 		assert isinstance(dss.keygen, Callable)

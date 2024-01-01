@@ -11,6 +11,7 @@
 __all__ = [
 	"QuantCryptError",
 	"PQAKeygenFailedError",
+	"PQAInvalidInputError",
 	"KEMEncapsFailedError",
 	"KEMDecapsFailedError",
 	"DSSSignFailedError",
@@ -32,7 +33,12 @@ class PQAError(QuantCryptError):
 
 class PQAKeygenFailedError(PQAError):
 	def __init__(self):
-		super().__init__("QuantCrypt KEM/DSS keygen failed.")
+		super().__init__("QuantCrypt PQA keygen failed.")
+
+
+class PQAInvalidInputError(PQAError):
+	def __init__(self):
+		super().__init__("QuantCrypt PQA received an invalid input.")
 
 
 class KEMEncapsFailedError(PQAError):
