@@ -10,6 +10,7 @@
 #
 import re
 import base64
+import binascii
 import platform
 import importlib
 from cffi import FFI
@@ -119,6 +120,7 @@ class BasePQAlgorithm(ABC):
 			strict=True
 		)]
 
+	@InputValidator()
 	def armor(self, key_bytes: bytes) -> str:
 		params = self.param_sizes
 		match len(key_bytes):
@@ -142,15 +144,19 @@ class BasePQAlgorithm(ABC):
 		footer = f"\n-----END {algo_name} {key_type} KEY-----"
 		return header + '\n'.join(lines) + footer
 
+	@InputValidator()
 	def dearmor(self, armored_key: str) -> bytes:
 		header_end = armored_key.find('\n') + 1
 		footer_start = armored_key.rfind('\n')
 		if -1 in [header_end, footer_start]:
 			raise PQAInvalidInputError
-		key_bytes = base64.b64decode(
-			armored_key[header_end:footer_start]
-			.replace('\n', '').encode('utf-8')
-		)
+		try:
+			key_bytes = base64.b64decode(
+				armored_key[header_end:footer_start]
+				.replace('\n', '').encode('utf-8')
+			)
+		except binascii.Error:
+			raise PQAInvalidInputError
 		if len(key_bytes) not in [
 			self.param_sizes.sk_size,
 			self.param_sizes.pk_size
