@@ -15,13 +15,13 @@
     "file_name": "mit.json"
   },
   "version_cmd": {
-    "app_version": "0.0.7",
+    "app_version": "0.0.8",
     "components": [
       {
         "name": "lib",
         "target": "quantcrypt",
         "ignore": [],
-        "hash": "c6da5f07907f1128ba80c28b071239c6"
+        "hash": "ecc77627d630108abad6ca8cfca1badf"
       }
     ],
     "only_config": false
