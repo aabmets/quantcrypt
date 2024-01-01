@@ -9,9 +9,11 @@
 #   SPDX-License-Identifier: MIT
 #
 import pytest
-from typing import Callable, Type
 from functools import lru_cache
+from pydantic import ValidationError
+from typing import Callable, Type, cast
 from quantcrypt.internal.crypto.common import BasePQAlgorithm
+from quantcrypt.errors import PQAInvalidInputError
 from quantcrypt.utils import *
 
 
@@ -73,5 +75,87 @@ def pqc_variant_tests():
 
 		with pytest.raises(ModuleNotFoundError):
 			algo_cls(PQAVariant.AVX2)
+
+	return closure
+
+
+@pytest.fixture(name="armoring_success_tests", scope="package")
+def fixture_armoring_success_tests():
+	def closure(kem_cls: Type[BasePQAlgorithm]):
+		kem = kem_cls()
+		public_key, secret_key = kem.keygen()
+
+		apk = kem.armor(public_key)
+		assert apk.startswith("-----BEGIN")
+		assert apk.endswith("PUBLIC KEY-----")
+
+		ask = kem.armor(secret_key)
+		assert ask.startswith("-----BEGIN")
+		assert ask.endswith("SECRET KEY-----")
+
+		pkb = kem.dearmor(apk)
+		assert pkb == public_key
+
+		skb = kem.dearmor(ask)
+		assert skb == secret_key
+
+	return closure
+
+
+@pytest.fixture(name="armor_failure_tests", scope="package")
+def fixture_armor_failure_tests():
+	def closure(kem_cls: Type[BasePQAlgorithm]):
+		kem = kem_cls()
+		public_key, secret_key = kem.keygen()
+
+		for key in [str, int, float, list, dict, tuple, set]:
+			with pytest.raises(ValidationError):
+				kem.armor(cast(key(), bytes))
+
+		for key in [public_key + b'x', public_key[:-1]]:
+			with pytest.raises(PQAInvalidInputError):
+				kem.armor(key)
+
+		for key in [secret_key + b'x', secret_key[:-1]]:
+			with pytest.raises(PQAInvalidInputError):
+				kem.armor(key)
+
+	return closure
+
+
+@pytest.fixture(name="dearmor_failure_tests", scope="package")
+def fixture_dearmor_failure_tests():
+	def closure(kem_cls: Type[BasePQAlgorithm]):
+		kem = kem_cls()
+		public_key, secret_key = kem.keygen()
+
+		for key in [str, int, float, list, dict, tuple, set]:
+			with pytest.raises(ValidationError):
+				kem.dearmor(cast(key(), bytes))
+
+		def _reuse_tests(data: list[str]):
+			center = len(data) // 2
+
+			with pytest.raises(PQAInvalidInputError):
+				copy = data.copy()
+				copy.pop(center)
+				kem.dearmor('\n'.join(copy))
+
+			with pytest.raises(PQAInvalidInputError):
+				copy = data.copy()
+				copy.insert(center, 'abcd')
+				kem.dearmor('\n'.join(copy))
+
+			with pytest.raises(PQAInvalidInputError):
+				copy = data.copy()
+				line = copy.pop(center)[:-1] + '!'
+				copy.insert(center, line)
+				kem.dearmor('\n'.join(copy))
+
+		apk = kem.armor(public_key).split('\n')
+		_reuse_tests(apk)
+
+		ask = kem.armor(secret_key).split('\n')
+		_reuse_tests(ask)
 
 	return closure

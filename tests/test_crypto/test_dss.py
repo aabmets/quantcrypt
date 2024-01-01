@@ -40,6 +40,12 @@ def fixture_attribute_tests():
 		assert hasattr(dss, "verify")
 		assert isinstance(dss.verify, Callable)
 
+		assert hasattr(dss, "armor")
+		assert isinstance(dss.armor, Callable)
+
+		assert hasattr(dss, "dearmor")
+		assert isinstance(dss.dearmor, Callable)
+
 	return closure
 
 
@@ -129,6 +135,18 @@ class TestDilithium:
 	def test_4(invalid_inputs_tests: Callable):
 		invalid_inputs_tests(DSS.Dilithium)
 
+	@staticmethod
+	def test_5(armoring_success_tests: Callable):
+		armoring_success_tests(DSS.Dilithium)
+
+	@staticmethod
+	def test_6(armor_failure_tests: Callable):
+		armor_failure_tests(DSS.Dilithium)
+
+	@staticmethod
+	def test_7(dearmor_failure_tests: Callable):
+		dearmor_failure_tests(DSS.Dilithium)
+
 
 class TestFalcon:
 	@staticmethod
@@ -146,6 +164,18 @@ class TestFalcon:
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
 		invalid_inputs_tests(DSS.Falcon)
+
+	@staticmethod
+	def test_5(armoring_success_tests: Callable):
+		armoring_success_tests(DSS.Falcon)
+
+	@staticmethod
+	def test_6(armor_failure_tests: Callable):
+		armor_failure_tests(DSS.Falcon)
+
+	@staticmethod
+	def test_7(dearmor_failure_tests: Callable):
+		dearmor_failure_tests(DSS.Falcon)
 
 
 class TestFastSphincs:
@@ -165,6 +195,18 @@ class TestFastSphincs:
 	def test_4(invalid_inputs_tests: Callable):
 		invalid_inputs_tests(DSS.FastSphincs)
 
+	@staticmethod
+	def test_5(armoring_success_tests: Callable):
+		armoring_success_tests(DSS.FastSphincs)
+
+	@staticmethod
+	def test_6(armor_failure_tests: Callable):
+		armor_failure_tests(DSS.FastSphincs)
+
+	@staticmethod
+	def test_7(dearmor_failure_tests: Callable):
+		dearmor_failure_tests(DSS.FastSphincs)
+
 
 class TestSmallSphincs:
 	@staticmethod
@@ -182,3 +224,15 @@ class TestSmallSphincs:
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
 		invalid_inputs_tests(DSS.SmallSphincs)
+
+	@staticmethod
+	def test_5(armoring_success_tests: Callable):
+		armoring_success_tests(DSS.SmallSphincs)
+
+	@staticmethod
+	def test_6(armor_failure_tests: Callable):
+		armor_failure_tests(DSS.SmallSphincs)
+
+	@staticmethod
+	def test_7(dearmor_failure_tests: Callable):
+		dearmor_failure_tests(DSS.SmallSphincs)
