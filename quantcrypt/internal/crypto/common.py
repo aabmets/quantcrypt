@@ -143,11 +143,17 @@ class BasePQAlgorithm(ABC):
 		return header + '\n'.join(lines) + footer
 
 	def dearmor(self, armored_key: str) -> bytes:
-		params = self.param_sizes
 		header_end = armored_key.find('\n') + 1
 		footer_start = armored_key.rfind('\n')
-		key_str = armored_key[header_end:footer_start].replace('\n', '')
-		key_bytes = base64.b64decode(key_str.encode('utf-8'))
-		if len(key_bytes) not in [params.sk_size, params.pk_size]:
+		if -1 in [header_end, footer_start]:
+			raise PQAInvalidInputError
+		key_bytes = base64.b64decode(
+			armored_key[header_end:footer_start]
+			.replace('\n', '').encode('utf-8')
+		)
+		if len(key_bytes) not in [
+			self.param_sizes.sk_size,
+			self.param_sizes.pk_size
+		]:
 			raise PQAInvalidInputError
 		return key_bytes
