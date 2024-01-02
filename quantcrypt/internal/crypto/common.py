@@ -9,8 +9,6 @@
 #   SPDX-License-Identifier: MIT
 #
 import re
-import base64
-import binascii
 import platform
 import importlib
 from cffi import FFI
@@ -21,6 +19,7 @@ from pydantic import ConfigDict, Field, validate_call
 from typing import Literal, Type, Annotated, Callable
 from abc import ABC, abstractmethod
 from quantcrypt.errors import *
+from .. import utils
 
 
 __all__ = [
@@ -105,8 +104,8 @@ class BasePQAlgorithm(ABC):
 
 		name = f"_crypto_{algo_type}_keypair"
 		func = getattr(self._lib, self._namespace + name)
-		if 0 != func(public_key, secret_key):
-			raise PQAKeygenFailedError
+		if func(public_key, secret_key) != 0:
+			return tuple()
 
 		pk = ffi.buffer(public_key, params.pk_size)
 		sk = ffi.buffer(secret_key, params.sk_size)
@@ -129,8 +128,8 @@ class BasePQAlgorithm(ABC):
 			case params.pk_size:
 				key_type = "PUBLIC"
 			case _:
-				raise PQAInvalidInputError
-		key_str = base64.b64encode(key_bytes).decode('utf-8')
+				raise InvalidArgsError
+		key_str = utils.b64(key_bytes)
 		max_line_length = 64
 		lines = [
 			key_str[i:i + max_line_length]
@@ -149,17 +148,14 @@ class BasePQAlgorithm(ABC):
 		header_end = armored_key.find('\n') + 1
 		footer_start = armored_key.rfind('\n')
 		if -1 in [header_end, footer_start]:
-			raise PQAInvalidInputError
-		try:
-			key_bytes = base64.b64decode(
-				armored_key[header_end:footer_start]
-				.replace('\n', '').encode('utf-8')
-			)
-		except binascii.Error:
-			raise PQAInvalidInputError
+			raise InvalidArgsError
+		key_bytes = utils.b64(
+			armored_key[header_end:footer_start]
+			.replace('\n', '')
+		)
 		if len(key_bytes) not in [
 			self.param_sizes.sk_size,
 			self.param_sizes.pk_size
 		]:
-			raise PQAInvalidInputError
+			raise InvalidArgsError
 		return key_bytes

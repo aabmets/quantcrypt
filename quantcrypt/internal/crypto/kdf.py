@@ -8,7 +8,6 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-import base64
 import secrets
 from enum import Enum
 from zxcvbn import zxcvbn
@@ -20,6 +19,7 @@ from pydantic import Field, validate_call
 from abc import ABC, abstractmethod
 from quantcrypt.errors import *
 from .common import InputValidator
+from .. import utils
 
 
 class KDFMemCost(Enum):
@@ -83,12 +83,6 @@ class BaseArgon2(ABC):
 		real_years = int(data) // (365 * 24 * 3600)
 		if real_years < min_years:
 			raise KDFWeakPasswordError
-
-	@staticmethod
-	def _pad_b64_str(data: str) -> str:
-		if remainder := len(data) % 4:
-			return data + '=' * (4 - remainder)
-		return data
 
 	def __init__(self, overrides: KDFParams | None):
 		params = overrides or self._default_params()
@@ -231,17 +225,17 @@ class KDF:
 			super().__init__(params)
 			try:
 				salt_bytes = (
-					secrets.token_bytes(32)
-					if public_salt is None else
-					base64.b64decode(public_salt.encode())
+					utils.b64(public_salt) if public_salt
+					else secrets.token_bytes(32)
 				)
 				secret_hash = self._engine.hash(
 					password, salt=salt_bytes
 				)
 				_salt, _hash = secret_hash.split('$')[-2:]
+				if remainder := len(_hash) % 4:
+					_hash += '=' * (4 - remainder)
+
+				self.secret_key = utils.b64(_hash)
 				self.public_salt = f"{_salt}="
-				self.secret_key = base64.b64decode(
-					self._pad_b64_str(_hash).encode()
-				)
 			except aex.HashingError:
 				raise KDFHashingError

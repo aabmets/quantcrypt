@@ -34,11 +34,13 @@ class BaseKEM(BasePQAlgorithm, ABC):
 		Generates a tuple of bytes, where the first bytes object is
 		the public key and the second bytes object is the secret key.
 		:return: tuple of public key bytes and secret key bytes, in this order.
-		:raises - errors.PQAKeygenFailedError: When the underlying CFFI
+		:raises - errors.KEMKeygenFailedError: When the underlying CFFI
 			library has failed to generate the keys for the current
 			KEM algorithm for any reason.
 		"""
-		return self._keygen("kem")
+		if result := self._keygen("kem"):
+			return result
+		raise KEMKeygenFailedError
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
 		"""

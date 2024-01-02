@@ -10,16 +10,20 @@
 #
 __all__ = [
 	"QuantCryptError",
-	"PQAKeygenFailedError",
-	"PQAInvalidInputError",
+	"InvalidArgsError",
+	"PQAError",
+	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
 	"KEMDecapsFailedError",
+	"DSSKeygenFailedError",
 	"DSSSignFailedError",
 	"DSSVerifyFailedError",
 	"KDFWeakPasswordError",
 	"KDFVerificationError",
 	"KDFInvalidHashError",
 	"KDFHashingError",
+	"CipherError",
+	"CipherDecryptionError"
 ]
 
 
@@ -27,18 +31,18 @@ class QuantCryptError(Exception):
 	"""Base class for all QuantCrypt errors."""
 
 
+class InvalidArgsError(QuantCryptError):
+	def __init__(self):
+		super().__init__("QuantCrypt method received an invalid argument.")
+
+
 class PQAError(QuantCryptError):
 	"""Base class for all QuantCrypt PQA errors."""
 
 
-class PQAKeygenFailedError(PQAError):
+class KEMKeygenFailedError(PQAError):
 	def __init__(self):
-		super().__init__("QuantCrypt PQA keygen failed.")
-
-
-class PQAInvalidInputError(PQAError):
-	def __init__(self):
-		super().__init__("QuantCrypt PQA received an invalid input.")
+		super().__init__("QuantCrypt KEM keygen failed.")
 
 
 class KEMEncapsFailedError(PQAError):
@@ -49,6 +53,11 @@ class KEMEncapsFailedError(PQAError):
 class KEMDecapsFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt KEM decaps failed.")
+
+
+class DSSKeygenFailedError(PQAError):
+	def __init__(self):
+		super().__init__("QuantCrypt DSS keygen failed.")
 
 
 class DSSSignFailedError(PQAError):
@@ -83,3 +92,12 @@ class KDFInvalidHashError(KDFError):
 class KDFHashingError(KDFError):
 	def __init__(self):
 		super().__init__("KDF was unable to hash the password due to an internal error.")
+
+
+class CipherError(QuantCryptError):
+	"""Base class for all QuantCrypt Cipher errors."""
+
+
+class CipherDecryptionError(CipherError):
+	def __init__(self):
+		super().__init__("Cipher was unable to decrypt the data packet with the provided key.")

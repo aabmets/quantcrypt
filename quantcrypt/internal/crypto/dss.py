@@ -34,11 +34,13 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		Generates a tuple of bytes, where the first bytes object is
 		the public key and the second bytes object is the secret key.
 		:return: tuple of public key bytes and secret key bytes, in this order.
-		:raises - errors.PQAKeygenFailedError: When the underlying CFFI
+		:raises - errors.DSSKeygenFailedError: When the underlying CFFI
 			library has failed to generate the keys for the current
 			DSS algorithm for any reason.
 		"""
-		return self._keygen("sign")
+		if result := self._keygen("sign"):
+			return result
+		raise DSSKeygenFailedError
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
 		"""

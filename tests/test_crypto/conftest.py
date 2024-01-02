@@ -13,7 +13,7 @@ from functools import lru_cache
 from pydantic import ValidationError
 from typing import Callable, Type, cast
 from quantcrypt.internal.crypto.common import BasePQAlgorithm
-from quantcrypt.errors import PQAInvalidInputError
+from quantcrypt.errors import InvalidArgsError
 from quantcrypt.utils import *
 
 
@@ -113,11 +113,11 @@ def fixture_armor_failure_tests():
 				kem.armor(cast(key(), bytes))
 
 		for key in [public_key + b'x', public_key[:-1]]:
-			with pytest.raises(PQAInvalidInputError):
+			with pytest.raises(InvalidArgsError):
 				kem.armor(key)
 
 		for key in [secret_key + b'x', secret_key[:-1]]:
-			with pytest.raises(PQAInvalidInputError):
+			with pytest.raises(InvalidArgsError):
 				kem.armor(key)
 
 	return closure
@@ -136,17 +136,17 @@ def fixture_dearmor_failure_tests():
 		def _reuse_tests(data: list[str]):
 			center = len(data) // 2
 
-			with pytest.raises(PQAInvalidInputError):
+			with pytest.raises(InvalidArgsError):
 				copy = data.copy()
 				copy.pop(center)
 				kem.dearmor('\n'.join(copy))
 
-			with pytest.raises(PQAInvalidInputError):
+			with pytest.raises(InvalidArgsError):
 				copy = data.copy()
 				copy.insert(center, 'abcd')
 				kem.dearmor('\n'.join(copy))
 
-			with pytest.raises(PQAInvalidInputError):
+			with pytest.raises(InvalidArgsError):
 				copy = data.copy()
 				line = copy.pop(center)[:-1] + '!'
 				copy.insert(center, line)
