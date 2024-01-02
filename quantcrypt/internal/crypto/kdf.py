@@ -142,15 +142,15 @@ class KDF:
 
 			:raises - pydantic.ValidationError:
 				When the class is instantiated with invalid inputs.
-			:raises - KDFWeakPasswordError(KDFError, QuantCryptError):
+			:raises - errors.KDFWeakPasswordError:
 				When **min_years** is >= 1 and the `zxcvbn` library has evaluated
 				the provided password to be weaker than the specified requirement.
-			:raises - KDFVerificationError(KDFError, QuantCryptError):
+			:raises - errors.KDFVerificationError:
 				When **verif_hash** is provided and the hashed
 				password does not match this verification hash.
-			:raises - KDFInvalidHashError(KDFError, QuantCryptError):
+			:raises - errors.KDFInvalidHashError:
 				When **verif_hash** is invalid.
-			:raises - KDFHashingError(KDFError, QuantCryptError):
+			:raises - errors.KDFHashingError:
 				When Argon2 hashing process encounters an unknown error.
 			"""
 			if not verif_hash and min_years > 0:
@@ -218,10 +218,10 @@ class KDF:
 
 			:raises - pydantic.ValidationError:
 				When the class is instantiated with invalid inputs.
-			:raises - KDFWeakPasswordError(KDFError, QuantCryptError):
+			:raises - errors.KDFWeakPasswordError:
 				When **min_years** is >= 1 and the `zxcvbn` library has evaluated
 				the provided password to be weaker than the specified requirement.
-			:raises - KDFHashingError(KDFError, QuantCryptError):
+			:raises - errors.KDFHashingError:
 				When Argon2 hashing process encounters an unknown error.
 			"""
 			if not public_salt and min_years > 0:

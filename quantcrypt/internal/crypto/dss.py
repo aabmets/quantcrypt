@@ -30,9 +30,29 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		return DSSParamSizes(self._lib, self._namespace)
 
 	def keygen(self) -> tuple[bytes, bytes]:
+		"""
+		Generates a tuple of bytes, where the first bytes object is
+		the public key and the second bytes object is the secret key.
+		:return: tuple of public key bytes and secret key bytes, in this order.
+		:raises - errors.PQAKeygenFailedError: When the underlying CFFI
+			library has failed to generate the keys for the current
+			DSS algorithm for any reason.
+		"""
 		return self._keygen("sign")
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
+		"""
+		Tries to generate a signature for the message using the secret key.
+
+		:param secret_key: The secret key which is used to sign the provided message.
+		:param message: The message for which the signature will be created.
+		:return: Bytes of the generated signature.
+		:raises - pydantic.ValidationError: When the user-provided
+			`secret_key` or `message` values have invalid types or the length
+			of the `secret_key` is invalid for the current DSS algorithm.
+		:raises - errors.DSSSignFailedError: When the underlying CFFI
+			library has failed to generate the signature for any reason.
+		"""
 		params = self.param_sizes
 		sk_anno = self._bytes_anno(equal_to=params.sk_size)
 		msg_anno = self._bytes_anno(min_size=1)
@@ -53,6 +73,26 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		return _sign(secret_key, message)
 
 	def verify(self, public_key: bytes, message: bytes, signature: bytes, *, raises: bool = True) -> bool:
+		"""
+		Tries to verify the validity of the signature of the message using the public key.
+
+		:param public_key: The public key which is used to
+			verify the validity of the signature.
+		:param message: The message of which the validity
+			of the signature is being verified.
+		:param signature: The signature which is being verified
+			with the `public_key` for the provided `message`.
+		:param raises: Option to disable the raising of the DSSVerifyFailedError,
+			which allows the use of an if block to branch logic execution based on
+			signature verification success. By default, errors are raised.
+		:return: True or False, if `raises` parameter is False, otherwise raises a
+			DSSVerifyFailedError on signature verification failure.
+		:raises - pydantic.ValidationError: When the user-provided `public_key`,
+			`message` or `signature` values have invalid types or when `public_key`
+			or `signature` have invalid lengths for the current DSS algorithm.
+		:raises - errors.DSSVerifyFailedError: When the underlying CFFI library
+			has failed to verify the provided signature for any reason.
+		"""
 		params = self.param_sizes
 		pk_anno = self._bytes_anno(equal_to=params.pk_size)
 		sig_anno = self._bytes_anno(max_size=params.sig_size)
