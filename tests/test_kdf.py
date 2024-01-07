@@ -12,9 +12,7 @@ import timeit
 import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
-from quantcrypt.utils import KDFParams
-from quantcrypt.errors import *
-from quantcrypt import KDF
+from quantcrypt.kdf import *
 
 
 @pytest.fixture(name="good_pw", scope="module")
@@ -135,28 +133,28 @@ def test_argon2params_too_long_salt_len():
 
 
 def test_argon2_success(good_pw: str, test_context: Callable):
-	with test_context(KDF.Argon2):
-		kdf1 = KDF.Argon2(good_pw)
+	with test_context(Argon2.Hash):
+		kdf1 = Argon2.Hash(good_pw)
 		assert kdf1.rehashed is False
 		assert kdf1.verified is False
 
-		kdf2 = KDF.Argon2(good_pw, kdf1.public_hash)
+		kdf2 = Argon2.Hash(good_pw, kdf1.public_hash)
 		assert kdf2.rehashed is False
 		assert kdf2.verified is True
 
 
 def test_argon2_errors(good_pw: str, test_context: Callable):
-	with test_context(KDF.Argon2):
-		kdf = KDF.Argon2(good_pw)
+	with test_context(Argon2.Hash):
+		kdf = Argon2.Hash(good_pw)
 
 		with pytest.raises(KDFVerificationError):
-			KDF.Argon2(good_pw[::-1], kdf.public_hash)
+			Argon2.Hash(good_pw[::-1], kdf.public_hash)
 
 		with pytest.raises(KDFInvalidHashError):
-			KDF.Argon2(good_pw, kdf.public_hash[::-1])
+			Argon2.Hash(good_pw, kdf.public_hash[::-1])
 
 		with pytest.raises(KDFWeakPasswordError):
-			KDF.Argon2('a' * 7)
+			Argon2.Hash('a' * 7)
 
 
 def test_argon2_overrides(good_pw: str):
@@ -181,39 +179,39 @@ def test_argon2_overrides(good_pw: str):
 		hash_len=16,
 		salt_len=16
 	)
-	kdf_ref = KDF.Argon2(good_pw, params=ovr_ref)
+	kdf_ref = Argon2.Hash(good_pw, params=ovr_ref)
 
-	kdf_s = KDF.Argon2(good_pw, kdf_ref.public_hash, params=ovr_s)
+	kdf_s = Argon2.Hash(good_pw, kdf_ref.public_hash, params=ovr_s)
 	assert kdf_s.rehashed is True
 	assert kdf_s.verified is True
 
-	kdf_l = KDF.Argon2(good_pw, kdf_ref.public_hash, params=ovr_l)
+	kdf_l = Argon2.Hash(good_pw, kdf_ref.public_hash, params=ovr_l)
 	assert kdf_l.rehashed is True
 	assert kdf_l.verified is True
 
 
 def test_argon2_duration(good_pw: str):
 	def test():
-		KDF.Argon2(good_pw)
+		Argon2.Hash(good_pw)
 
 	assert timeit.timeit(test, number=1) > 0.4
 
 
 def test_argon2key_success(good_pw: str, test_context: Callable):
-	with test_context(KDF.Argon2Key):
-		kdf1 = KDF.Argon2Key(good_pw)
+	with test_context(Argon2.Key):
+		kdf1 = Argon2.Key(good_pw)
 
 		assert isinstance(kdf1.public_salt, str)
 		assert isinstance(kdf1.secret_key, bytes)
 
-		kdf2 = KDF.Argon2Key(good_pw, kdf1.public_salt)
+		kdf2 = Argon2.Key(good_pw, kdf1.public_salt)
 		assert kdf2.secret_key == kdf1.secret_key
 
 
 def test_argon2key_errors(good_pw: str, test_context: Callable):
-	with test_context(KDF.Argon2Key):
+	with test_context(Argon2.Key):
 		with pytest.raises(KDFWeakPasswordError):
-			KDF.Argon2Key('a' * 7)
+			Argon2.Key('a' * 7)
 
 
 def test_argon2key_overrides(good_pw: str):
@@ -224,12 +222,12 @@ def test_argon2key_overrides(good_pw: str):
 		hash_len=20,
 		salt_len=20
 	)
-	kdf = KDF.Argon2Key(good_pw, params=ovr1)
+	kdf = Argon2.Key(good_pw, params=ovr1)
 	assert kdf.params == ovr1
 
 
 def test_argon2secret_duration(good_pw: str):
 	def test():
-		KDF.Argon2Key(good_pw)
+		Argon2.Key(good_pw)
 
 	assert timeit.timeit(test, number=1) > 2.5
