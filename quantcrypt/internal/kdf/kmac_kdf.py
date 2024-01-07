@@ -28,7 +28,7 @@ class KKDF:
 			num_keys: Annotated[int, Field(ge=1, le=2048)] = 1,
 			salt: Annotated[Optional[bytes], Field()] = None,
 			context: Annotated[Optional[bytes], Field()] = None
-	) -> tuple[bytes]:
+	) -> tuple[bytes, ...]:
 		digest_size = 64
 		entropy_limit = digest_size * 1024
 		output_len = key_len * num_keys
@@ -52,7 +52,7 @@ class KKDF:
 		macs = b''
 		iters = 1
 		while len(macs) < output_len:
-			iter_byte = struct.pack('B', iters)
+			iter_byte = struct.pack('H', iters)
 			macs += KMAC256.new(
 				key=prk,
 				data=macs[-digest_size:] + iter_byte,
