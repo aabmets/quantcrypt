@@ -12,9 +12,8 @@ import pytest
 from functools import lru_cache
 from pydantic import ValidationError
 from typing import Callable, Type, cast
-from quantcrypt.internal.crypto.common import BasePQAlgorithm
+from quantcrypt.internal.pqa.common import *
 from quantcrypt.errors import InvalidArgsError
-from quantcrypt.utils import *
 
 
 @pytest.fixture(scope="package")

@@ -11,10 +11,8 @@
 import pytest
 from typing import Callable, Type
 from pydantic import ValidationError
-from quantcrypt.internal.crypto.dss import BaseDSS
-from quantcrypt.utils import *
-from quantcrypt.errors import *
-from quantcrypt import DSS
+from quantcrypt.internal.pqa.dss import BaseDSS
+from quantcrypt.dss import *
 
 
 @pytest.fixture(name="attribute_tests", scope="module")
@@ -121,118 +119,118 @@ def fixture_invalid_inputs_tests(
 class TestDilithium:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(DSS.Dilithium)
+		pqc_variant_tests(Dilithium)
 
 	@staticmethod
 	def test_2(attribute_tests: Callable):
-		attribute_tests(DSS.Dilithium)
+		attribute_tests(Dilithium)
 
 	@staticmethod
 	def test_3(cryptography_tests: Callable):
-		cryptography_tests(DSS.Dilithium)
+		cryptography_tests(Dilithium)
 
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(DSS.Dilithium)
+		invalid_inputs_tests(Dilithium)
 
 	@staticmethod
 	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(DSS.Dilithium)
+		armoring_success_tests(Dilithium)
 
 	@staticmethod
 	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(DSS.Dilithium)
+		armor_failure_tests(Dilithium)
 
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(DSS.Dilithium)
+		dearmor_failure_tests(Dilithium)
 
 
 class TestFalcon:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(DSS.Falcon)
+		pqc_variant_tests(Falcon)
 
 	@staticmethod
 	def test_2(attribute_tests: Callable):
-		attribute_tests(DSS.Falcon)
+		attribute_tests(Falcon)
 
 	@staticmethod
 	def test_3(cryptography_tests: Callable):
-		cryptography_tests(DSS.Falcon)
+		cryptography_tests(Falcon)
 
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(DSS.Falcon)
+		invalid_inputs_tests(Falcon)
 
 	@staticmethod
 	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(DSS.Falcon)
+		armoring_success_tests(Falcon)
 
 	@staticmethod
 	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(DSS.Falcon)
+		armor_failure_tests(Falcon)
 
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(DSS.Falcon)
+		dearmor_failure_tests(Falcon)
 
 
 class TestFastSphincs:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(DSS.FastSphincs)
+		pqc_variant_tests(FastSphincs)
 
 	@staticmethod
 	def test_2(attribute_tests: Callable):
-		attribute_tests(DSS.FastSphincs)
+		attribute_tests(FastSphincs)
 
 	@staticmethod
 	def test_3(cryptography_tests: Callable):
-		cryptography_tests(DSS.FastSphincs)
+		cryptography_tests(FastSphincs)
 
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(DSS.FastSphincs)
+		invalid_inputs_tests(FastSphincs)
 
 	@staticmethod
 	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(DSS.FastSphincs)
+		armoring_success_tests(FastSphincs)
 
 	@staticmethod
 	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(DSS.FastSphincs)
+		armor_failure_tests(FastSphincs)
 
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(DSS.FastSphincs)
+		dearmor_failure_tests(FastSphincs)
 
 
 class TestSmallSphincs:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(DSS.SmallSphincs)
+		pqc_variant_tests(SmallSphincs)
 
 	@staticmethod
 	def test_2(attribute_tests: Callable):
-		attribute_tests(DSS.SmallSphincs)
+		attribute_tests(SmallSphincs)
 
 	@staticmethod
 	def test_3(cryptography_tests: Callable):
-		cryptography_tests(DSS.SmallSphincs)
+		cryptography_tests(SmallSphincs)
 
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(DSS.SmallSphincs)
+		invalid_inputs_tests(SmallSphincs)
 
 	@staticmethod
 	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(DSS.SmallSphincs)
+		armoring_success_tests(SmallSphincs)
 
 	@staticmethod
 	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(DSS.SmallSphincs)
+		armor_failure_tests(SmallSphincs)
 
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(DSS.SmallSphincs)
+		dearmor_failure_tests(SmallSphincs)

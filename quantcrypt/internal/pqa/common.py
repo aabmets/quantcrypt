@@ -13,29 +13,20 @@ import platform
 import importlib
 from cffi import FFI
 from enum import Enum
-from types import ModuleType
-from functools import lru_cache
-from pydantic import ConfigDict, Field, validate_call
-from typing import Literal, Type, Annotated, Callable
 from abc import ABC, abstractmethod
-from quantcrypt.errors import *
+from types import ModuleType
+from typing import Literal, Type, Annotated
+from pydantic import Field
+from functools import lru_cache
+from ..errors import InvalidArgsError
 from .. import utils
 
 
 __all__ = [
-	"InputValidator",
 	"PQAVariant",
 	"BasePQAParamSizes",
 	"BasePQAlgorithm",
 ]
-
-
-class InputValidator:
-	def __new__(cls) -> Callable:
-		return validate_call(config=ConfigDict(
-			arbitrary_types_allowed=True,
-			validate_return=True
-		))
 
 
 class PQAVariant(Enum):
@@ -119,7 +110,7 @@ class BasePQAlgorithm(ABC):
 			strict=True
 		)]
 
-	@InputValidator()
+	@utils.input_validator()
 	def armor(self, key_bytes: bytes) -> str:
 		params = self.param_sizes
 		match len(key_bytes):
@@ -143,7 +134,7 @@ class BasePQAlgorithm(ABC):
 		footer = f"\n-----END {algo_name} {key_type} KEY-----"
 		return header + '\n'.join(lines) + footer
 
-	@InputValidator()
+	@utils.input_validator()
 	def dearmor(self, armored_key: str) -> bytes:
 		header_end = armored_key.find('\n') + 1
 		footer_start = armored_key.rfind('\n')

@@ -8,7 +8,17 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-from .internal.errors import *
-from .internal.cipher.errors import *
-from .internal.kdf.errors import *
-from .internal.pqa.errors import *
+from .internal.pqa.common import PQAVariant
+from .internal.pqa.errors import (
+	PQAError,
+	DSSKeygenFailedError,
+	DSSSignFailedError,
+	DSSVerifyFailedError
+)
+from .internal.pqa.dss import (
+	DSSParamSizes,
+	Dilithium,
+	Falcon,
+	FastSphincs,
+	SmallSphincs
+)

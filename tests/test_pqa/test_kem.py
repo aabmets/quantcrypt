@@ -12,9 +12,8 @@ import pytest
 from typing import Callable, Type
 from secrets import compare_digest
 from pydantic import ValidationError
-from quantcrypt.internal.crypto.kem import BaseKEM
-from quantcrypt.utils import *
-from quantcrypt import KEM
+from quantcrypt.internal.pqa.kem import BaseKEM
+from quantcrypt.kem import *
 
 
 @pytest.fixture(name="attribute_tests", scope="module")
@@ -107,28 +106,28 @@ def fixture_invalid_inputs_tests(
 class TestKyber:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(KEM.Kyber)
+		pqc_variant_tests(Kyber)
 
 	@staticmethod
 	def test_2(attribute_tests: Callable):
-		attribute_tests(KEM.Kyber)
+		attribute_tests(Kyber)
 
 	@staticmethod
 	def test_3(cryptography_tests: Callable):
-		cryptography_tests(KEM.Kyber)
+		cryptography_tests(Kyber)
 
 	@staticmethod
 	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(KEM.Kyber)
+		invalid_inputs_tests(Kyber)
 
 	@staticmethod
 	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(KEM.Kyber)
+		armoring_success_tests(Kyber)
 
 	@staticmethod
 	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(KEM.Kyber)
+		armor_failure_tests(Kyber)
 
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(KEM.Kyber)
+		dearmor_failure_tests(Kyber)

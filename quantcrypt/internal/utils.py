@@ -10,11 +10,12 @@
 #
 import base64
 import binascii
-from pydantic import validate_call
-from quantcrypt.errors import InvalidArgsError
+from typing import Callable
+from pydantic import ConfigDict, validate_call
+from .errors import InvalidArgsError
 
 
-__all__ = ["b64"]
+__all__ = ["b64", "input_validator"]
 
 
 @validate_call
@@ -26,3 +27,10 @@ def b64(data: str | bytes) -> str | bytes:
 			return base64.b64encode(data).decode("utf-8")
 	except (UnicodeError, binascii.Error):
 		raise InvalidArgsError
+
+
+def input_validator() -> Callable:
+	return validate_call(config=ConfigDict(
+		arbitrary_types_allowed=True,
+		validate_return=True
+	))
