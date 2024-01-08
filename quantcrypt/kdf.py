@@ -8,6 +8,6 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-from .internal.kdf.kdf_argon2 import *
+from .internal.kdf.argon2_kdf import *
 from .internal.kdf.kmac_kdf import *
 from .internal.kdf.errors import *

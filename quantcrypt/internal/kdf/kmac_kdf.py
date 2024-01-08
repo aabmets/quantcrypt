@@ -29,12 +29,30 @@ class KKDF:
 			salt: Annotated[Optional[bytes], Field()] = None,
 			context: Annotated[Optional[bytes], Field()] = None
 	) -> tuple[bytes, ...]:
+		"""
+		KKDF is a variant of HKDF, where the pseudorandom function
+		HMAC is replaced with KMAC256, which is based on cSHAKE256,
+		as defined in NIST SP 800-185. This implementation of KKDF
+		only allows to derive 65536 bytes of keys from one master
+		key, which is calculated with `key_len` * `num_keys`.
+
+		:param master: The master secret key from which to derive new keys.
+		:param key_len: The length of each derivative key in bytes.
+		:param num_keys: The number of derivative keys to generate.
+		:param salt: A cryptographically strong random number. It is
+			recommended to generate a unique salt for each master key.
+		:param context: A customization string, behaves like a namespace.
+			Can be reused across multiple master keys and salt values.
+		:raises - errors.KDFOutputLimitError: When `key_len` * `num_keys`
+			is larger than the allowed maximum output of 65536 bytes for
+			one master key.
+		"""
 		digest_size = 64
 		entropy_limit = digest_size * 1024
 		output_len = key_len * num_keys
 
 		if output_len > entropy_limit:
-			raise KDFEntropyLimitError(output_len)
+			raise KDFOutputLimitError(output_len)
 		if salt is None:
 			salt = b'\x00' * digest_size
 		if context is None:

@@ -13,7 +13,7 @@ from ..errors import QuantCryptError
 
 __all__ = [
 	"KDFError",
-	"KDFEntropyLimitError",
+	"KDFOutputLimitError",
 	"KDFWeakPasswordError",
 	"KDFVerificationError",
 	"KDFInvalidHashError",
@@ -25,9 +25,9 @@ class KDFError(QuantCryptError):
 	"""Base class for all KDF errors."""
 
 
-class KDFEntropyLimitError(KDFError):
+class KDFOutputLimitError(KDFError):
 	def __init__(self, limit: int):
-		super().__init__(f"Not allowed to derive more than {limit} bytes of keys from one key/salt pair.")
+		super().__init__(f"Not allowed to derive more than {limit} bytes of keys from one master key.")
 
 
 class KDFWeakPasswordError(KDFError):
