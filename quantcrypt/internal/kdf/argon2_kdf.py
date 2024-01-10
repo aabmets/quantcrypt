@@ -80,12 +80,12 @@ class BaseArgon2(ABC):
 
 	def __init__(self, overrides: KDFParams | None = None):
 		params = overrides or self._default_params()
-		if params is None:
-			raise RuntimeError("Params must never be None here.")
-		if not overrides and self._testing:
-			params.memory_cost = 2 ** 10
-		self._engine = PasswordHasher(**params.toDict())
-		self.params = params
+		if params is not None:
+			if not overrides and self._testing:
+				params.memory_cost = 2 ** 10
+			self._engine = PasswordHasher(**params.toDict())
+			self.params = params
+		raise RuntimeError("Params must never be None in BaseArgon2 __init__")
 
 	@staticmethod
 	def _assert_crack_resistance(password: str, min_years: int, data_key: str) -> None:
