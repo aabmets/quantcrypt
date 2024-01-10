@@ -74,7 +74,7 @@ branch = true
 source = ["quantcrypt/*"]
 
 [tool.coverage.report]
-#fail_under = 90
+fail_under = 90
 skip_empty = true
 ignore_errors = true
 exclude_lines = [
