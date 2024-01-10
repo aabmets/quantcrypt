@@ -1,22 +1,20 @@
 [tool.poetry]
 name = "quantcrypt"
-version = "0.0.9"
+version = "0.0.10"
 description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries of algorithms defined in the CNSA Suite"
 authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
 repository = "https://github.com/aabmets/quantcrypt"
 license = "MIT"
 readme = "README.md"
-keywords = ["toolbox", "cross-language", "utility", "scripts", "software", "development"]
+keywords = ["post-quantum", "cryptography", "encryption", "decryption", "pqclean", "cnsa"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Microsoft :: Windows",
-    "Operating System :: OS Independent",
-    "Programming Language :: C",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -38,7 +36,7 @@ orjson = "^3.9.10"
 dotmap = "^1.3.30"
 pydantic = "^2.5.3"
 argon2-cffi = "^23.1.0"
-pycryptodomex = "^3.19.1"
+pycryptodomex = "^3.20.0"
 types-zxcvbn = "^4.4.1.6"
 zxcvbn = "^4.4.28"
 rich = "^13.7.0"
@@ -50,7 +48,7 @@ pyyaml = "^6.0.1"
 setuptools = "^69.0.3"
 devtools-cli = "^0.12.1"
 coverage = "^7.4.0"
-pytest = "^7.4.3"
+pytest = "^7.4.4"
 pytest-cov = "^4.1.0"
 
 [tool.pytest.ini_options]
