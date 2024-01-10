@@ -9,8 +9,8 @@
 #   SPDX-License-Identifier: MIT
 #
 from __future__ import annotations
-from typing import Literal
-from ..errors import *
+from typing import Literal, Type
+from ..errors import InvalidUsageError
 from .. import utils
 
 
@@ -50,12 +50,12 @@ class ChunkSize:
 		"""
 		This class is a collection of classes and is not
 		intended to be instantiated directly. You can access
-		the contained KB and MB classes as attributes of this
-		class.
+		the contained **KB** and **MB** classes as attributes
+		of this class.
 		"""
 		raise InvalidUsageError(
 			"ChunkSize class is a collection of classes and "
 			"is not intended to be instantiated directly."
 		)
-	KB = ChunkSizeKB
-	MB = ChunkSizeMB
+	KB: Type[ChunkSizeKB] = ChunkSizeKB
+	MB: Type[ChunkSizeMB] = ChunkSizeMB

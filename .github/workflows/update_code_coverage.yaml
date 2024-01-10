@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update:
+  codecov:
     runs-on: ubuntu-latest
 
     steps:

@@ -12,7 +12,12 @@ import pytest
 from typing import Callable, Type
 from pydantic import ValidationError
 from quantcrypt.internal.pqa.dss import BaseDSS
-from quantcrypt.dss import *
+from quantcrypt.internal.pqa import errors
+from quantcrypt.dss import (
+	Dilithium, Falcon,
+	FastSphincs, SmallSphincs,
+	PQAVariant, DSSParamSizes
+)
 
 
 @pytest.fixture(name="attribute_tests", scope="module")
@@ -104,13 +109,13 @@ def fixture_invalid_inputs_tests(
 			with pytest.raises(ValidationError):
 				dss.verify(public_key, message, inv_sig)
 
-		with pytest.raises(DSSVerifyFailedError):
+		with pytest.raises(errors.DSSVerifyFailedError):
 			dss.verify(public_key[::-1], message, signature)
 
-		with pytest.raises(DSSVerifyFailedError):
+		with pytest.raises(errors.DSSVerifyFailedError):
 			dss.verify(public_key, message[::-1], signature)
 
-		with pytest.raises(DSSVerifyFailedError):
+		with pytest.raises(errors.DSSVerifyFailedError):
 			dss.verify(public_key, message, signature[::-1])
 
 	return closure

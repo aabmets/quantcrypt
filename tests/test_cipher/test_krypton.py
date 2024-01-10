@@ -11,7 +11,8 @@
 import pytest
 from typing import Callable
 from pydantic import ValidationError
-from quantcrypt.cipher import *
+from quantcrypt.cipher import Krypton, ChunkSize
+from quantcrypt.internal.cipher import errors
 
 
 def test_krypton_attributes():
@@ -89,18 +90,18 @@ def test_krypton_chunked_errors():
 
     k1 = Krypton(secret_key, chunk_size=ChunkSize.KB(1))
     k1.begin_encryption()
-    with pytest.raises(CipherChunkSizeError):
+    with pytest.raises(errors.CipherChunkSizeError):
         k1.encrypt(b'x' * 1025)
     ciphertext = k1.encrypt(plaintext)
     digest = k1.finish_encryption()
 
     k2 = Krypton(secret_key, chunk_size=ChunkSize.KB(1))
     k2.begin_decryption(digest)
-    with pytest.raises(CipherChunkSizeError):
+    with pytest.raises(errors.CipherChunkSizeError):
         k2.decrypt(b'x' * 1024)
-    with pytest.raises(CipherChunkSizeError):
+    with pytest.raises(errors.CipherChunkSizeError):
         k2.decrypt(b'x' * 1026)
-    with pytest.raises(CipherPaddingError):
+    with pytest.raises(errors.CipherPaddingError):
         k2.decrypt(ciphertext[::-1])
 
 
@@ -115,7 +116,7 @@ def test_krypton_invalid_digest():
     digest = digest[::-1]  # Corrupt digest
 
     k2 = Krypton(secret_key)
-    with pytest.raises(CipherVerifyError):
+    with pytest.raises(errors.CipherVerifyError):
         k2.begin_decryption(digest, header)
 
 
@@ -134,7 +135,7 @@ def test_krypton_invalid_ciphertext():
     k2 = Krypton(secret_key)
     k2.begin_decryption(digest, header)
     k2.decrypt(ciphertext)
-    with pytest.raises(CipherVerifyError):
+    with pytest.raises(errors.CipherVerifyError):
         k2.finish_decryption()
 
 
@@ -142,20 +143,20 @@ def test_krypton_invalid_state_error():
     k = Krypton(b'x' * 64)
 
     k.begin_encryption()
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.begin_decryption(b'x' * 160)
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.decrypt(b'')
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.finish_decryption()
 
     digest = k.finish_encryption()
     k.flush()
 
     k.begin_decryption(digest)
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.begin_encryption()
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.encrypt(b'')
-    with pytest.raises(CipherStateError):
+    with pytest.raises(errors.CipherStateError):
         k.finish_encryption()

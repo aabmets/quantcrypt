@@ -13,7 +13,9 @@ from typing import Callable, Type
 from secrets import compare_digest
 from pydantic import ValidationError
 from quantcrypt.internal.pqa.kem import BaseKEM
-from quantcrypt.kem import *
+from quantcrypt.kem import (
+	Kyber, PQAVariant, KEMParamSizes
+)
 
 
 @pytest.fixture(name="attribute_tests", scope="module")
@@ -90,7 +92,7 @@ def fixture_invalid_inputs_tests(
 			with pytest.raises(ValidationError):
 				kem.encaps(ipk)
 
-		cipher_text, shared_secret = kem.encaps(public_key)
+		cipher_text, _ = kem.encaps(public_key)
 
 		for isk in invalid_keys(secret_key):
 			with pytest.raises(ValidationError):

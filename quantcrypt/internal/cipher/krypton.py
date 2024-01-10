@@ -17,10 +17,10 @@ from Cryptodome.Hash import SHA3_512, cSHAKE256
 from Cryptodome.Hash.cSHAKE128 import cSHAKE_XOF
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Util.strxor import strxor
+from .common import ChunkSizeKB, ChunkSizeMB
 from ..kdf.kmac_kdf import KKDF
 from .. import utils
-from .errors import *
-from .common import *
+from . import errors
 
 
 __all__ = ["Krypton"]
@@ -114,11 +114,11 @@ class Krypton:
 		:param header: Associated Authenticated Data
 		:return: None
 		:raises - pydantic.ValidationError: On invalid input.
-		:raises - CipherStateError:
+		:raises - errors.CipherStateError:
 			If the cipher is already in encryption or decryption mode.
 		"""
 		if self._mode is not None:
-			raise CipherStateError
+			raise errors.CipherStateError
 		self._mode = "enc"
 		self._nonce = secrets.token_bytes(64)
 		self._salt = secrets.token_bytes(64)
@@ -144,10 +144,10 @@ class Krypton:
 			length is larger than this value.
 		"""
 		if self._mode != "enc":
-			raise CipherStateError
+			raise errors.CipherStateError
 		elif self._chunk_size:
 			if len(plaintext) > self._chunk_size:
-				raise CipherChunkSizeError
+				raise errors.CipherChunkSizeError
 			plaintext = pad(
 				plaintext,
 				self._chunk_size + 1,
@@ -168,7 +168,7 @@ class Krypton:
 			If the encryption process has not begun.
 		"""
 		if self._mode != "enc":
-			raise CipherStateError
+			raise errors.CipherStateError
 		salt = self._salt
 		ct, tag = self._wrap_aes.encrypt_and_digest(
 			self._nonce + self._data_aes.digest()
@@ -195,7 +195,7 @@ class Krypton:
 			If the cipher is already in encryption or decryption mode.
 		"""
 		if self._mode is not None:
-			raise CipherStateError
+			raise errors.CipherStateError
 		self._mode = "dec"
 		ct, tag, salt = verif_data[:80], verif_data[80:96], verif_data[96:]
 		key1, key2, key3 = self._keygen(salt)
@@ -203,7 +203,7 @@ class Krypton:
 		try:
 			pt = self._wrap_aes.decrypt_and_verify(ct, tag)
 		except ValueError:
-			raise CipherVerifyError
+			raise errors.CipherVerifyError
 		self._nonce, self._tag = pt[:64], pt[64:]
 		self._create_data_aes(key2, header)
 		self._create_xof(key1)
@@ -229,10 +229,9 @@ class Krypton:
 			the decrypted plaintext is incorrect (corrupted).
 		"""
 		if self._mode != "dec":
-			raise CipherStateError
-		elif self._chunk_size:
-			if len(ciphertext) != self._chunk_size + 1:
-				raise CipherChunkSizeError
+			raise errors.CipherStateError
+		elif self._chunk_size and len(ciphertext) != self._chunk_size + 1:
+			raise errors.CipherChunkSizeError
 		obf_pt = self._data_aes.decrypt(ciphertext)
 		mask = self._xof.read(len(obf_pt))
 		plaintext = strxor(mask, obf_pt)
@@ -244,7 +243,7 @@ class Krypton:
 					style='iso7816'
 				)
 			except ValueError:
-				raise CipherPaddingError
+				raise errors.CipherPaddingError
 		return plaintext
 
 	def finish_decryption(self) -> None:
@@ -259,9 +258,9 @@ class Krypton:
 			If the cipher was unable to verify the decrypted data.
 		"""
 		if self._mode != "dec":
-			raise CipherStateError
+			raise errors.CipherStateError
 		try:
 			self._data_aes.verify(self._tag)
 		except ValueError:
-			raise CipherVerifyError
+			raise errors.CipherVerifyError
 		self.flush()

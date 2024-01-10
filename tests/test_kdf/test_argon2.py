@@ -12,7 +12,8 @@ import timeit
 import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
-from quantcrypt.kdf import *
+from quantcrypt.kdf import KDFParams, Argon2
+from quantcrypt.internal.kdf import errors
 
 
 @pytest.fixture(name="good_pw", scope="module")
@@ -147,13 +148,13 @@ def test_argon2_errors(good_pw: str, test_context: Callable):
 	with test_context(Argon2.Hash):
 		kdf = Argon2.Hash(good_pw)
 
-		with pytest.raises(KDFVerificationError):
+		with pytest.raises(errors.KDFVerificationError):
 			Argon2.Hash(good_pw[::-1], kdf.public_hash)
 
-		with pytest.raises(KDFInvalidHashError):
+		with pytest.raises(errors.KDFInvalidHashError):
 			Argon2.Hash(good_pw, kdf.public_hash[::-1])
 
-		with pytest.raises(KDFWeakPasswordError):
+		with pytest.raises(errors.KDFWeakPasswordError):
 			Argon2.Hash('a' * 7)
 
 
@@ -210,7 +211,7 @@ def test_argon2key_success(good_pw: str, test_context: Callable):
 
 def test_argon2key_errors(good_pw: str, test_context: Callable):
 	with test_context(Argon2.Key):
-		with pytest.raises(KDFWeakPasswordError):
+		with pytest.raises(errors.KDFWeakPasswordError):
 			Argon2.Key('a' * 7)
 
 

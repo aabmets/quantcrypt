@@ -12,7 +12,7 @@ import struct
 from pydantic import Field
 from typing import Annotated, Optional
 from Cryptodome.Hash import KMAC256
-from .errors import *
+from . import errors
 from .. import utils
 
 
@@ -52,7 +52,7 @@ class KKDF:
 		output_len = key_len * num_keys
 
 		if output_len > entropy_limit:
-			raise KDFOutputLimitError(output_len)
+			raise errors.KDFOutputLimitError(output_len)
 		if salt is None:
 			salt = b'\x00' * digest_size
 		if context is None:

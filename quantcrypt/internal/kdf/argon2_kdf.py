@@ -13,12 +13,13 @@ from enum import Enum
 from pydantic import Field
 from dotmap import DotMap
 from zxcvbn import zxcvbn
-from typing import Type, Annotated
 from argon2 import PasswordHasher
 from argon2 import exceptions as aex
+from typing import Type, Annotated, Optional
 from abc import ABC, abstractmethod
-from .errors import *
+from ..errors import InvalidUsageError
 from .. import utils
+from . import errors
 
 
 __all__ = ["MemSize", "KDFParams", "Argon2"]
@@ -78,7 +79,7 @@ class BaseArgon2(ABC):
 	def _default_params() -> KDFParams: ...
 
 	def __init__(self, overrides: KDFParams | None):
-		params = overrides or self._default_params()
+		params: KDFParams = overrides or self._default_params()
 		if not overrides and self._testing:
 			params.memory_cost = 2 ** 10
 		self._engine = PasswordHasher(**params.toDict())
@@ -90,11 +91,11 @@ class BaseArgon2(ABC):
 		data = result["crack_times_seconds"][data_key]
 		real_years = int(data) // (365 * 24 * 3600)
 		if real_years < min_years:
-			raise KDFWeakPasswordError
+			raise errors.KDFWeakPasswordError
 
 
 class Argon2Hash(BaseArgon2):
-	public_hash: str = None
+	public_hash: Optional[str] = None
 	rehashed: bool = False
 	verified: bool = False
 
@@ -163,16 +164,16 @@ class Argon2Hash(BaseArgon2):
 				self.public_hash = verif_hash
 				self.verified = True
 		except aex.VerificationError:
-			raise KDFVerificationError
+			raise errors.KDFVerificationError
 		except aex.InvalidHashError:
-			raise KDFInvalidHashError
+			raise errors.KDFInvalidHashError
 		except aex.HashingError:
-			raise KDFHashingError
+			raise errors.KDFHashingError
 
 
 class Argon2Key(BaseArgon2):
-	secret_key: bytes = None
-	public_salt: str = None
+	secret_key: Optional[bytes] = None
+	public_salt: Optional[str] = None
 
 	@staticmethod
 	def _default_params() -> KDFParams:
@@ -240,9 +241,20 @@ class Argon2Key(BaseArgon2):
 			self.secret_key = utils.b64(_hash)
 			self.public_salt = f"{_salt}="
 		except aex.HashingError:
-			raise KDFHashingError
+			raise errors.KDFHashingError
 
 
 class Argon2:
+	def __init__(self):
+		"""
+		This class is a collection of classes and is not
+		intended to be instantiated directly. You can access
+		the contained **Hash** and **Key** classes as
+		attributes of this class.
+		"""
+		raise InvalidUsageError(
+			"Argon2 class is a collection of classes and "
+			"is not intended to be instantiated directly."
+		)
 	Hash: Type[Argon2Hash] = Argon2Hash
 	Key: Type[Argon2Key] = Argon2Key

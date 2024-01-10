@@ -13,9 +13,13 @@ from abc import ABC
 from cffi import FFI
 from types import ModuleType
 from functools import lru_cache
-from .common import *
-from .errors import *
+from . import errors
 from .. import utils
+from .common import (
+	BasePQAParamSizes,
+	BasePQAlgorithm,
+	PQAVariant
+)
 
 
 __all__ = [
@@ -51,7 +55,7 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		"""
 		result = self._keygen("sign")
 		if not result:  # pragma: no cover
-			raise DSSKeygenFailedError
+			raise errors.DSSKeygenFailedError
 		return result
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
@@ -77,9 +81,9 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			sig_buf = ffi.new(f"uint8_t [{params.sig_size}]")
 			sig_len = ffi.new("size_t *", params.sig_size)
 
-			func = getattr(self._lib, self._namespace + f"_crypto_sign_signature")
+			func = getattr(self._lib, self._namespace + "_crypto_sign_signature")
 			if 0 != func(sig_buf, sig_len, msg, len(msg), sk):  # pragma: no cover
-				raise DSSSignFailedError
+				raise errors.DSSSignFailedError
 
 			sig_len = struct.unpack("Q", ffi.buffer(sig_len, 8))[0]
 			return bytes(ffi.buffer(sig_buf, sig_len))
@@ -114,10 +118,10 @@ class BaseDSS(BasePQAlgorithm, ABC):
 
 		@utils.input_validator()
 		def _verify(pk: pk_anno, msg: msg_anno, sig: sig_anno, _raises: bool) -> bool:
-			func = getattr(self._lib, self._namespace + f"_crypto_sign_verify")
+			func = getattr(self._lib, self._namespace + "_crypto_sign_verify")
 			result = func(sig, len(sig), msg, len(msg), pk)
 			if result != 0 and _raises:
-				raise DSSVerifyFailedError
+				raise errors.DSSVerifyFailedError
 			return result == 0
 
 		return _verify(public_key, message, signature, raises)

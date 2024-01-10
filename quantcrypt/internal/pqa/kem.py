@@ -12,9 +12,13 @@ from abc import ABC
 from cffi import FFI
 from types import ModuleType
 from functools import lru_cache
-from .common import *
-from .errors import *
+from . import errors
 from .. import utils
+from .common import (
+	BasePQAParamSizes,
+	BasePQAlgorithm,
+	PQAVariant
+)
 
 
 __all__ = ["KEMParamSizes", "BaseKEM", "Kyber"]
@@ -44,7 +48,7 @@ class BaseKEM(BasePQAlgorithm, ABC):
 		"""
 		result = self._keygen("kem")
 		if not result:  # pragma: no cover
-			raise KEMKeygenFailedError
+			raise errors.KEMKeygenFailedError
 		return result
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
@@ -73,7 +77,7 @@ class BaseKEM(BasePQAlgorithm, ABC):
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
 			if 0 != func(cipher_text, shared_secret, pk):  # pragma: no cover
-				raise KEMEncapsFailedError
+				raise errors.KEMEncapsFailedError
 
 			ct = ffi.buffer(cipher_text, params.ct_size)
 			ss = ffi.buffer(shared_secret, params.ss_size)
@@ -108,8 +112,8 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
-			if 0 != func(shared_secret, ct, sk): # pragma: no cover
-				raise KEMDecapsFailedError
+			if 0 != func(shared_secret, ct, sk):  # pragma: no cover
+				raise errors.KEMDecapsFailedError
 
 			ss = ffi.buffer(shared_secret, params.ss_size)
 			return bytes(ss)

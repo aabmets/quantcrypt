@@ -9,8 +9,8 @@
 #   SPDX-License-Identifier: MIT
 #
 import pytest
-from quantcrypt.errors import *
 from quantcrypt.kdf import KKDF
+from quantcrypt.internal.kdf import errors
 
 
 def test_kkdf_instantiation_with_minimum_args():
@@ -127,7 +127,7 @@ def test_kkdf_max_allowed_entropy():
 
 
 def test_kkdf_key_len_entropy_limit_error():
-	with pytest.raises(KDFOutputLimitError):
+	with pytest.raises(errors.KDFOutputLimitError):
 		KKDF(
 			master=b'\x00' * 32,
 			key_len=65,  # Key length set to exceed the entropy limit when multiplied by num_keys
@@ -136,7 +136,7 @@ def test_kkdf_key_len_entropy_limit_error():
 
 
 def test_kkdf_num_keys_entropy_limit_error():
-	with pytest.raises(KDFOutputLimitError):
+	with pytest.raises(errors.KDFOutputLimitError):
 		KKDF(
 			master=b'\x00' * 32,
 			key_len=64,
