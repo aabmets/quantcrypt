@@ -1,4 +1,4 @@
-name: Compile, Test, Build, Publish
+name: PyPi Publish Pipeline
 
 on:
   workflow_dispatch:
@@ -28,11 +28,6 @@ jobs:
           poetry install --with dev
           python scripts/compile.py
           pytest
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload compiled binaries
         uses: actions/upload-artifact@v4

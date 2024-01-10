@@ -2,9 +2,10 @@ name: Update Code Coverage
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
-  codecov:
+  code-cov:
     runs-on: ubuntu-latest
 
     steps:
