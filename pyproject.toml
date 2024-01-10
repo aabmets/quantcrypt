@@ -1,12 +1,11 @@
 [tool.poetry]
 name = "quantcrypt"
-version = "0.0.10"
-description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries of algorithms defined in the CNSA Suite"
+version = "0.1.0"
+description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries"
 authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
-repository = "https://github.com/aabmets/quantcrypt"
 license = "MIT"
 readme = "README.md"
-keywords = ["post-quantum", "cryptography", "encryption", "decryption", "pqclean", "cnsa"]
+keywords = ["post-quantum", "crypto", "cryptography", "security", "pqclean"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,6 +25,11 @@ classifiers = [
 packages = [
     { include = "quantcrypt" }
 ]
+
+[tool.poetry.urls]
+"Repository" = "https://github.com/aabmets/quantcrypt"
+"Documentation" = "https://github.com/aabmets/quantcrypt/wiki"
+"Bug Tracker" = "https://github.com/aabmets/quantcrypt/issues"
 
 [tool.poetry.scripts]
 kupydo = "quantcrypt.internal.cli.main:app"
