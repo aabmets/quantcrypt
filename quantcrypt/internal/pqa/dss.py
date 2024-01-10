@@ -49,9 +49,10 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			library has failed to generate the keys for the current
 			DSS algorithm for any reason.
 		"""
-		if result := self._keygen("sign"):
-			return result
-		raise DSSKeygenFailedError
+		result = self._keygen("sign")
+		if not result:  # pragma: no cover
+			raise DSSKeygenFailedError
+		return result
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
 		"""
@@ -77,7 +78,7 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			sig_len = ffi.new("size_t *", params.sig_size)
 
 			func = getattr(self._lib, self._namespace + f"_crypto_sign_signature")
-			if 0 != func(sig_buf, sig_len, msg, len(msg), sk):
+			if 0 != func(sig_buf, sig_len, msg, len(msg), sk):  # pragma: no cover
 				raise DSSSignFailedError
 
 			sig_len = struct.unpack("Q", ffi.buffer(sig_len, 8))[0]

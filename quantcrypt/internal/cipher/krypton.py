@@ -11,10 +11,8 @@
 from __future__ import annotations
 import secrets
 from pydantic import Field
-from typing import Annotated, Optional, Literal
+from typing import Annotated, Optional, Literal, Any
 from Cryptodome.Cipher import AES
-from Cryptodome.Cipher._mode_eax import EaxMode
-from Cryptodome.Cipher._mode_siv import SivMode
 from Cryptodome.Hash import SHA3_512, cSHAKE256
 from Cryptodome.Hash.cSHAKE128 import cSHAKE_XOF
 from Cryptodome.Util.Padding import pad, unpad
@@ -22,47 +20,17 @@ from Cryptodome.Util.strxor import strxor
 from ..kdf.kmac_kdf import KKDF
 from .. import utils
 from .errors import *
+from .common import *
 
 
-__all__ = ["ChunkSize", "Krypton"]
-
-
-class ChunkSizeKB(dict):
-	@utils.input_validator()
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
-		"""
-		Converts the size argument kilobytes input value to bytes.
-		:param size: The block size in kilobytes
-		:return: The block size in bytes
-		:raises - pydantic.ValidationError:
-			If the input size value is not a valid Literal
-		"""
-		super().__init__(value=1024 * size)
-
-
-class ChunkSizeMB(dict):
-	@utils.input_validator()
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
-		"""
-		Converts the size argument megabytes input value to bytes.
-		:param size: The block size in megabytes
-		:return: The block size in bytes
-		:raises - pydantic.ValidationError:
-			If the input size value is not a valid Literal
-		"""
-		super().__init__(value=1024 ** 2 * size)
-
-
-class ChunkSize:
-	KB = ChunkSizeKB
-	MB = ChunkSizeMB
+__all__ = ["Krypton"]
 
 
 class Krypton:
 	_mode: Literal["enc", "dec"] | None = None
 	_xof: cSHAKE_XOF | None = None
-	_data_aes: EaxMode | None = None
-	_wrap_aes: SivMode | None = None
+	_data_aes: Any | None = None
+	_wrap_aes: Any | None = None
 	_nonce: bytes | None = None
 	_salt: bytes | None = None
 	_tag: bytes | None = None
@@ -85,7 +53,7 @@ class Krypton:
 			of plaintext chunks to `chunk_size` + 1. Disabled by default.
 		:raises - pydantic.ValidationError: On invalid input.
 		"""
-		self._chunk_size = (chunk_size or {}).get("value")
+		self._chunk_size: int | None = (chunk_size or {}).get("value")
 		self._secret_key = secret_key
 		self._context = SHA3_512.new(
 			context + b'krypton'
@@ -94,8 +62,9 @@ class Krypton:
 	def flush(self) -> None:
 		"""
 		Resets the ciphers internal state.
-		Does not remove `secret_key`, `context`
+		Does not clear the `secret_key`, `context`
 		or `chunk_size` values.
+
 		:return: None
 		"""
 		self._mode = None
@@ -262,7 +231,7 @@ class Krypton:
 		if self._mode != "dec":
 			raise CipherStateError
 		elif self._chunk_size:
-			if len(ciphertext) > self._chunk_size + 1:
+			if len(ciphertext) != self._chunk_size + 1:
 				raise CipherChunkSizeError
 		obf_pt = self._data_aes.decrypt(ciphertext)
 		mask = self._xof.read(len(obf_pt))

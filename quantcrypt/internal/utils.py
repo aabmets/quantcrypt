@@ -18,13 +18,13 @@ from .errors import InvalidArgsError
 __all__ = ["b64", "input_validator"]
 
 
-@validate_call
 def b64(data: str | bytes) -> str | bytes:
 	try:
 		if isinstance(data, str):
 			return base64.b64decode(data.encode("utf-8"))
 		elif isinstance(data, bytes):
 			return base64.b64encode(data).decode("utf-8")
+		raise InvalidArgsError
 	except (UnicodeError, binascii.Error):
 		raise InvalidArgsError
 

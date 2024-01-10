@@ -42,9 +42,10 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			library has failed to generate the keys for the current
 			KEM algorithm for any reason.
 		"""
-		if result := self._keygen("kem"):
-			return result
-		raise KEMKeygenFailedError
+		result = self._keygen("kem")
+		if not result:  # pragma: no cover
+			raise KEMKeygenFailedError
+		return result
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
 		"""
@@ -71,7 +72,7 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
-			if 0 != func(cipher_text, shared_secret, pk):
+			if 0 != func(cipher_text, shared_secret, pk):  # pragma: no cover
 				raise KEMEncapsFailedError
 
 			ct = ffi.buffer(cipher_text, params.ct_size)
@@ -107,7 +108,7 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
 			func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
-			if 0 != func(shared_secret, ct, sk):
+			if 0 != func(shared_secret, ct, sk): # pragma: no cover
 				raise KEMDecapsFailedError
 
 			ss = ffi.buffer(shared_secret, params.ss_size)

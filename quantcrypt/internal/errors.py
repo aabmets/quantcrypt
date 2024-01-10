@@ -20,10 +20,10 @@ class QuantCryptError(Exception):
 
 
 class InvalidUsageError(QuantCryptError):
-	def __init__(self):
-		super().__init__("")
+	def __init__(self, message: str = None):
+		super().__init__(message or "Invalid usage of object.")
 
 
 class InvalidArgsError(QuantCryptError):
-	def __init__(self):
-		super().__init__("QuantCrypt method received an invalid argument.")
+	def __init__(self, message: str = None):
+		super().__init__(message or "Method received an invalid argument.")

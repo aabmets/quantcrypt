@@ -8,5 +8,6 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-from .internal.cipher.krypton import *
+from .internal.cipher.common import ChunkSize
 from .internal.cipher.errors import *
+from .internal.cipher.krypton import *
