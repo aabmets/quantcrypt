@@ -79,12 +79,11 @@ class BaseArgon2(ABC):
 	def _default_params() -> KDFParams: ...
 
 	def __init__(self, overrides: KDFParams | None = None):
-		if overrides:
-			params = overrides
-		else:
-			params = self._default_params()
-			if self._testing:
-				params.memory_cost = 2 ** 10
+		params = overrides or self._default_params()
+		if params is None:
+			raise RuntimeError("Params must never be None here.")
+		if not overrides and self._testing:
+			params.memory_cost = 2 ** 10
 		self._engine = PasswordHasher(**params.toDict())
 		self.params = params
 
