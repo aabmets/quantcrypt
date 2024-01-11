@@ -28,7 +28,7 @@ packages = [
 
 [tool.poetry.urls]
 "Repository" = "https://github.com/aabmets/quantcrypt"
-"Documentation" = "https://github.com/aabmets/quantcrypt/wiki"
+"Documentation" = "https://github.com/aabmets/quantcrypt/wiki/Documentation"
 "Bug Tracker" = "https://github.com/aabmets/quantcrypt/issues"
 
 [tool.poetry.scripts]
@@ -73,7 +73,7 @@ pythonpath = [
 
 [tool.coverage.run]
 branch = true
-source = ["quantcrypt/*"]
+source = ["quantcrypt"]
 
 [tool.coverage.report]
 fail_under = 90
