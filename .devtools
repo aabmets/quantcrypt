@@ -15,7 +15,7 @@
     "file_name": "mit.json"
   },
   "version_cmd": {
-    "app_version": "0.1.1",
+    "app_version": "0.1.2",
     "components": [
       {
         "name": "lib",
