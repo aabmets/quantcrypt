@@ -259,19 +259,19 @@ toml = ["tomli"]
 
 [[package]]
 name = "devtools-cli"
-version = "0.12.1"
+version = "0.13.0"
 description = "A toolbox of cross-language utility scripts for efficient software development."
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "devtools_cli-0.12.1-py3-none-any.whl", hash = "sha256:cbf8ef2a2e675c211536d4acd1f11df05e59a78f0a56f80be7ab6b1a4bdd1499"},
-    {file = "devtools_cli-0.12.1.tar.gz", hash = "sha256:15f687e0de019e72430e510623f033bf19f9528deb2e909cd370809e8142e709"},
+    {file = "devtools_cli-0.13.0-py3-none-any.whl", hash = "sha256:bb18c8b3e3c56cb5d22c4dec2c1dd10fb3df3152b8a61d8ba06483be10de13f8"},
+    {file = "devtools_cli-0.13.0.tar.gz", hash = "sha256:d48a9b16028e6b2e08ba56773d885bedf6d64c4f60cd22b68e7cc1cc0a24d5cb"},
 ]
 
 [package.dependencies]
 httpx = ">=0.26.0,<0.27.0"
 orjson = ">=3.9.10,<4.0.0"
-pydantic = ">=2.5.2,<3.0.0"
+pydantic = ">=2.5.3,<3.0.0"
 pyyaml = ">=6.0.1,<7.0.0"
 semver = ">=3.0.2,<4.0.0"
 typer = {version = ">=0.9.0,<0.10.0", extras = ["all"]}
@@ -928,4 +928,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a4c19eb91e0974e627cc9f328ae1fbe59e76062987b3b45e201295c87d86807d"
+content-hash = "d7d34e2a3dcc1703089109e5591edb85eef2fc5bedcfded2a84a3c7d090d2a48"

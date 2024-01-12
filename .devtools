@@ -10,20 +10,26 @@
     },
     "paths": [
       "quantcrypt",
-      "scripts"
+      "scripts",
+      "tests"
     ],
     "file_name": "mit.json"
   },
   "version_cmd": {
     "app_version": "0.1.2",
+    "track_descriptor": true,
+    "track_chart": false,
     "components": [
       {
         "name": "lib",
         "target": "quantcrypt",
         "ignore": [],
-        "hash": "5632451049b07d04135051816476e25d"
+        "hash": "2eb183e68e9b21740ca0f85ca64cd5b6"
       }
-    ],
-    "only_config": false
+    ]
+  },
+  "log_cmd": {
+    "gh_user": "aabmets",
+    "gh_repo": "quantcrypt"
   }
 }
