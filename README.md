@@ -1,6 +1,6 @@
 # QuantCrypt
 
-<img src="https://raw.githubusercontent.com/aabmets/quantcrypt/main/docs/images/quantcrypt-logo.jpg" alt="Logo" width="538" height="307">
+<img src="https://raw.githubusercontent.com/aabmets/quantcrypt/main/docs/images/quantcrypt-logo.jpg" alt="Logo" style="height: auto; width: auto; max-width: 500px">
 
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/quantcrypt)](https://pypi.org/project/quantcrypt/)
