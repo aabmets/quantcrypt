@@ -14,9 +14,15 @@ from dotmap import DotMap
 from typing import Annotated
 from typer import Typer, Option
 from rich.console import Console
+from . import utils
 
 
-app = Typer()
+app = Typer(
+    name="qclib",
+    invoke_without_command=True,
+    no_args_is_help=True
+)
+utils.add_typer_apps(app)
 
 
 Version = Annotated[bool, Option(
@@ -29,7 +35,7 @@ Info = Annotated[bool, Option(
 )]
 
 
-@app.callback(invoke_without_command=True, no_args_is_help=True)
+@app.callback()
 def main(version: Version = False, info: Info = False):
     if version:
         pkg_info = PackageInfo()
@@ -55,7 +61,7 @@ class PackageInfo(DotMap):
 
     def __init__(self) -> None:
         super().__init__()
-        fields = ["Name", "Version", "Summary", "License", "Author"]
+
         for site_dir in site.getsitepackages():
             if "site-packages" not in site_dir:
                 continue
@@ -69,16 +75,19 @@ class PackageInfo(DotMap):
                 if meta.is_file():
                     with meta.open("r") as file:
                         lines = file.readlines()
+                    self._set_fields(lines)
 
-                    for line in lines:
-                        line = line.strip()
-                        if line == '':
-                            break
-                        k, v = line.split(':', maxsplit=1)
-                        v = v.strip()
-                        if v.startswith('Repository'):
-                            k, v = v.split(', ')
-                            k = "Homepage"
-                            setattr(self, k, v)
-                        if k in fields:
-                            setattr(self, k, v)
+    def _set_fields(self, lines: list[str]) -> None:
+        fields = ["Name", "Version", "Summary", "License", "Author"]
+        for line in lines:
+            line = line.strip()
+            if line == '':
+                break
+            k, v = line.split(':', maxsplit=1)
+            v = v.strip()
+            if k in fields:
+                setattr(self, k, v)
+            if v.startswith('Repository'):
+                k, v = v.split(', ')
+                k = "Homepage"
+                setattr(self, k, v)
