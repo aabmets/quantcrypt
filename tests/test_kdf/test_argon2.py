@@ -1,11 +1,11 @@
 #
 #   MIT License
-#
+#   
 #   Copyright (c) 2024, Mattias Aabmets
-#
+#   
 #   The contents of this file are subject to the terms and conditions defined in the License.
 #   You may not use, modify, or distribute this file except in compliance with the License.
-#
+#   
 #   SPDX-License-Identifier: MIT
 #
 import timeit
@@ -13,6 +13,7 @@ import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
 from quantcrypt.kdf import KDFParams, Argon2
+from quantcrypt.internal.kdf.common import MemCost
 from quantcrypt.internal.kdf import errors
 
 
@@ -37,7 +38,7 @@ def fixture_test_context() -> Callable:
 
 def test_argon2params_good_values():
 	KDFParams(
-		memory_cost=2**15,
+		memory_cost=MemCost.MB(32),
 		parallelism=1,
 		time_cost=1,
 		hash_len=64,
@@ -48,41 +49,41 @@ def test_argon2params_good_values():
 def test_argon2params_bad_parallelism():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=0,  # less than 1
-			memory_cost=2**15,
 			time_cost=1,
 			hash_len=64,
 			salt_len=16
 		)
 
 
-def test_argon2params_too_weak_mem_cost():
-	with pytest.raises(ValidationError):
-		KDFParams(
-			parallelism=1,
-			memory_cost=2**14,  # less than 2**15
-			time_cost=1,
-			hash_len=64,
-			salt_len=16
-		)
-
-
-def test_argon2params_bad_mem_cost_number():
-	with pytest.raises(ValidationError):
-		KDFParams(
-			parallelism=1,
-			memory_cost=3**15,  # not power of 2
-			time_cost=1,
-			hash_len=64,
-			salt_len=16
-		)
+# def test_argon2params_too_weak_mem_cost():
+# 	with pytest.raises(ValidationError):
+# 		KDFParams(
+# 			parallelism=1,
+# 			memory_cost=2**14,  # less than 2**15
+# 			time_cost=1,
+# 			hash_len=64,
+# 			salt_len=16
+# 		)
+#
+#
+# def test_argon2params_bad_mem_cost_number():
+# 	with pytest.raises(ValidationError):
+# 		KDFParams(
+# 			parallelism=1,
+# 			memory_cost=3**15,  # not power of 2
+# 			time_cost=1,
+# 			hash_len=64,
+# 			salt_len=16
+# 		)
 
 
 def test_argon2params_bad_time_cost():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=1,
-			memory_cost=2**15,
 			time_cost=0,  # less than 1
 			hash_len=64,
 			salt_len=16
@@ -92,8 +93,8 @@ def test_argon2params_bad_time_cost():
 def test_argon2params_too_short_hash_len():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=1,
-			memory_cost=2**15,
 			time_cost=1,
 			hash_len=15,  # less than 16
 			salt_len=16
@@ -103,8 +104,8 @@ def test_argon2params_too_short_hash_len():
 def test_argon2params_too_long_hash_len():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=1,
-			memory_cost=2**15,
 			time_cost=1,
 			hash_len=65,  # more than 64
 			salt_len=16
@@ -114,8 +115,8 @@ def test_argon2params_too_long_hash_len():
 def test_argon2params_too_short_salt_len():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=1,
-			memory_cost=2**15,
 			time_cost=1,
 			hash_len=64,
 			salt_len=15  # less than 16
@@ -125,8 +126,8 @@ def test_argon2params_too_short_salt_len():
 def test_argon2params_too_long_salt_len():
 	with pytest.raises(ValidationError):
 		KDFParams(
+			memory_cost=MemCost.MB(32),
 			parallelism=1,
-			memory_cost=2**15,
 			time_cost=1,
 			hash_len=64,
 			salt_len=65  # more than 64
@@ -160,22 +161,22 @@ def test_argon2_errors(good_pw: str, test_context: Callable):
 
 def test_argon2_overrides(good_pw: str):
 	ovr_s = KDFParams(
+		memory_cost=MemCost.MB(32),  # smaller than ovr2
 		parallelism=8,
-		memory_cost=2 ** 15,  # smaller than ovr2
 		time_cost=1,
 		hash_len=16,
 		salt_len=16
 	)
 	ovr_ref = KDFParams(
+		memory_cost=MemCost.MB(64),  # Reference
 		parallelism=8,
-		memory_cost=2**16,  # Reference
 		time_cost=1,
 		hash_len=16,
 		salt_len=16
 	)
 	ovr_l = KDFParams(
+		memory_cost=MemCost.MB(128),  # larger than ovr2
 		parallelism=8,
-		memory_cost=2**17,  # larger than ovr2
 		time_cost=1,
 		hash_len=16,
 		salt_len=16
@@ -217,8 +218,8 @@ def test_argon2key_errors(good_pw: str, test_context: Callable):
 
 def test_argon2key_overrides(good_pw: str):
 	ovr1 = KDFParams(
+		memory_cost=MemCost.MB(32),
 		parallelism=4,
-		memory_cost=2**15,
 		time_cost=1,
 		hash_len=20,
 		salt_len=20

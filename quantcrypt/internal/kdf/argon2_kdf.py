@@ -1,57 +1,40 @@
 #
 #   MIT License
-#
+#   
 #   Copyright (c) 2024, Mattias Aabmets
-#
+#   
 #   The contents of this file are subject to the terms and conditions defined in the License.
 #   You may not use, modify, or distribute this file except in compliance with the License.
-#
+#   
 #   SPDX-License-Identifier: MIT
 #
 import secrets
-from enum import Enum
+from abc import ABC, abstractmethod
 from pydantic import Field
 from dotmap import DotMap
 from zxcvbn import zxcvbn
 from argon2 import PasswordHasher
 from argon2 import exceptions as aex
 from typing import Type, Annotated, Optional
-from abc import ABC, abstractmethod
+from .common import MemCostMB, MemCostGB, MemCost
 from ..errors import InvalidUsageError
 from .. import utils
 from . import errors
 
 
-__all__ = ["MemSize", "KDFParams", "Argon2"]
-
-
-class MemSize(Enum):
-	"""
-	The amount of memory in MiB or GiB.
-	"""
-	MiB_32 = 2**15
-	MiB_64 = 2**16
-	MiB_128 = 2**17
-	MiB_256 = 2**18
-	MiB_512 = 2**19
-	GiB_1 = 2**20
-	GiB_2 = 2**21
-	GiB_4 = 2**22
-	GiB_8 = 2**23
-	GiB_16 = 2**24
-	GiB_32 = 2**25
+__all__ = ["KDFParams", "Argon2"]
 
 
 class KDFParams(DotMap):
 	@utils.input_validator()
 	def __init__(
 			self,
-			memory_cost: MemSize,
+			memory_cost: MemCostMB | MemCostGB,
 			parallelism: Annotated[int, Field(gt=0)],
 			time_cost: Annotated[int, Field(gt=0)],
 			hash_len: Annotated[int, Field(ge=16, le=64)] = 32,
 			salt_len: Annotated[int, Field(ge=16, le=64)] = 32
-	):
+	) -> None:
 		"""
 		Custom parameters for altering the security
 		level of key derivation functions.
@@ -62,7 +45,7 @@ class KDFParams(DotMap):
 		:param hash_len: The length of the generated hash, in bytes.
 		:param salt_len: The length of the generated salt, in bytes.
 		"""
-		memory_cost = memory_cost.value
+		memory_cost = memory_cost.get("value")
 		super().__init__({
 			k: v for k, v in locals().items()
 			if k not in ["self", "__class__"]
@@ -104,7 +87,7 @@ class Argon2Hash(BaseArgon2):
 	@staticmethod
 	def _default_params() -> KDFParams:
 		return KDFParams(
-			memory_cost=MemSize.GiB_1,
+			memory_cost=MemCost.GB(1),
 			parallelism=8,
 			time_cost=3,
 			hash_len=32,
@@ -114,12 +97,12 @@ class Argon2Hash(BaseArgon2):
 	@utils.input_validator()
 	def __init__(
 			self,
-			password: str,
+			password: str | bytes,
 			verif_hash: str = None,
 			*,
 			min_years: int = 1,
 			params: KDFParams = None
-	):
+	) -> None:
 		"""
 		This class is designed to be used as a hasher and verifier of user-provided
 		passwords for online services. On user registration, their password should be
@@ -133,14 +116,15 @@ class Argon2Hash(BaseArgon2):
 		:param password: A user-provided secret to be hashed.
 		:param verif_hash: A previously generated hash to compare the current password hash with.
 		:param min_years: How crack resistant the password is required to be, in years.
-			Password strength check is disabled when the min_years value is set to zero
-			or verif_hash is provided. Defaults to one year for this class.
+			Defaults to one year for this class. Password strength check is disabled,
+			when **password** is an instance of bytes, **min_years** value is set to
+			zero or **public_salt** is provided.
 		:param params: Optional parameters to override the security level of this KDF.
 
 		:raises - pydantic.ValidationError:
 			When the class is instantiated with invalid inputs.
 		:raises - errors.KDFWeakPasswordError:
-			When **min_years** is >= 1 and the `zxcvbn` library has evaluated
+			When password strength check is enabled and the `zxcvbn` library has evaluated
 			the provided password to be weaker than the specified requirement.
 		:raises - errors.KDFVerificationError:
 			When **verif_hash** is provided and the hashed
@@ -150,7 +134,7 @@ class Argon2Hash(BaseArgon2):
 		:raises - errors.KDFHashingError:
 			When Argon2 hashing process encounters an unknown error.
 		"""
-		if not verif_hash and min_years > 0:
+		if isinstance(password, str) and not verif_hash and min_years > 0:
 			data_key = "online_no_throttling_10_per_second"
 			self._assert_crack_resistance(password, min_years, data_key)
 
@@ -180,7 +164,7 @@ class Argon2Key(BaseArgon2):
 	@staticmethod
 	def _default_params() -> KDFParams:
 		return KDFParams(
-			memory_cost=MemSize.GiB_4,
+			memory_cost=MemCost.GB(4),
 			parallelism=8,
 			time_cost=5,
 			hash_len=32,
@@ -190,12 +174,12 @@ class Argon2Key(BaseArgon2):
 	@utils.input_validator()
 	def __init__(
 			self,
-			password: str,
+			password: str | bytes,
 			public_salt: str = None,
 			*,
 			min_years: int = 10,
 			params: KDFParams = None
-	):
+	) -> None:
 		"""
 		This class is designed to be used as a generator of secret keys from user-provided
 		passwords for encrypting files with symmetric ciphers like AES. When the user wishes
@@ -211,19 +195,20 @@ class Argon2Key(BaseArgon2):
 		:param public_salt: A previously generated salt to hash the password with.
 			Argon2 will generate a salt if one is not provided.
 		:param min_years: How crack resistant the password is required to be, in years.
-			Password strength check is disabled when the min_years value is set to zero
-			or public_salt is provided. Defaults to ten years for this class.
+			Defaults to ten years for this class. Password strength check is disabled,
+			when **password** is an instance of bytes, **min_years** value is set to
+			zero or **public_salt** is provided.
 		:param params: Optional parameters to override the security level of this KDF.
 
 		:raises - pydantic.ValidationError:
 			When the class is instantiated with invalid inputs.
 		:raises - errors.KDFWeakPasswordError:
-			When **min_years** is >= 1 and the `zxcvbn` library has evaluated
+			When password strength check is enabled and the `zxcvbn` library has evaluated
 			the provided password to be weaker than the specified requirement.
 		:raises - errors.KDFHashingError:
 			When Argon2 hashing process encounters an unknown error.
 		"""
-		if not public_salt and min_years > 0:
+		if isinstance(password, str) and not public_salt and min_years > 0:
 			data_key = "offline_slow_hashing_1e4_per_second"
 			self._assert_crack_resistance(password, min_years, data_key)
 
