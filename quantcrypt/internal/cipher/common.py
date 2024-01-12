@@ -1,11 +1,11 @@
 #
 #   MIT License
-#
+#   
 #   Copyright (c) 2024, Mattias Aabmets
-#
+#   
 #   The contents of this file are subject to the terms and conditions defined in the License.
 #   You may not use, modify, or distribute this file except in compliance with the License.
-#
+#   
 #   SPDX-License-Identifier: MIT
 #
 from __future__ import annotations
@@ -21,7 +21,7 @@ class ChunkSizeKB(dict):
 	@utils.input_validator()
 	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
 		"""
-		Converts the size argument kilobytes input value to bytes.
+		Converts the size input argument value of kilobytes to bytes.
 
 		:param size: The block size in kilobytes
 		:return: The block size in bytes
@@ -35,7 +35,7 @@ class ChunkSizeMB(dict):
 	@utils.input_validator()
 	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
 		"""
-		Converts the size argument megabytes input value to bytes.
+		Converts the size input argument value of megabytes to bytes.
 
 		:param size: The block size in megabytes
 		:return: The block size in bytes
