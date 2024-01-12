@@ -79,11 +79,11 @@ class BasePQAlgorithm(ABC):
 					self._lib = self._import(PQAVariant.CLEAN)
 					self.variant = PQAVariant.CLEAN
 					return
-				except ModuleNotFoundError:
+				except ModuleNotFoundError:  # pragma: no cover
 					pass
-			elif variant == PQAVariant.AVX2:
+			elif variant == PQAVariant.AVX2:  # pragma: no cover
 				raise ex
-			raise SystemExit(
+			raise SystemExit(  # pragma: no cover
 				"Quantcrypt Fatal Error:\n"
 				"Unable to continue due to missing CLEAN binaries."
 			)
@@ -95,7 +95,7 @@ class BasePQAlgorithm(ABC):
 
 		name = f"_crypto_{algo_type}_keypair"
 		func = getattr(self._lib, self._namespace + name)
-		if func(public_key, secret_key) != 0:
+		if func(public_key, secret_key) != 0:  # pragma: no cover
 			return tuple()
 
 		pk = ffi.buffer(public_key, params.pk_size)

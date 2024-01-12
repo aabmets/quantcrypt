@@ -12,8 +12,7 @@ import timeit
 import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
-from quantcrypt.kdf import KDFParams, Argon2
-from quantcrypt.internal.kdf.common import MemCost
+from quantcrypt.kdf import KDFParams, MemCost, Argon2
 from quantcrypt.internal.kdf import errors
 
 
@@ -55,28 +54,6 @@ def test_argon2params_bad_parallelism():
 			hash_len=64,
 			salt_len=16
 		)
-
-
-# def test_argon2params_too_weak_mem_cost():
-# 	with pytest.raises(ValidationError):
-# 		KDFParams(
-# 			parallelism=1,
-# 			memory_cost=2**14,  # less than 2**15
-# 			time_cost=1,
-# 			hash_len=64,
-# 			salt_len=16
-# 		)
-#
-#
-# def test_argon2params_bad_mem_cost_number():
-# 	with pytest.raises(ValidationError):
-# 		KDFParams(
-# 			parallelism=1,
-# 			memory_cost=3**15,  # not power of 2
-# 			time_cost=1,
-# 			hash_len=64,
-# 			salt_len=16
-# 		)
 
 
 def test_argon2params_bad_time_cost():
@@ -208,6 +185,13 @@ def test_argon2key_success(good_pw: str, test_context: Callable):
 
 		kdf2 = Argon2.Key(good_pw, kdf1.public_salt)
 		assert kdf2.secret_key == kdf1.secret_key
+
+
+def test_argon2key_custom_hash_length():
+	kdf = Argon2.Key(b'anything', params=KDFParams(
+		memory_cost=MemCost.MB(32), time_cost=1, parallelism=1, hash_len=30
+	))
+	assert len(kdf.secret_key) == 30
 
 
 def test_argon2key_errors(good_pw: str, test_context: Callable):

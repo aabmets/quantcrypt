@@ -153,7 +153,7 @@ class Argon2Hash(BaseArgon2):
 			raise errors.KDFVerificationError
 		except aex.InvalidHashError:
 			raise errors.KDFInvalidHashError
-		except aex.HashingError:
+		except aex.HashingError:  # pragma: no cover
 			raise errors.KDFHashingError
 
 
@@ -227,7 +227,7 @@ class Argon2Key(BaseArgon2):
 
 			self.secret_key = utils.b64(_hash)
 			self.public_salt = f"{_salt}="
-		except aex.HashingError:
+		except aex.HashingError:  # pragma: no cover
 			raise errors.KDFHashingError
 
 

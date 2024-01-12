@@ -5,7 +5,7 @@
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/quantcrypt)](https://pypi.org/project/quantcrypt/)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/aabmets/quantcrypt/pypi_publish_pipeline.yaml)](https://github.com/aabmets/quantcrypt/actions/workflows/pypi_publish_pipeline.yaml)
-[![Codecov](https://img.shields.io/codecov/c/github/aabmets/quantcrypt)](https://app.codecov.io/gh/aabmets/quantcrypt)
+[![codecov](https://codecov.io/gh/aabmets/quantcrypt/graph/badge.svg?token=jymcRynp2P)](https://codecov.io/gh/aabmets/quantcrypt)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/quantcrypt)](https://pypistats.org/packages/quantcrypt)
 
 
