@@ -61,8 +61,7 @@ class Krypton:
 	def flush(self) -> None:
 		"""
 		Resets the ciphers internal state.
-		Does not clear the `secret_key`, `context`
-		or `chunk_size` values.
+		Does not clear the `secret_key`, `context` or `chunk_size` values.
 
 		:return: None
 		"""

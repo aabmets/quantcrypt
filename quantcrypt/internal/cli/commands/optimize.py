@@ -14,7 +14,10 @@ from typer import Typer
 from quantcrypt.internal import utils
 
 
-optimize_app = Typer(name="optimize", invoke_without_command=True)
+optimize_app = Typer(
+	name="optimize",
+	invoke_without_command=True
+)
 
 
 @optimize_app.callback()

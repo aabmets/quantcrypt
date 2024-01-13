@@ -25,18 +25,18 @@ app = Typer(
 utils.add_typer_apps(app)
 
 
-Version = Annotated[bool, Option(
+VersionAtd = Annotated[bool, Option(
     '--version', '-v', show_default=False,
     help='Print the package version to console and exit.'
 )]
-Info = Annotated[bool, Option(
+InfoAtd = Annotated[bool, Option(
     '--info', '-i', show_default=False,
     help='Print package info to console and exit.'
 )]
 
 
 @app.callback()
-def main(version: Version = False, info: Info = False):
+def main(version: VersionAtd = False, info: InfoAtd = False):
     if version:
         pkg_info = PackageInfo()
         print(pkg_info.Version)
