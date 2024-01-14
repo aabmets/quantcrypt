@@ -8,41 +8,45 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from __future__ import annotations
-from typing import Literal, Type
+from dataclasses import dataclass
+from pydantic import Field
+from typing import Literal, Type, Annotated
 from ..errors import InvalidUsageError
 from .. import utils
 
 
-__all__ = ["ChunkSizeKB", "ChunkSizeMB", "ChunkSize"]
+__all__ = [
+	"ChunkSizeKB", "ChunkSizeMB", "ChunkSize",
+	"determine_file_chunk_size"
+]
 
 
-class ChunkSizeKB(dict):
+@dataclass(frozen=True)
+class ChunkSizeKB:
+	value: int
+
 	@utils.input_validator()
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
+	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256]) -> None:
 		"""
-		Converts the size input argument value of kilobytes to bytes.
-
-		:param size: The block size in kilobytes
-		:return: The block size in bytes
+		:param size: The chunk size in kilobytes.
 		:raises - pydantic.ValidationError:
-			If the input size value is not a valid Literal
+			On invalid size argument value.
 		"""
-		super().__init__(value=1024 * size)
+		object.__setattr__(self, 'value', 1024 * size)
 
 
-class ChunkSizeMB(dict):
+@dataclass(frozen=True)
+class ChunkSizeMB:
+	value: int
+
 	@utils.input_validator()
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]):
+	def __init__(self, size: Annotated[int, Field(ge=1, le=10)]) -> None:
 		"""
-		Converts the size input argument value of megabytes to bytes.
-
-		:param size: The block size in megabytes
-		:return: The block size in bytes
+		:param size: The chunk size in megabytes.
 		:raises - pydantic.ValidationError:
-			If the input size value is not a valid Literal
+			On invalid size argument value.
 		"""
-		super().__init__(value=1024 ** 2 * size)
+		object.__setattr__(self, 'value', 1024 ** 2 * size)
 
 
 class ChunkSize:
@@ -59,3 +63,25 @@ class ChunkSize:
 		)
 	KB: Type[ChunkSizeKB] = ChunkSizeKB
 	MB: Type[ChunkSizeMB] = ChunkSizeMB
+
+
+def determine_file_chunk_size(file_size: int) -> ChunkSizeKB | ChunkSizeMB:
+	kilo_bytes = 1024
+	mega_bytes = kilo_bytes * 1024
+
+	if file_size <= kilo_bytes * 4:
+		return ChunkSizeKB(1)
+	elif file_size <= kilo_bytes * 16:
+		return ChunkSizeKB(4)
+	elif file_size <= kilo_bytes * 64:
+		return ChunkSizeKB(16)
+	elif file_size <= kilo_bytes * 256:
+		return ChunkSizeKB(64)
+	elif file_size <= kilo_bytes * 1024:
+		return ChunkSizeKB(256)
+
+	for x in range(0, 10):
+		x += 1
+		if file_size <= mega_bytes * x * 100:
+			return ChunkSizeMB(x)
+	return ChunkSizeMB(10)

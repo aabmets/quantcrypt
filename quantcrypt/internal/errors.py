@@ -26,4 +26,4 @@ class InvalidUsageError(QuantCryptError):
 
 class InvalidArgsError(QuantCryptError):
 	def __init__(self, message: str = None):
-		super().__init__(message or "Method received an invalid argument.")
+		super().__init__(message or "Method received invalid arguments.")
