@@ -18,22 +18,9 @@ from .. import utils
 
 
 __all__ = [
-	"find_command_modules",
-	"add_typer_apps"
+	"add_typer_apps",
+	"find_command_modules"
 ]
-
-
-def find_command_modules() -> Generator[ModuleType, None, None]:
-	package_path = utils.search_upwards(__file__, "__init__.py").parent
-	import_dir = Path(__file__).with_name("commands")
-
-	for filepath in import_dir.rglob("*.py"):
-		relative_path = filepath.relative_to(package_path)
-		module_path = '.'.join(relative_path.with_suffix('').parts)
-		yield importlib.import_module(
-			package=package_path.name,
-			name=f'.{module_path}'
-		)
 
 
 def add_typer_apps(app: Typer) -> None:
@@ -50,3 +37,16 @@ def add_typer_apps(app: Typer) -> None:
 					typer_instance=obj,
 					name=obj.info.name
 				)
+
+
+def find_command_modules() -> Generator[ModuleType, None, None]:
+	package_path = utils.search_upwards(__file__, "__init__.py").parent
+	import_dir = Path(__file__).with_name("commands")
+
+	for filepath in import_dir.rglob("*.py"):
+		relative_path = filepath.relative_to(package_path)
+		module_path = '.'.join(relative_path.with_suffix('').parts)
+		yield importlib.import_module(
+			package=package_path.name,
+			name=f'.{module_path}'
+		)
