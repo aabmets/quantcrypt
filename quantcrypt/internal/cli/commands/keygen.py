@@ -22,24 +22,21 @@ from quantcrypt.dss import (
 	SmallSphincs
 )
 
-
 keygen_app = Typer(
-	name="keygen",
-	no_args_is_help=True,
-	help="Select a Post-Quantum Algorithm to generate keys for. "
+	name="keygen", no_args_is_help=True, help=
+	"Select a Post-Quantum Algorithm to generate keys for. "
 	"All sub-commands have identical call options. You can see the "
 	"available options by calling a sub-command with the --help option."
 )
 
-
 NameAtd = Annotated[str, Option(
-	"--name", "-n", show_default=False,
-	help='Unique identifier for the keyfile names, optional. '
+	"--name", "-n", show_default=False, help=
+	'Unique identifier for the keyfile names, optional. '
 	'If not provided, file names will be without a unique identifier.'
 )]
 PathAtd = Annotated[str, Option(
-	"--dir", "-d", show_default=False,
-	help='Directory where to save the generated keypair, optional. '
+	"--dir", "-d", show_default=False, help=
+	'Directory where to save the generated keypair, optional. '
 	'If not provided, the keys are saved into the current working directory.'
 )]
 
@@ -74,24 +71,21 @@ def keygen_interactive_flow(
 	apk_file = tgt_dir / apk_name
 	ask_file = tgt_dir / ask_name
 
+	def user_input_gate(file_names: str, plural: bool):
+		file_noun = "files" if plural else "a file"
+		print(f"The target directory already contains {file_noun} named {file_names}.")
+		answer = input("Okay to overwrite? (y/N): ").upper()
+		if answer == 'N':
+			reason = "existing files" if plural else "an existing file"
+			raise SystemExit(f"\nUnable to continue due to {reason}.\n")
+		print()
+
 	if apk_file.is_file() and ask_file.is_file():
-		print(f"The target directory already contains files named '{apk_name}' and '{ask_name}'.")
-		answer = input("Okay to overwrite? (y/N): ").upper()
-		if answer == 'N':
-			raise SystemExit("\nUnable to continue due to existing files.\n")
-		print()
+		user_input_gate(f"'{apk_name}' and '{ask_name}'", True)
 	elif apk_file.is_file():
-		print(f"The target directory already contains a file named '{apk_name}'.")
-		answer = input("Okay to overwrite? (y/N): ").upper()
-		if answer == 'N':
-			raise SystemExit("\nUnable to continue due to an existing file.\n")
-		print()
+		user_input_gate(f"'{apk_name}'", False)
 	elif ask_file.is_file():
-		print(f"The target directory already contains a file named '{ask_name}'.")
-		answer = input("Okay to overwrite? (y/N): ").upper()
-		if answer == 'N':
-			raise SystemExit("\nUnable to continue due to an existing file.\n")
-		print()
+		user_input_gate(f"'{ask_name}'", False)
 
 	apk_file.write_text(apk)
 	ask_file.write_text(ask)

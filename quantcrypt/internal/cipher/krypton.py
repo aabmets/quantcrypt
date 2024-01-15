@@ -11,7 +11,7 @@
 import secrets
 from pathlib import Path
 from pydantic import Field
-from typing import Annotated, Optional, Literal, Any
+from typing import Annotated, Optional, Literal, Any, Generator
 from Cryptodome.Hash import SHA3_512, cSHAKE256
 from Cryptodome.Hash.cSHAKE128 import cSHAKE_XOF
 from Cryptodome.Util.Padding import pad, unpad
@@ -377,6 +377,16 @@ class Krypton:
 		elif not output_file and not into_memory:
 			raise InvalidArgsError
 
+		def _decrypted_chunk() -> Generator[bytes, None, None]:
+			while True:
+				_chunk = in_file.read(cs_int + 1)
+				if not _chunk:
+					break
+				_pt = krypton.decrypt(_chunk)
+				if callback:
+					callback()
+				yield _pt
+
 		with open(ciphertext_file, 'rb') as in_file:
 			vdp_cs = in_file.read(170)
 			vdp, cs = vdp_cs[:160], vdp_cs[160:]
@@ -389,25 +399,14 @@ class Krypton:
 
 			if into_memory:
 				plaintext = bytes()
-				while True:
-					chunk = in_file.read(cs_int + 1)
-					if not chunk:
-						break
-					plaintext += krypton.decrypt(chunk)
-					if callback:
-						callback()
+				for chunk in _decrypted_chunk():
+					plaintext += chunk
 				krypton.finish_decryption()
 				return plaintext
 
 			output_file.unlink(missing_ok=True)
 			output_file.touch()
 			with output_file.open("wb") as out_file:
-				while True:
-					chunk = in_file.read(cs_int + 1)
-					if not chunk:
-						break
-					plaintext = krypton.decrypt(chunk)
-					if callback:
-						callback()
-					out_file.write(plaintext)
+				for chunk in _decrypted_chunk():
+					out_file.write(chunk)
 				krypton.finish_decryption()
