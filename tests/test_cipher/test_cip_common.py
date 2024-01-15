@@ -11,7 +11,10 @@
 import pytest
 from typing import Literal, cast
 from pydantic import ValidationError
-from quantcrypt.internal.cipher.common import ChunkSizeKB, ChunkSizeMB
+from quantcrypt.internal.cipher.common import (
+    ChunkSizeKB, ChunkSizeMB,
+    determine_file_chunk_size
+)
 from quantcrypt.errors import InvalidUsageError
 from quantcrypt.cipher import ChunkSize
 
@@ -48,3 +51,20 @@ def test_chunk_size_invalid_input():
         ChunkSize.MB(-1)
     with pytest.raises(ValidationError):
         ChunkSize.MB(0)
+
+
+def test_determine_file_chunk_size():
+    kilo_bytes = 1024
+    mega_bytes = kilo_bytes * 1024
+
+    for x, y in [(4, 1), (16, 4), (64, 16), (256, 64), (1024, 256)]:
+        cs = determine_file_chunk_size(kilo_bytes * x)
+        assert cs.value == kilo_bytes * y
+
+    for x in range(0, 10):
+        x += 1
+        cs = determine_file_chunk_size(mega_bytes * x * 100)
+        assert cs.value == mega_bytes * x
+
+    cs = determine_file_chunk_size(mega_bytes * 11 * 100)
+    assert cs.value == mega_bytes * 10
