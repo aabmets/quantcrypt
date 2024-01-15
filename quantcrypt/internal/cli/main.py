@@ -34,7 +34,7 @@ InfoAtd = Annotated[bool, Option(
 
 
 @app.callback()
-def main(version: VersionAtd = False, info: InfoAtd = False):
+def main(version: VersionAtd = False, info: InfoAtd = False) -> None:
     if version:
         pkg_info = PackageInfo()
         print(pkg_info.Version)

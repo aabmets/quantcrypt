@@ -19,7 +19,7 @@ from quantcrypt.cipher import Krypton, ChunkSize
 from quantcrypt.internal.cipher import errors
 
 
-@pytest.fixture(name="file_data")
+@pytest.fixture(name="file_data", scope="function")
 def fixture_file_data(tmp_path: Path) -> DotMap:
     orig_pt = os.urandom(1024 * 16)
     pt_file = tmp_path / "test_file.bin"
@@ -219,13 +219,21 @@ def test_krypton_file_enc_dec_callback(file_data: DotMap):
     assert sum(counters[1]) == 4
 
 
+def test_krypton_file_enc_dec_header(file_data: DotMap):
+    header = b'z' * 32
+    Krypton.encrypt_file(file_data.sk, file_data.pt_file, file_data.ct_file, header)
+    dec_data = Krypton.decrypt_file(file_data.sk, file_data.ct_file, file_data.pt2_file)
+    assert dec_data.plaintext is None
+    assert dec_data.header == header
+
+
 def test_krypton_file_enc_dec_into_memory(file_data: DotMap):
     Krypton.encrypt_file(file_data.sk, file_data.pt_file, file_data.ct_file)
-    pt2 = Krypton.decrypt_file(
+    dec_data = Krypton.decrypt_file(
         file_data.sk, file_data.ct_file, file_data.pt2_file,
         into_memory=True
     )
-    assert pt2 == file_data.orig_pt
+    assert dec_data.plaintext == file_data.orig_pt
 
 
 def test_krypton_file_enc_dec_chunk_size_override(file_data: DotMap):
@@ -238,12 +246,12 @@ def test_krypton_file_enc_dec_chunk_size_override(file_data: DotMap):
         file_data.sk, file_data.pt_file, file_data.ct_file,
         chunk_size=ChunkSize.KB(1)
     )
-    pt2 = Krypton.decrypt_file(
+    dec_data = Krypton.decrypt_file(
         file_data.sk, file_data.ct_file, file_data.pt2_file,
         callback=callback, into_memory=True
     )
     assert sum(counter) == 16
-    assert pt2 == file_data.orig_pt
+    assert dec_data.plaintext == file_data.orig_pt
 
 
 def test_krypton_file_enc_dec_errors(tmp_path: Path):

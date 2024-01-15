@@ -18,6 +18,7 @@ from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Util.strxor import strxor
 from Cryptodome.Cipher import AES
 from collections.abc import Callable
+from dataclasses import dataclass
 from ..errors import InvalidArgsError
 from ..kdf.kmac_kdf import KKDF
 from .common import (
@@ -28,7 +29,13 @@ from .. import utils
 from . import errors
 
 
-__all__ = ["Krypton"]
+__all__ = ["DecryptedData", "Krypton"]
+
+
+@dataclass
+class DecryptedData:
+	plaintext: bytes = None,
+	header: bytes = None
 
 
 class Krypton:
@@ -293,7 +300,8 @@ class Krypton:
 		:param plaintext_file: Path to the plaintext file, which must exist.
 		:param output_file: Path to the ciphertext file.
 			If the file exists, it will be overwritten.
-		:param header: Associated Authenticated Data
+		:param header: Associated Authenticated Data, which is included
+			unencrypted into the metadata field of the generated ciphertext file.
 		:param context: Optional field to describe the ciphers purpose.
 			Alters the output of internal hash functions. Not a secret.
 		:param chunk_size: By default, the chunk size is automatically determined
@@ -320,7 +328,8 @@ class Krypton:
 			output_file.unlink(missing_ok=True)
 			output_file.touch()
 			with open(output_file, 'r+b') as out_file:
-				out_file.write(b'0' * 170)  # reserved space
+				reserved_space = b'0' * (180 + len(header))
+				out_file.write(reserved_space)
 				while True:
 					chunk = in_file.read(chunk_size.value)
 					if not chunk:
@@ -329,10 +338,14 @@ class Krypton:
 					out_file.write(ciphertext)  # chunk_size + 1 byte
 					if callback:
 						callback()
-				vdp = krypton.finish_encryption()  # 160 bytes
-				cs = f"{chunk_size.value:0>10}".encode("utf-8")  # 10 bytes
 				out_file.seek(0)
-				out_file.write(vdp + cs)  # 170 bytes
+
+				h_len = f"{len(header):0>10}".encode("utf-8")  # 10 bytes
+				cs = f"{chunk_size.value:0>10}".encode("utf-8")  # 10 bytes
+				vdp = krypton.finish_encryption()  # 160 bytes
+
+				out_file.write(h_len + cs + vdp)  # 180 bytes
+				out_file.write(header)  # len(header) bytes
 
 	@classmethod
 	@utils.input_validator()
@@ -341,12 +354,11 @@ class Krypton:
 			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
 			ciphertext_file: Path,
 			output_file: Path | None = None,
-			header: bytes = b'',
 			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
 			callback: Callable = None,
 			*,
 			into_memory: bool = False
-	) -> bytes | None:
+	) -> DecryptedData:
 		"""
 		Decrypts a file of any size on disk in chunks. The user must provide either
 		a path for the `output_file` parameter, where the decrypted plaintext will be
@@ -358,7 +370,6 @@ class Krypton:
 		:param ciphertext_file: Path to the ciphertext file, which must exist.
 		:param output_file: Path to the plaintext file, optional.
 			If the file exists, it will be overwritten.
-		:param header: Associated Authenticated Data
 		:param context: Optional field to describe the ciphers purpose.
 			Alters the output of internal hash functions. Not a secret.
 		:param callback: This callback, when provided, will be called for each
@@ -388,25 +399,31 @@ class Krypton:
 				yield _pt
 
 		with open(ciphertext_file, 'rb') as in_file:
-			vdp_cs = in_file.read(170)
-			vdp, cs = vdp_cs[:160], vdp_cs[160:]
+			data = in_file.read(180)
+			h_len, cs, vdp = data[:10], data[10:20], data[20:180]
+			h_len_int = int(h_len.decode("utf-8"))
+			header = in_file.read(h_len_int)
 
 			cs_int = int(cs.decode("utf-8"))
 			krypton = cls(secret_key, context, None)
 			setattr(krypton, '_chunk_size', cs_int)
 
 			krypton.begin_decryption(vdp, header)
+			plaintext = None
 
 			if into_memory:
 				plaintext = bytes()
 				for chunk in _decrypted_chunk():
 					plaintext += chunk
-				krypton.finish_decryption()
-				return plaintext
+			else:
+				output_file.unlink(missing_ok=True)
+				output_file.touch()
+				with output_file.open("wb") as out_file:
+					for chunk in _decrypted_chunk():
+						out_file.write(chunk)
 
-			output_file.unlink(missing_ok=True)
-			output_file.touch()
-			with output_file.open("wb") as out_file:
-				for chunk in _decrypted_chunk():
-					out_file.write(chunk)
-				krypton.finish_decryption()
+			krypton.finish_decryption()
+			return DecryptedData(
+				plaintext=plaintext,
+				header=header
+			)
