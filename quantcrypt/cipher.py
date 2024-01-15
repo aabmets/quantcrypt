@@ -14,6 +14,10 @@ from .internal.cipher.common import (
 from .internal.cipher.krypton import (
 	Krypton
 )
+from .internal.cipher.krypton_file import (
+	KryptonFile,
+	DecryptedFileData
+)
 from .internal.cipher.errors import (
 	CipherError,
 	CipherStateError,

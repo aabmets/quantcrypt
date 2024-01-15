@@ -8,34 +8,11 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-import os
 import pytest
-from pathlib import Path
-from dotmap import DotMap
 from typing import Callable
 from pydantic import ValidationError
-from quantcrypt.errors import InvalidArgsError
 from quantcrypt.cipher import Krypton, ChunkSize
 from quantcrypt.internal.cipher import errors
-
-
-@pytest.fixture(name="file_data", scope="function")
-def fixture_file_data(tmp_path: Path) -> DotMap:
-    orig_pt = os.urandom(1024 * 16)
-    pt_file = tmp_path / "test_file.bin"
-    ct_file = tmp_path / "test_file.enc"
-    pt2_file = tmp_path / "test_file2.bin"
-
-    with pt_file.open("wb") as file:
-        file.write(orig_pt)
-
-    return DotMap(
-        sk=b'x' * 64,
-        orig_pt=orig_pt,
-        pt_file=pt_file,
-        ct_file=ct_file,
-        pt2_file=pt2_file
-    )
 
 
 def test_krypton_attributes():
@@ -183,85 +160,3 @@ def test_krypton_invalid_state_error():
         k.encrypt(b'')
     with pytest.raises(errors.CipherStateError):
         k.finish_encryption()
-
-
-def test_krypton_file_enc_dec(file_data: DotMap):
-    Krypton.encrypt_file(file_data.sk, file_data.pt_file, file_data.ct_file)
-    Krypton.decrypt_file(file_data.sk, file_data.ct_file, file_data.pt2_file)
-
-    with file_data.pt2_file.open("rb") as file:
-        pt2 = file.read()
-    with file_data.ct_file.open("rb") as file:
-        ct = file.read()
-
-    assert pt2 == file_data.orig_pt
-    assert ct != file_data.orig_pt
-
-
-def test_krypton_file_enc_dec_callback(file_data: DotMap):
-    counters = list(), list()
-
-    def callback(i):
-        def _cb():
-            counters[i].append(1)
-        return _cb
-
-    Krypton.encrypt_file(
-        file_data.sk, file_data.pt_file, file_data.ct_file,
-        callback=callback(0)
-    )
-    Krypton.decrypt_file(
-        file_data.sk, file_data.ct_file, file_data.pt2_file,
-        callback=callback(1)
-    )
-
-    assert sum(counters[0]) == 4
-    assert sum(counters[1]) == 4
-
-
-def test_krypton_file_enc_dec_header(file_data: DotMap):
-    header = b'z' * 32
-    Krypton.encrypt_file(file_data.sk, file_data.pt_file, file_data.ct_file, header)
-    dec_data = Krypton.decrypt_file(file_data.sk, file_data.ct_file, file_data.pt2_file)
-    assert dec_data.plaintext is None
-    assert dec_data.header == header
-
-
-def test_krypton_file_enc_dec_into_memory(file_data: DotMap):
-    Krypton.encrypt_file(file_data.sk, file_data.pt_file, file_data.ct_file)
-    dec_data = Krypton.decrypt_file(
-        file_data.sk, file_data.ct_file, file_data.pt2_file,
-        into_memory=True
-    )
-    assert dec_data.plaintext == file_data.orig_pt
-
-
-def test_krypton_file_enc_dec_chunk_size_override(file_data: DotMap):
-    counter = list()
-
-    def callback():
-        counter.append(1)
-
-    Krypton.encrypt_file(
-        file_data.sk, file_data.pt_file, file_data.ct_file,
-        chunk_size=ChunkSize.KB(1)
-    )
-    dec_data = Krypton.decrypt_file(
-        file_data.sk, file_data.ct_file, file_data.pt2_file,
-        callback=callback, into_memory=True
-    )
-    assert sum(counter) == 16
-    assert dec_data.plaintext == file_data.orig_pt
-
-
-def test_krypton_file_enc_dec_errors(tmp_path: Path):
-    valid_sk = b'x' * 64
-    tmp_file = tmp_path / "tmp.bin"
-    tmp_file.touch()
-
-    with pytest.raises(FileNotFoundError):
-        Krypton.encrypt_file(valid_sk, Path("asdfg"), Path("qwerty"))
-    with pytest.raises(FileNotFoundError):
-        Krypton.decrypt_file(valid_sk, Path("asdfg"), Path("qwerty"))
-    with pytest.raises(InvalidArgsError):
-        Krypton.decrypt_file(valid_sk, tmp_file)

@@ -9,33 +9,23 @@
 #   SPDX-License-Identifier: MIT
 #
 import secrets
-from pathlib import Path
 from pydantic import Field
-from typing import Annotated, Optional, Literal, Any, Generator
+from typing import Annotated, Optional, Literal, Any
 from Cryptodome.Hash import SHA3_512, cSHAKE256
 from Cryptodome.Hash.cSHAKE128 import cSHAKE_XOF
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Util.strxor import strxor
 from Cryptodome.Cipher import AES
-from collections.abc import Callable
-from dataclasses import dataclass
-from ..errors import InvalidArgsError
 from ..kdf.kmac_kdf import KKDF
-from .common import (
-	ChunkSizeKB, ChunkSizeMB,
-	determine_file_chunk_size
-)
 from .. import utils
 from . import errors
+from .common import (
+	ChunkSizeKB,
+	ChunkSizeMB
+)
 
 
-__all__ = ["DecryptedData", "Krypton"]
-
-
-@dataclass
-class DecryptedData:
-	plaintext: bytes = None,
-	header: bytes = None
+__all__ = ["Krypton"]
 
 
 class Krypton:
@@ -280,150 +270,3 @@ class Krypton:
 		except ValueError:
 			raise errors.CipherVerifyError
 		self.flush()
-
-	@classmethod
-	@utils.input_validator()
-	def encrypt_file(
-			cls,
-			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
-			plaintext_file: Path,
-			output_file: Path,
-			header: bytes = b'',
-			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
-			chunk_size: ChunkSizeKB | ChunkSizeMB | None = None,
-			callback: Callable = None
-	) -> None:
-		"""
-		Encrypts a file of any size on disk in chunks.
-
-		:param secret_key: The key which will be used for encryption.
-		:param plaintext_file: Path to the plaintext file, which must exist.
-		:param output_file: Path to the ciphertext file.
-			If the file exists, it will be overwritten.
-		:param header: Associated Authenticated Data, which is included
-			unencrypted into the metadata field of the generated ciphertext file.
-		:param context: Optional field to describe the ciphers purpose.
-			Alters the output of internal hash functions. Not a secret.
-		:param chunk_size: By default, the chunk size is automatically determined
-			from the file size. Providing a value for this argument allows to
-			manually override the chunk size.
-		:param callback: This callback, when provided, will be called for each
-			encrypted ciphertext chunk. No arguments are passed into the callback.
-			Useful for updating progress bars.
-		:return: None
-		:raises - pydantic.ValidationError: On invalid input.
-		:raises - FileNotFoundError: If the `plaintext_file` does not exist.
-		"""
-		if not plaintext_file.exists():
-			raise FileNotFoundError
-
-		if chunk_size is None:
-			ptf_size = plaintext_file.stat().st_size
-			chunk_size = determine_file_chunk_size(ptf_size)
-
-		krypton = cls(secret_key, context, chunk_size)
-		krypton.begin_encryption(header)
-
-		with open(plaintext_file, 'rb') as in_file:
-			output_file.unlink(missing_ok=True)
-			output_file.touch()
-			with open(output_file, 'r+b') as out_file:
-				reserved_space = b'0' * (180 + len(header))
-				out_file.write(reserved_space)
-				while True:
-					chunk = in_file.read(chunk_size.value)
-					if not chunk:
-						break
-					ciphertext = krypton.encrypt(chunk)
-					out_file.write(ciphertext)  # chunk_size + 1 byte
-					if callback:
-						callback()
-				out_file.seek(0)
-
-				h_len = f"{len(header):0>10}".encode("utf-8")  # 10 bytes
-				cs = f"{chunk_size.value:0>10}".encode("utf-8")  # 10 bytes
-				vdp = krypton.finish_encryption()  # 160 bytes
-
-				out_file.write(h_len + cs + vdp)  # 180 bytes
-				out_file.write(header)  # len(header) bytes
-
-	@classmethod
-	@utils.input_validator()
-	def decrypt_file(
-			cls,
-			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
-			ciphertext_file: Path,
-			output_file: Path | None = None,
-			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
-			callback: Callable = None,
-			*,
-			into_memory: bool = False
-	) -> DecryptedData:
-		"""
-		Decrypts a file of any size on disk in chunks. The user must provide either
-		a path for the `output_file` parameter, where the decrypted plaintext will be
-		written to, or the `in_memory` argument must be set **True**, which will cause
-		the entire plaintext to be decrypted into memory and be returned by this method.
-		**Note:** Do NOT decrypt large files (>100MB) into memory, use your best judgement.
-
-		:param secret_key: The key which will be used for encryption.
-		:param ciphertext_file: Path to the ciphertext file, which must exist.
-		:param output_file: Path to the plaintext file, optional.
-			If the file exists, it will be overwritten.
-		:param context: Optional field to describe the ciphers purpose.
-			Alters the output of internal hash functions. Not a secret.
-		:param callback: This callback, when provided, will be called for each
-			decrypted plaintext chunk. No arguments are passed into the callback.
-			Useful for updating progress bars.
-		:param into_memory: Whether the decrypted plaintext chunks should be collected
-			and joined together in memory to be returned as a single bytes object.
-		:return: Plaintext bytes or None.
-		:raises - pydantic.ValidationError: On invalid input.
-		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
-		:raises - errors.InvalidArgsError: If neither `output_file` nor `in_memory`
-			have been provided to the method call.
-		"""
-		if not ciphertext_file.exists():
-			raise FileNotFoundError
-		elif not output_file and not into_memory:
-			raise InvalidArgsError
-
-		def _decrypted_chunk() -> Generator[bytes, None, None]:
-			while True:
-				_chunk = in_file.read(cs_int + 1)
-				if not _chunk:
-					break
-				_pt = krypton.decrypt(_chunk)
-				if callback:
-					callback()
-				yield _pt
-
-		with open(ciphertext_file, 'rb') as in_file:
-			data = in_file.read(180)
-			h_len, cs, vdp = data[:10], data[10:20], data[20:180]
-			h_len_int = int(h_len.decode("utf-8"))
-			header = in_file.read(h_len_int)
-
-			cs_int = int(cs.decode("utf-8"))
-			krypton = cls(secret_key, context, None)
-			setattr(krypton, '_chunk_size', cs_int)
-
-			krypton.begin_decryption(vdp, header)
-			plaintext = None
-
-			if into_memory:
-				plaintext = bytes()
-				for chunk in _decrypted_chunk():
-					plaintext += chunk
-			else:
-				output_file.unlink(missing_ok=True)
-				output_file.touch()
-				with output_file.open("wb") as out_file:
-					for chunk in _decrypted_chunk():
-						out_file.write(chunk)
-
-			krypton.finish_decryption()
-			return DecryptedData(
-				plaintext=plaintext,
-				header=header
-			)
