@@ -9,14 +9,14 @@
 #   SPDX-License-Identifier: MIT
 #
 from .internal.cipher.common import (
-	ChunkSize
+	ChunkSize,
+	DecryptedData
 )
 from .internal.cipher.krypton import (
 	Krypton
 )
 from .internal.cipher.krypton_file import (
-	KryptonFile,
-	DecryptedFileData
+	KryptonFile
 )
 from .internal.cipher.errors import (
 	CipherError,

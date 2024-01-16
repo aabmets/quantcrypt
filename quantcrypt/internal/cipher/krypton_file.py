@@ -12,22 +12,16 @@ from pathlib import Path
 from pydantic import Field
 from typing import Annotated, Optional, Generator, BinaryIO
 from collections.abc import Callable
-from dataclasses import dataclass
 from .krypton import Krypton
 from .common import (
+	DecryptedData,
 	ChunkSizeKB, ChunkSizeMB,
 	determine_file_chunk_size
 )
 from .. import utils
 
 
-__all__ = ["DecryptedFileData", "KryptonFile"]
-
-
-@dataclass
-class DecryptedFileData:
-	plaintext: Optional[bytes] = None
-	header: Optional[bytes] = None
+__all__ = ["KryptonFile"]
 
 
 class KryptonFile:
@@ -77,26 +71,25 @@ class KryptonFile:
 		krypton = Krypton(self._secret_key, self._context, self._chunk_size)
 		krypton.begin_encryption(header)
 
-		with open(plaintext_file, 'rb') as in_file:
-			output_file.unlink(missing_ok=True)
-			output_file.touch()
-			with open(output_file, 'r+b') as out_file:
-				reserved_space = b'0' * (180 + len(header))
-				out_file.write(reserved_space)
-				while True:
-					chunk = in_file.read(self._chunk_size.value)
-					if not chunk:
-						break
+		output_file.unlink(missing_ok=True)
+		output_file.touch()
+
+		with open(output_file, 'r+b') as write_file:
+			reserved_space = b'0' * (180 + len(header))
+			write_file.write(reserved_space)
+
+			with open(plaintext_file, 'rb') as read_file:
+				cs_int = self._chunk_size.value
+				for chunk in self._read_file_chunks(read_file, cs_int):
 					ciphertext = krypton.encrypt(chunk)
-					out_file.write(ciphertext)  # chunk_size + 1 byte
-					if self._callback:
-						self._callback()
-				out_file.seek(0)
-				metadata = self._pack_metadata(krypton, header)
-				out_file.write(metadata)
+					write_file.write(ciphertext)
+
+			write_file.seek(0)
+			metadata = self._pack_metadata(krypton, header)
+			write_file.write(metadata)
 
 	@utils.input_validator()
-	def decrypt(self, ciphertext_file: Path, output_file: Path) -> DecryptedFileData:
+	def decrypt(self, ciphertext_file: Path, output_file: Path) -> DecryptedData:
 		"""
 		Decrypts a file of any size from disk in chunks into a plaintext file.
 
@@ -110,8 +103,8 @@ class KryptonFile:
 		if not ciphertext_file.exists():
 			raise FileNotFoundError
 
-		with open(ciphertext_file, 'rb') as in_file:
-			cs_int, vdp, header = self._unpack_metadata(in_file)
+		with open(ciphertext_file, 'rb') as read_file:
+			cs_int, vdp, header = self._unpack_metadata(read_file)
 			krypton = Krypton(self._secret_key, self._context, None)
 			setattr(krypton, '_chunk_size', cs_int)
 
@@ -119,18 +112,20 @@ class KryptonFile:
 
 			output_file.unlink(missing_ok=True)
 			output_file.touch()
-			with output_file.open("wb") as out_file:
-				for chunk in self._decrypted_chunk(in_file, cs_int, krypton, self._callback):
-					out_file.write(chunk)
+
+			with output_file.open("wb") as write_file:
+				for chunk in self._read_file_chunks(read_file, cs_int + 1):
+					plaintext = krypton.decrypt(chunk)
+					write_file.write(plaintext)
 
 		krypton.finish_decryption()
-		return DecryptedFileData(
+		return DecryptedData(
 			plaintext=None,
 			header=header
 		)
 
 	@utils.input_validator()
-	def decrypt_into_memory(self, ciphertext_file: Path) -> DecryptedFileData:
+	def decrypt_into_memory(self, ciphertext_file: Path) -> DecryptedData:
 		"""
 		Decrypts a file of any size from disk in chunks into memory.
 		**Note:** Do NOT decrypt large files (>100MB) into memory, use your best judgement.
@@ -143,18 +138,19 @@ class KryptonFile:
 		if not ciphertext_file.exists():
 			raise FileNotFoundError
 
-		with open(ciphertext_file, 'rb') as in_file:
-			cs_int, vdp, header = self._unpack_metadata(in_file)
+		with open(ciphertext_file, 'rb') as read_file:
+			cs_int, vdp, header = self._unpack_metadata(read_file)
 			krypton = Krypton(self._secret_key, self._context, None)
 			setattr(krypton, '_chunk_size', cs_int)
 
 			krypton.begin_decryption(vdp, header)
+
 			plaintext = bytes()
-			for chunk in self._decrypted_chunk(in_file, cs_int, krypton, self._callback):
-				plaintext += chunk
+			for chunk in self._read_file_chunks(read_file, cs_int + 1):
+				plaintext += krypton.decrypt(chunk)
 
 		krypton.finish_decryption()
-		return DecryptedFileData(
+		return DecryptedData(
 			plaintext=plaintext,
 			header=header
 		)
@@ -174,18 +170,11 @@ class KryptonFile:
 		header = in_file.read(h_len_int)
 		return cs_int, vdp, header
 
-	@staticmethod
-	def _decrypted_chunk(
-			in_file: BinaryIO,
-			chunk_size: int,
-			krypton: Krypton,
-			callback: Callable = None
-	) -> Generator[bytes, None, None]:
+	def _read_file_chunks(self, file: BinaryIO, chunk_size: int) -> Generator[bytes, None, None]:
 		while True:
-			chunk = in_file.read(chunk_size + 1)
+			chunk = file.read(chunk_size)
 			if not chunk:
 				break
-			plaintext = krypton.decrypt(chunk)
-			if callback:
-				callback()
-			yield plaintext
+			elif self._callback:
+				self._callback()
+			yield chunk
