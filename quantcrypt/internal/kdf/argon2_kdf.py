@@ -90,7 +90,7 @@ class Argon2Hash(BaseArgon2):
 			memory_cost=MemCost.GB(1),
 			parallelism=8,
 			time_cost=3,
-			hash_len=32,
+			hash_len=64,
 			salt_len=32
 		)
 
@@ -167,7 +167,7 @@ class Argon2Key(BaseArgon2):
 			memory_cost=MemCost.GB(4),
 			parallelism=8,
 			time_cost=5,
-			hash_len=32,
+			hash_len=64,
 			salt_len=32
 		)
 
