@@ -10,7 +10,7 @@
 #
 from .internal.cipher.common import (
 	ChunkSize,
-	DecryptedData
+	DecryptedFileData
 )
 from .internal.cipher.krypton import (
 	Krypton

@@ -44,7 +44,7 @@ def test_krypton_file_enc_dec(helpers: DotMap):
 	krypton = KryptonFile(helpers.sk)
 
 	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	krypton.decrypt(helpers.ct_file, helpers.pt2_file)
+	krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
 
 	with helpers.pt2_file.open("rb") as file:
 		pt2 = file.read()
@@ -59,8 +59,19 @@ def test_krypton_file_enc_dec_callback(helpers: DotMap):
 	krypton = KryptonFile(helpers.sk, callback=helpers.callback)
 	krypton.encrypt(helpers.pt_file, helpers.ct_file)
 	assert sum(helpers.counter) == 4
-	krypton.decrypt(helpers.ct_file, helpers.pt2_file)
+	krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
 	assert sum(helpers.counter) == 8
+
+
+def test_krypton_file_read_header(helpers: DotMap):
+	header = b'z' * 32
+	krypton = KryptonFile(helpers.sk)
+	krypton.encrypt(helpers.pt_file, helpers.ct_file, header=header)
+	header2 = krypton.read_file_header(helpers.ct_file)
+	assert header2 == header
+
+	with pytest.raises(FileNotFoundError):
+		krypton.read_file_header(Path("asdfgh"))
 
 
 def test_krypton_file_enc_dec_header(helpers: DotMap):
@@ -68,10 +79,8 @@ def test_krypton_file_enc_dec_header(helpers: DotMap):
 
 	krypton = KryptonFile(helpers.sk)
 	krypton.encrypt(helpers.pt_file, helpers.ct_file, header=header)
-	dec_data = krypton.decrypt(helpers.ct_file, helpers.pt2_file)
-
-	assert dec_data.plaintext is None
-	assert dec_data.header == header
+	header2 = krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
+	assert header2 == header
 
 
 def test_krypton_file_enc_dec_into_memory(helpers: DotMap):
@@ -95,6 +104,6 @@ def test_krypton_file_enc_dec_errors(helpers: DotMap):
 	with pytest.raises(FileNotFoundError):
 		krypton.encrypt(Path("asdfg"), Path("qwerty"))
 	with pytest.raises(FileNotFoundError):
-		krypton.decrypt(Path("asdfg"), Path("qwerty"))
+		krypton.decrypt_to_file(Path("asdfg"), Path("qwerty"))
 	with pytest.raises(FileNotFoundError):
 		krypton.decrypt_into_memory(Path("asdfg"))

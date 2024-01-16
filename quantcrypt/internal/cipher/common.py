@@ -10,22 +10,26 @@
 #
 from dataclasses import dataclass
 from pydantic import Field
-from typing import Optional, Literal, Type, Annotated
+from typing import Literal, Type, Annotated
 from ..errors import InvalidUsageError
 from .. import utils
 
 
 __all__ = [
-	"DecryptedData",
+	"DecryptedFileData",
 	"ChunkSizeKB", "ChunkSizeMB", "ChunkSize",
 	"determine_file_chunk_size"
 ]
 
 
 @dataclass
-class DecryptedData:
-	plaintext: Optional[bytes] = None
-	header: Optional[bytes] = None
+class DecryptedFileData:
+	"""
+	Contains two instance attributes:
+	plaintext (bytes) and header (bytes)
+	"""
+	plaintext: bytes = b''
+	header: bytes = b''
 
 
 @dataclass(frozen=True)
