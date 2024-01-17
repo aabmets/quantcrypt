@@ -10,46 +10,17 @@
 #
 import secrets
 from abc import ABC, abstractmethod
-from pydantic import Field
-from dotmap import DotMap
 from zxcvbn import zxcvbn
 from argon2 import PasswordHasher
+from typing import Type, Optional
 from argon2 import exceptions as aex
-from typing import Type, Annotated, Optional
-from .common import MemCostMB, MemCostGB, MemCost
 from ..errors import InvalidUsageError
-from .. import utils
+from .common import MemCost, KDFParams
 from . import errors
+from .. import utils
 
 
-__all__ = ["KDFParams", "Argon2"]
-
-
-class KDFParams(DotMap):
-	@utils.input_validator()
-	def __init__(
-			self,
-			memory_cost: MemCostMB | MemCostGB,
-			parallelism: Annotated[int, Field(gt=0)],
-			time_cost: Annotated[int, Field(gt=0)],
-			hash_len: Annotated[int, Field(ge=16, le=64)] = 32,
-			salt_len: Annotated[int, Field(ge=16, le=64)] = 32
-	) -> None:
-		"""
-		Custom parameters for altering the security
-		level of key derivation functions.
-
-		:param memory_cost: The amount of memory the KDF must use.
-		:param parallelism: Up to how many threads the KDF can use.
-		:param time_cost: The amount of iterations the KDF must run.
-		:param hash_len: The length of the generated hash, in bytes.
-		:param salt_len: The length of the generated salt, in bytes.
-		"""
-		memory_cost = memory_cost.get("value")
-		super().__init__({
-			k: v for k, v in locals().items()
-			if k not in ["self", "__class__"]
-		})
+__all__ = ["Argon2"]
 
 
 class BaseArgon2(ABC):
@@ -61,14 +32,16 @@ class BaseArgon2(ABC):
 	@abstractmethod
 	def _default_params() -> KDFParams: ...
 
-	def __init__(self, overrides: KDFParams | None = None) -> None:
-		params = overrides or self._default_params()
-		if params is None:  # pragma: no cover
-			raise RuntimeError("Params variable must never be None in BaseArgon2.__init__")
-		if getattr(self, "_testing") and overrides is None:
-			params.memory_cost = 2 ** 10
-		self._engine = PasswordHasher(**params.toDict())
-		self.params = params
+	def __init__(self, params: KDFParams | None) -> None:
+		if isinstance(params, KDFParams):
+			self.params = params
+		else:
+			self.params = self._default_params()
+			if self._testing:
+				self.params.memory_cost = 2 ** 10
+		self._engine = PasswordHasher(
+			**self.params.toDict()
+		)
 
 	@staticmethod
 	def _assert_crack_resistance(password: str, min_years: int, data_key: str) -> None:
@@ -98,7 +71,7 @@ class Argon2Hash(BaseArgon2):
 	def __init__(
 			self,
 			password: str | bytes,
-			verif_hash: str = None,
+			verif_hash: str | bytes = None,
 			*,
 			min_years: int = 1,
 			params: KDFParams = None
@@ -175,7 +148,7 @@ class Argon2Key(BaseArgon2):
 	def __init__(
 			self,
 			password: str | bytes,
-			public_salt: str = None,
+			public_salt: str | bytes = None,
 			*,
 			min_years: int = 10,
 			params: KDFParams = None
@@ -193,7 +166,8 @@ class Argon2Key(BaseArgon2):
 
 		:param password: The user-provided low-entropy password.
 		:param public_salt: A previously generated salt to hash the password with.
-			Argon2 will generate a salt if one is not provided.
+			Argon2 will generate the salt if one is not provided. If the salt is
+			a string, it is expected to be base64 encoded.
 		:param min_years: How crack resistant the password is required to be, in years.
 			Defaults to ten years for this class. Password strength check is disabled,
 			when **password** is an instance of bytes, **min_years** value is set to
@@ -214,10 +188,12 @@ class Argon2Key(BaseArgon2):
 
 		super().__init__(params)
 		try:
-			salt_bytes = (
-				utils.b64(public_salt) if public_salt
-				else secrets.token_bytes(32)
-			)
+			if public_salt is None:
+				salt_bytes = secrets.token_bytes(self.params.salt_len)
+			elif isinstance(public_salt, str):
+				salt_bytes = utils.b64(public_salt)
+			else:
+				salt_bytes = public_salt
 			secret_hash = self._engine.hash(
 				password, salt=salt_bytes
 			)

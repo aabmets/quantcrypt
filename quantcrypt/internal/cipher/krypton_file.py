@@ -132,7 +132,7 @@ class KryptonFile:
 		return header
 
 	@utils.input_validator()
-	def decrypt_into_memory(self, ciphertext_file: Path) -> DecryptedFileData:
+	def decrypt_to_memory(self, ciphertext_file: Path) -> DecryptedFileData:
 		"""
 		Reads ciphertext from the `ciphertext_file` in chunks and decrypts
 		them into plaintext, storing the entire decrypted plaintext into memory.

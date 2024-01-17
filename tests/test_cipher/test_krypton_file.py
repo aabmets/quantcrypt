@@ -86,7 +86,7 @@ def test_krypton_file_enc_dec_header(helpers: DotMap):
 def test_krypton_file_enc_dec_into_memory(helpers: DotMap):
 	krypton = KryptonFile(helpers.sk)
 	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	dec_data = krypton.decrypt_into_memory(helpers.ct_file)
+	dec_data = krypton.decrypt_to_memory(helpers.ct_file)
 	assert dec_data.plaintext == helpers.orig_pt
 
 
@@ -94,7 +94,7 @@ def test_krypton_file_enc_dec_chunk_size_override(helpers: DotMap):
 	krypton = KryptonFile(helpers.sk, chunk_size=ChunkSize.KB(1), callback=helpers.callback)
 	krypton.encrypt(helpers.pt_file, helpers.ct_file)
 	assert sum(helpers.counter) == 16
-	dec_data = krypton.decrypt_into_memory(helpers.ct_file)
+	dec_data = krypton.decrypt_to_memory(helpers.ct_file)
 	assert sum(helpers.counter) == 32
 	assert dec_data.plaintext == helpers.orig_pt
 
@@ -106,4 +106,4 @@ def test_krypton_file_enc_dec_errors(helpers: DotMap):
 	with pytest.raises(FileNotFoundError):
 		krypton.decrypt_to_file(Path("asdfg"), Path("qwerty"))
 	with pytest.raises(FileNotFoundError):
-		krypton.decrypt_into_memory(Path("asdfg"))
+		krypton.decrypt_to_memory(Path("asdfg"))

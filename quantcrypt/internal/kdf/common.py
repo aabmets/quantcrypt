@@ -8,12 +8,14 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .. import utils
+from dotmap import DotMap
+from pydantic import Field
+from typing import Type, Annotated, Literal
 from ..errors import InvalidUsageError
-from typing import Literal, Type
+from .. import utils
 
 
-__all__ = ["MemCostMB", "MemCostGB", "MemCost"]
+__all__ = ["MemCostMB", "MemCostGB", "MemCost", "KDFParams"]
 
 
 class MemCostMB(dict):
@@ -58,3 +60,30 @@ class MemCost:
 		)
 	MB: Type[MemCostMB] = MemCostMB
 	GB: Type[MemCostGB] = MemCostGB
+
+
+class KDFParams(DotMap):
+	@utils.input_validator()
+	def __init__(
+			self,
+			memory_cost: MemCostMB | MemCostGB,
+			parallelism: Annotated[int, Field(gt=0)],
+			time_cost: Annotated[int, Field(gt=0)],
+			hash_len: Annotated[int, Field(ge=16, le=64)] = 32,
+			salt_len: Annotated[int, Field(ge=16, le=64)] = 32
+	) -> None:
+		"""
+		Custom parameters for altering the security
+		level of key derivation functions.
+
+		:param memory_cost: The amount of memory the KDF must use.
+		:param parallelism: Up to how many threads the KDF can use.
+		:param time_cost: The amount of iterations the KDF must run.
+		:param hash_len: The length of the generated hash, in bytes.
+		:param salt_len: The length of the generated salt, in bytes.
+		"""
+		memory_cost = memory_cost.get("value")
+		super().__init__({
+			k: v for k, v in locals().items()
+			if k not in ["self", "__class__"]
+		})

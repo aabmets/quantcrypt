@@ -14,6 +14,7 @@ from typing import Type, Callable
 from pydantic import ValidationError
 from quantcrypt.kdf import KDFParams, MemCost, Argon2
 from quantcrypt.internal.kdf import errors
+from quantcrypt.internal import utils
 
 
 @pytest.fixture(name="good_pw", scope="module")
@@ -185,6 +186,9 @@ def test_argon2key_success(good_pw: str, test_context: Callable):
 
 		kdf2 = Argon2.Key(good_pw, kdf1.public_salt)
 		assert kdf2.secret_key == kdf1.secret_key
+
+		kdf3 = Argon2.Key(good_pw, utils.b64(kdf1.public_salt))
+		assert kdf3.secret_key == kdf1.secret_key
 
 
 def test_argon2key_custom_hash_length():
