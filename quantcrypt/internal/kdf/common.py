@@ -32,7 +32,7 @@ class MemCostMB(dict):
 
 class MemCostGB(dict):
 	@utils.input_validator()
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32]) -> None:
+	def __init__(self, size: Literal[1, 2, 3, 4, 5, 6, 7, 8]) -> None:
 		"""
 		Converts the size input argument value of gigabytes to kilobytes.
 

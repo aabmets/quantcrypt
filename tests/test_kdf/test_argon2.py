@@ -111,7 +111,7 @@ def test_argon2params_too_long_salt_len():
 		)
 
 
-def test_argon2_success(good_pw: str, test_context: Callable):
+def test_argon2hash_success(good_pw: str, test_context: Callable):
 	with test_context(Argon2.Hash):
 		kdf1 = Argon2.Hash(good_pw)
 		assert kdf1.rehashed is False
@@ -122,7 +122,7 @@ def test_argon2_success(good_pw: str, test_context: Callable):
 		assert kdf2.verified is True
 
 
-def test_argon2_errors(good_pw: str, test_context: Callable):
+def test_argon2hash_errors(good_pw: str, test_context: Callable):
 	with test_context(Argon2.Hash):
 		kdf = Argon2.Hash(good_pw)
 
@@ -136,7 +136,7 @@ def test_argon2_errors(good_pw: str, test_context: Callable):
 			Argon2.Hash('a' * 7)
 
 
-def test_argon2_overrides(good_pw: str):
+def test_argon2hash_overrides(good_pw: str):
 	ovr_s = KDFParams(
 		memory_cost=MemCost.MB(32),  # smaller than ovr2
 		parallelism=8,
@@ -169,11 +169,11 @@ def test_argon2_overrides(good_pw: str):
 	assert kdf_l.verified is True
 
 
-def test_argon2_duration(good_pw: str):
+def test_argon2hash_duration(good_pw: str):
 	def test():
 		Argon2.Hash(good_pw)
 
-	assert timeit.timeit(test, number=1) > 0.4
+	assert timeit.timeit(test, number=1) > 0.35
 
 
 def test_argon2key_success(good_pw: str, test_context: Callable):
@@ -212,8 +212,8 @@ def test_argon2key_overrides(good_pw: str):
 	assert kdf.params == ovr1
 
 
-def test_argon2secret_duration(good_pw: str):
+def test_argon2key_duration(good_pw: str):
 	def test():
 		Argon2.Key(good_pw)
 
-	assert timeit.timeit(test, number=1) > 2.5
+	assert timeit.timeit(test, number=1) > 3.5

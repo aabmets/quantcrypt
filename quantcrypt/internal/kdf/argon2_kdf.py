@@ -87,9 +87,9 @@ class Argon2Hash(BaseArgon2):
 	@staticmethod
 	def _default_params() -> KDFParams:
 		return KDFParams(
-			memory_cost=MemCost.GB(1),
+			memory_cost=MemCost.GB(2),
 			parallelism=8,
-			time_cost=3,
+			time_cost=1,
 			hash_len=64,
 			salt_len=32
 		)
@@ -164,9 +164,9 @@ class Argon2Key(BaseArgon2):
 	@staticmethod
 	def _default_params() -> KDFParams:
 		return KDFParams(
-			memory_cost=MemCost.GB(4),
+			memory_cost=MemCost.GB(8),
 			parallelism=8,
-			time_cost=5,
+			time_cost=4,
 			hash_len=64,
 			salt_len=32
 		)

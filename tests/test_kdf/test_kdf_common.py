@@ -26,13 +26,14 @@ def test_mem_cost_mb_values():
 
 
 def test_mem_cost_gb_values():
-	for value in range(33):
+	valid_values = [x for x in range(1, 9)]
+	for value in range(-10, 10):
 		c_val = cast(Literal, value)
-		if value in [1, 2, 4, 8, 16, 32]:
+		if value in valid_values:
 			assert MemCost.GB(c_val).get("value") == 1024 ** 2 * value
-		else:
-			with pytest.raises(ValidationError):
-				MemCost.GB(c_val)
+			continue
+		with pytest.raises(ValidationError):
+			MemCost.GB(c_val)
 
 
 def test_invalid_usage():
