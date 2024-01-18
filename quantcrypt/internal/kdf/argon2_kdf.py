@@ -83,7 +83,7 @@ class Argon2Hash(BaseArgon2):
 		be stored into a database for comparison when the user attempts to log in.
 		This class automatically rehashes passwords on successful verification if the
 		security parameters have changed. The default security parameters of this class
-		have been chosen such that the hashing process uses 1 GiB of memory and takes
+		have been chosen such that the hashing process uses 2 GiB of memory and takes
 		about 0.5 seconds on a 12-th Gen Intel i7 CPU at 2.2 GHz.
 
 		:param password: A user-provided secret to be hashed.

@@ -72,11 +72,11 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			library has failed to generate the signature for any reason.
 		"""
 		params = self.param_sizes
-		sk_anno = self._bytes_anno(equal_to=params.sk_size)
-		msg_anno = self._bytes_anno(min_size=1)
+		sk_atd = utils.annotated_bytes(equal_to=params.sk_size)
+		msg_atd = utils.annotated_bytes(min_size=1)
 
 		@utils.input_validator()
-		def _sign(sk: sk_anno, msg: msg_anno) -> bytes:
+		def _sign(sk: sk_atd, msg: msg_atd) -> bytes:
 			ffi = FFI()
 			sig_buf = ffi.new(f"uint8_t [{params.sig_size}]")
 			sig_len = ffi.new("size_t *", params.sig_size)
@@ -112,12 +112,12 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			has failed to verify the provided signature for any reason.
 		"""
 		params = self.param_sizes
-		pk_anno = self._bytes_anno(equal_to=params.pk_size)
-		sig_anno = self._bytes_anno(max_size=params.sig_size)
-		msg_anno = self._bytes_anno(min_size=1)
+		pk_atd = utils.annotated_bytes(equal_to=params.pk_size)
+		sig_atd = utils.annotated_bytes(max_size=params.sig_size)
+		msg_atd = utils.annotated_bytes(min_size=1)
 
 		@utils.input_validator()
-		def _verify(pk: pk_anno, msg: msg_anno, sig: sig_anno, _raises: bool) -> bool:
+		def _verify(pk: pk_atd, msg: msg_atd, sig: sig_atd, _raises: bool) -> bool:
 			func = getattr(self._lib, self._namespace + "_crypto_sign_verify")
 			result = func(sig, len(sig), msg, len(msg), pk)
 			if result != 0 and _raises:

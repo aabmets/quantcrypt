@@ -10,13 +10,24 @@
 #
 import base64
 import binascii
-from pathlib import Path
-from typing import Callable
-from pydantic import ConfigDict, validate_call
-from .errors import InvalidArgsError
+import platform
+from typing import Callable, Type, Annotated
+from pydantic import Field, ConfigDict, validate_call
+from pathlib import (
+	PureWindowsPath,
+	PurePosixPath,
+	Path
+)
+from . import errors
 
 
-__all__ = ["b64", "input_validator", "search_upwards"]
+__all__ = [
+	"b64",
+	"input_validator",
+	"search_upwards",
+	"is_path_relative",
+	"annotated_bytes"
+]
 
 
 def b64(data: str | bytes) -> str | bytes:
@@ -25,9 +36,9 @@ def b64(data: str | bytes) -> str | bytes:
 			return base64.b64decode(data.encode("utf-8"))
 		elif isinstance(data, bytes):
 			return base64.b64encode(data).decode("utf-8")
-		raise InvalidArgsError
+		raise errors.InvalidArgsError
 	except (UnicodeError, binascii.Error):
-		raise InvalidArgsError
+		raise errors.InvalidArgsError
 
 
 def input_validator() -> Callable:
@@ -45,3 +56,19 @@ def search_upwards(from_path: str, for_path: str) -> Path | None:
 			return new_path
 		current_path = current_path.parent
 	raise RuntimeError(f"Fatal Error! Path not found: {for_path}")
+
+
+def is_path_relative(path: Path | str) -> bool:
+	match platform.system():  # pragma: no cover
+		case "Linux" | "Darwin":
+			return not PurePosixPath(path).is_absolute()
+		case "Windows":
+			return not PureWindowsPath(path).is_absolute()
+
+
+def annotated_bytes(min_size: int = None, max_size: int = None, equal_to: int = None) -> Type[bytes]:
+	return Annotated[bytes, Field(
+		min_length=equal_to or min_size,
+		max_length=equal_to or max_size,
+		strict=True
+	)]

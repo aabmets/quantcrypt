@@ -67,10 +67,10 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			secret for any reason.
 		"""
 		params = self.param_sizes
-		pk_anno = self._bytes_anno(equal_to=params.pk_size)
+		pk_atd = utils.annotated_bytes(equal_to=params.pk_size)
 
 		@utils.input_validator()
-		def _encaps(pk: pk_anno) -> tuple[bytes, bytes]:
+		def _encaps(pk: pk_atd) -> tuple[bytes, bytes]:
 			ffi = FFI()
 			cipher_text = ffi.new(f"uint8_t [{params.ct_size}]")
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
@@ -103,11 +103,11 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			secret from the ciphertext for any reason.
 		"""
 		params = self.param_sizes
-		sk_anno = self._bytes_anno(equal_to=params.sk_size)
-		ct_anno = self._bytes_anno(equal_to=params.ct_size)
+		sk_atd = utils.annotated_bytes(equal_to=params.sk_size)
+		ct_atd = utils.annotated_bytes(equal_to=params.ct_size)
 
 		@utils.input_validator()
-		def _decaps(sk: sk_anno, ct: ct_anno) -> bytes:
+		def _decaps(sk: sk_atd, ct: ct_atd) -> bytes:
 			ffi = FFI()
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 

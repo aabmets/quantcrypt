@@ -15,8 +15,7 @@ from cffi import FFI
 from enum import Enum
 from abc import ABC, abstractmethod
 from types import ModuleType
-from typing import Literal, Type, Annotated
-from pydantic import Field
+from typing import Literal
 from functools import lru_cache
 from ..errors import InvalidArgsError
 from .. import utils
@@ -101,14 +100,6 @@ class BasePQAlgorithm(ABC):
 		pk = ffi.buffer(public_key, params.pk_size)
 		sk = ffi.buffer(secret_key, params.sk_size)
 		return bytes(pk), bytes(sk)
-
-	@staticmethod
-	def _bytes_anno(min_size: int = None, max_size: int = None, equal_to: int = None) -> Type[bytes]:
-		return Annotated[bytes, Field(
-			min_length=equal_to or min_size,
-			max_length=equal_to or max_size,
-			strict=True
-		)]
 
 	@utils.input_validator()
 	def armor(self, key_bytes: bytes) -> str:
