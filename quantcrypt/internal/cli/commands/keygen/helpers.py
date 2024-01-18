@@ -28,8 +28,8 @@ def keygen_interactive_flow(
 	ask = pqa.armor(secret_key)
 
 	prefix = f"{name_arg}-" if name_arg else ''
-	apk_name = f"{prefix}{algo_name}-pubkey.qclib"
-	ask_name = f"{prefix}{algo_name}-seckey.qclib"
+	apk_name = f"{prefix}{algo_name}-pubkey.qc"
+	ask_name = f"{prefix}{algo_name}-seckey.qc"
 	apk_file = target_dir / apk_name
 	ask_file = target_dir / ask_name
 

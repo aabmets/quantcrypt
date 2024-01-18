@@ -40,7 +40,7 @@ PathAtd = Annotated[str, Option(
 
 
 @keygen_app.command(name="kyber")
-def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
+def command_kyber(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 	"""
 	[KEM] Generates Kyber keys and writes them to disk.
 	"""
@@ -52,7 +52,7 @@ def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 
 
 @keygen_app.command(name="dilithium")
-def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
+def command_dilithium(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 	"""
 	[DSS] Generates Dilithium keys and writes them to disk.
 	"""
@@ -64,7 +64,7 @@ def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 
 
 @keygen_app.command(name="falcon")
-def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
+def command_falcon(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 	"""
 	[DSS] Generates Falcon keys and writes them to disk.
 	"""
@@ -76,7 +76,7 @@ def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 
 
 @keygen_app.command(name="smallsphincs")
-def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
+def command_smallsphincs(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 	"""
 	[DSS] Generates SmallSphincs keys and writes them to disk.
 	"""
@@ -88,7 +88,7 @@ def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 
 
 @keygen_app.command(name="fastsphincs")
-def command_optimize(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
+def command_fastsphincs(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
 	"""
 	[DSS] Generates FastSphincs keys and writes them to disk.
 	"""
