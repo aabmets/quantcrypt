@@ -8,102 +8,106 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-import os
 import pytest
 from pathlib import Path
 from dotmap import DotMap
+from typing import Callable
 from quantcrypt.cipher import KryptonFile, ChunkSize
 
 
-@pytest.fixture(name="helpers", scope="function")
-def fixture_file_data(tmp_path: Path) -> DotMap:
-	orig_pt = os.urandom(1024 * 16)
-	pt_file = tmp_path / "test_file.bin"
-	ct_file = tmp_path / "test_file.enc"
-	pt2_file = tmp_path / "test_file2.bin"
-	counter = list()
+def test_krypton_file_attributes():
+	krypton = KryptonFile(b'x' * 64)
 
-	with pt_file.open("wb") as file:
-		file.write(orig_pt)
+	assert hasattr(krypton, "encrypt")
+	assert hasattr(krypton, "decrypt_to_file")
+	assert hasattr(krypton, "decrypt_to_memory")
+	assert hasattr(krypton, "read_file_header")
 
-	def callback():
-		counter.append(1)
-
-	return DotMap(
-		sk=b'x' * 64,
-		orig_pt=orig_pt,
-		pt_file=pt_file,
-		ct_file=ct_file,
-		pt2_file=pt2_file,
-		counter=counter,
-		callback=callback
-	)
+	assert isinstance(getattr(krypton, "encrypt"), Callable)
+	assert isinstance(getattr(krypton, "decrypt_to_file"), Callable)
+	assert isinstance(getattr(krypton, "decrypt_to_memory"), Callable)
+	assert isinstance(getattr(krypton, "read_file_header"), Callable)
 
 
-def test_krypton_file_enc_dec(helpers: DotMap):
-	krypton = KryptonFile(helpers.sk)
+def test_krypton_file_enc_dec(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
 
-	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
+	krypton = KryptonFile(kfh.sk)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file)
+	krypton.decrypt_to_file(kfh.ct_file, kfh.pt2_file)
 
-	with helpers.pt2_file.open("rb") as file:
+	with kfh.pt2_file.open("rb") as file:
 		pt2 = file.read()
-	with helpers.ct_file.open("rb") as file:
+	with kfh.ct_file.open("rb") as file:
 		ct = file.read()
 
-	assert pt2 == helpers.orig_pt
-	assert ct != helpers.orig_pt
+	assert pt2 == kfh.orig_pt
+	assert ct != kfh.orig_pt
 
 
-def test_krypton_file_enc_dec_callback(helpers: DotMap):
-	krypton = KryptonFile(helpers.sk, callback=helpers.callback)
-	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	assert sum(helpers.counter) == 4
-	krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
-	assert sum(helpers.counter) == 8
+def test_krypton_file_enc_dec_callback(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
+	krypton = KryptonFile(kfh.sk, callback=kfh.callback)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file)
+	assert sum(kfh.counter) == 4
+	krypton.decrypt_to_file(kfh.ct_file, kfh.pt2_file)
+	assert sum(kfh.counter) == 8
 
 
-def test_krypton_file_read_header(helpers: DotMap):
+def test_krypton_file_read_header(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
 	header = b'z' * 32
-	krypton = KryptonFile(helpers.sk)
-	krypton.encrypt(helpers.pt_file, helpers.ct_file, header=header)
-	header2 = krypton.read_file_header(helpers.ct_file)
+	krypton = KryptonFile(kfh.sk)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file, header=header)
+	header2 = krypton.read_file_header(kfh.ct_file)
 	assert header2 == header
 
 	with pytest.raises(FileNotFoundError):
 		krypton.read_file_header(Path("asdfgh"))
 
 
-def test_krypton_file_enc_dec_header(helpers: DotMap):
+def test_krypton_file_enc_dec_header(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
 	header = b'z' * 32
 
-	krypton = KryptonFile(helpers.sk)
-	krypton.encrypt(helpers.pt_file, helpers.ct_file, header=header)
-	header2 = krypton.decrypt_to_file(helpers.ct_file, helpers.pt2_file)
+	krypton = KryptonFile(kfh.sk)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file, header=header)
+	header2 = krypton.decrypt_to_file(kfh.ct_file, kfh.pt2_file)
 	assert header2 == header
 
 
-def test_krypton_file_enc_dec_into_memory(helpers: DotMap):
-	krypton = KryptonFile(helpers.sk)
-	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	dec_data = krypton.decrypt_to_memory(helpers.ct_file)
-	assert dec_data.plaintext == helpers.orig_pt
+def test_krypton_file_enc_dec_into_memory(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
+	krypton = KryptonFile(kfh.sk)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file)
+	dec_data = krypton.decrypt_to_memory(kfh.ct_file)
+	assert dec_data.plaintext == kfh.orig_pt
 
 
-def test_krypton_file_enc_dec_chunk_size_override(helpers: DotMap):
-	krypton = KryptonFile(helpers.sk, chunk_size=ChunkSize.KB(1), callback=helpers.callback)
-	krypton.encrypt(helpers.pt_file, helpers.ct_file)
-	assert sum(helpers.counter) == 16
-	dec_data = krypton.decrypt_to_memory(helpers.ct_file)
-	assert sum(helpers.counter) == 32
-	assert dec_data.plaintext == helpers.orig_pt
+def test_krypton_file_enc_dec_chunk_size_override(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
+	krypton = KryptonFile(kfh.sk, chunk_size=ChunkSize.KB(1), callback=kfh.callback)
+	krypton.encrypt(kfh.pt_file, kfh.ct_file)
+	assert sum(kfh.counter) == 16
+	dec_data = krypton.decrypt_to_memory(kfh.ct_file)
+	assert sum(kfh.counter) == 32
+	assert dec_data.plaintext == kfh.orig_pt
 
 
-def test_krypton_file_enc_dec_errors(helpers: DotMap):
-	krypton = KryptonFile(helpers.sk)
+def test_krypton_file_enc_dec_errors(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
+	kfh.ct_file.touch()
+	kfh.pt2_file.touch()
+
+	krypton = KryptonFile(kfh.sk)
 	with pytest.raises(FileNotFoundError):
-		krypton.encrypt(Path("asdfg"), Path("qwerty"))
+		krypton.encrypt(Path("asdfg"), kfh.ct_file)
 	with pytest.raises(FileNotFoundError):
-		krypton.decrypt_to_file(Path("asdfg"), Path("qwerty"))
+		krypton.decrypt_to_file(Path("asdfg"), kfh.pt2_file)
 	with pytest.raises(FileNotFoundError):
 		krypton.decrypt_to_memory(Path("asdfg"))

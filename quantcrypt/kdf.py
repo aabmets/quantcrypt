@@ -9,10 +9,10 @@
 #   SPDX-License-Identifier: MIT
 #
 from .internal.kdf.common import (
-	MemCost
+	MemCost,
+	KDFParams
 )
 from .internal.kdf.argon2_kdf import (
-	KDFParams,
 	Argon2
 )
 from .internal.kdf.kmac_kdf import (

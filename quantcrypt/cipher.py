@@ -18,6 +18,9 @@ from .internal.cipher.krypton import (
 from .internal.cipher.krypton_file import (
 	KryptonFile
 )
+from .internal.cipher.krypton_kem import (
+	KryptonKEM
+)
 from .internal.cipher.errors import (
 	CipherError,
 	CipherStateError,

@@ -81,8 +81,8 @@ def pqc_variant_tests():
 	return closure
 
 
-@pytest.fixture(name="armoring_success_tests", scope="package")
-def fixture_armoring_success_tests():
+@pytest.fixture(scope="package")
+def armoring_success_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()
@@ -104,8 +104,8 @@ def fixture_armoring_success_tests():
 	return closure
 
 
-@pytest.fixture(name="armor_failure_tests", scope="package")
-def fixture_armor_failure_tests():
+@pytest.fixture(scope="package")
+def armor_failure_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()
@@ -125,8 +125,8 @@ def fixture_armor_failure_tests():
 	return closure
 
 
-@pytest.fixture(name="dearmor_failure_tests", scope="package")
-def fixture_dearmor_failure_tests():
+@pytest.fixture(scope="package")
+def dearmor_failure_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()
