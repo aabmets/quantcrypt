@@ -29,7 +29,7 @@ class KryptonKEM:
 		if isinstance(self._kdf_overrides, KDFParams):
 			return self._kdf_overrides
 		default = KDFParams(
-			memory_cost=MemCost.GB(2),
+			memory_cost=MemCost.GB(1),
 			parallelism=8,
 			time_cost=1,
 			hash_len=64,
@@ -209,7 +209,7 @@ class KryptonKEM:
 				utils.is_path_relative(ciphertext_file)
 				else Path(ciphertext_file)
 			)
-			orig_name, salt, kem_ct = self._unpack_header(_in_file)
+			_, salt, kem_ct = self._unpack_header(_in_file)
 			ss = kem.decaps(_key, kem_ct)
 			argon = Argon2.Key(
 				params=self._kdf_params,

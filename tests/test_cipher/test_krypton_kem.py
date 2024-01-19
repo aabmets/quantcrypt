@@ -160,6 +160,6 @@ def test_krypton_kem_argon2_delay(krypton_file_helpers: DotMap):
 	def test3():
 		krypton.decrypt_to_memory(sk, kfh.ct_file)
 
-	assert timeit.timeit(test, number=1) > 0.35
-	assert timeit.timeit(test2, number=1) > 0.35
-	assert timeit.timeit(test3, number=1) > 0.35
+	assert timeit.timeit(test, number=1) > 0.2
+	assert timeit.timeit(test2, number=1) > 0.2
+	assert timeit.timeit(test3, number=1) > 0.2
