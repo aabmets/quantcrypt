@@ -163,3 +163,22 @@ def test_krypton_kem_argon2_delay(krypton_file_helpers: DotMap):
 	assert timeit.timeit(test, number=1) > 0.2
 	assert timeit.timeit(test2, number=1) > 0.2
 	assert timeit.timeit(test3, number=1) > 0.2
+
+
+def test_krypton_kem_armored_keys(krypton_file_helpers: DotMap):
+	kfh = krypton_file_helpers
+
+	kem = Kyber()
+	pk, sk = kem.keygen()
+
+	krypton = KryptonKEM(Kyber, KDFParams(
+		memory_cost=MemCost.MB(32),
+		parallelism=8,
+		time_cost=1,
+		hash_len=64,
+		salt_len=32
+	))
+
+	krypton.encrypt(kem.armor(pk), kfh.pt_file, kfh.ct_file)
+	pt = krypton.decrypt_to_memory(kem.armor(sk), kfh.ct_file)
+	assert pt == kfh.orig_pt

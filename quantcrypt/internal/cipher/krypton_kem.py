@@ -76,7 +76,7 @@ class KryptonKEM:
 	@utils.input_validator()
 	def encrypt(
 			self,
-			public_key: bytes,
+			public_key: str | bytes,
 			data_file: str | Path,
 			output_file: str | Path = None
 	) -> None:
@@ -90,17 +90,28 @@ class KryptonKEM:
 
 		:param public_key: The public key corresponding to the secret key
 			of the KEM algorithm which was used to generate the keypair.
+			If the key is a string, it is expected to be in ASCII armor
+			format, armored by the KEM algorithm that generated the key.
 		:param data_file: Path to the plaintext file, which must exist.
 		:param output_file: Path to the ciphertext file.
 			If the file exists, it will be overwritten.
 		:return: None
-		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `plaintext_file` does not exist.
+		:raises - pydantic.ValidationError: On invalid input.
+		:raises - errors.PQAKeyArmorError: If `public_key` is a string
+			and QuantCrypt is unable to successfully de-armor the key.
+		:raises - errors.KEMEncapsFailedError: When the underlying
+			CFFI library has failed to encapsulate the shared
+			secret for any reason.
 		"""
 		if not Path(data_file).exists():
 			raise FileNotFoundError
 
 		kem = self._kem_class()
+
+		if isinstance(public_key, str):
+			public_key = kem.dearmor(public_key)
+
 		pk_atd = utils.annotated_bytes(
 			equal_to=kem.param_sizes.pk_size
 		)
@@ -139,7 +150,7 @@ class KryptonKEM:
 	@utils.input_validator()
 	def decrypt_to_file(
 			self,
-			secret_key: bytes,
+			secret_key: str | bytes,
 			encrypted_file: str | Path,
 			output_file: str | Path = None
 	) -> None:
@@ -152,12 +163,19 @@ class KryptonKEM:
 
 		:param secret_key: The secret key corresponding to the public key
 			of the KEM algorithm which was used to generate the keypair.
+			If the key is a string, it is expected to be in ASCII armor
+			format, armored by the KEM algorithm that generated the key.
 		:param encrypted_file: Path to the ciphertext file, which must exist.
 		:param output_file: Path to the plaintext file.
 			If the file exists, it will be overwritten.
 		:return: Header bytes (Associated Authenticated Data).
-		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
+		:raises - pydantic.ValidationError: On invalid input.
+		:raises - errors.PQAKeyArmorError: If `public_key` is a string
+			and QuantCrypt is unable to successfully de-armor the key.
+		:raises - errors.KEMDecapsFailedError: When the underlying
+			CFFI library has failed to decapsulate the shared
+			secret from the ciphertext for any reason.
 		"""
 		in_file, kf = self._kf_decrypt(secret_key, encrypted_file)
 		if output_file is None:
@@ -171,7 +189,7 @@ class KryptonKEM:
 	@utils.input_validator()
 	def decrypt_to_memory(
 			self,
-			secret_key: bytes,
+			secret_key: str | bytes,
 			encrypted_file: str | Path
 	) -> bytes:
 		"""
@@ -184,33 +202,44 @@ class KryptonKEM:
 
 		:param secret_key: The secret key corresponding to the public key
 			of the KEM algorithm which was used to generate the keypair.
+			If the key is a string, it is expected to be in ASCII armor
+			format, armored by the KEM algorithm that generated the key.
 		:param encrypted_file: Path to the ciphertext file, which must exist.
 		:return: Header bytes (Associated Authenticated Data).
-		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
+		:raises - pydantic.ValidationError: On invalid input.
+		:raises - errors.PQAKeyArmorError: If `public_key` is a string
+			and QuantCrypt is unable to successfully de-armor the key.
+		:raises - errors.KEMDecapsFailedError: When the underlying
+			CFFI library has failed to decapsulate the shared
+			secret from the ciphertext for any reason.
 		"""
 		in_file, kf = self._kf_decrypt(secret_key, encrypted_file)
 		dec_data = kf.decrypt_to_memory(in_file)
 		return dec_data.plaintext
 
-	def _kf_decrypt(self, key: bytes, ciphertext_file: str | Path) -> tuple[Path, KryptonFile]:
+	def _kf_decrypt(self, secret_key: str | bytes, ciphertext_file: str | Path) -> tuple[Path, KryptonFile]:
 		if not Path(ciphertext_file).exists():
 			raise FileNotFoundError
 
 		kem = self._kem_class()
+
+		if isinstance(secret_key, str):
+			secret_key = kem.dearmor(secret_key)
+
 		sk_atd = utils.annotated_bytes(
 			equal_to=kem.param_sizes.sk_size
 		)
 
 		@utils.input_validator()
-		def _inner(_key: sk_atd) -> tuple[Path, KryptonFile]:
+		def _inner(_secret_key: sk_atd) -> tuple[Path, KryptonFile]:
 			_in_file: Path = (
 				Path.cwd() / ciphertext_file if
 				utils.is_path_relative(ciphertext_file)
 				else Path(ciphertext_file)
 			)
 			_, salt, kem_ct = self._unpack_header(_in_file)
-			ss = kem.decaps(_key, kem_ct)
+			ss = kem.decaps(_secret_key, kem_ct)
 			argon = Argon2.Key(
 				params=self._kdf_params,
 				public_salt=salt,
@@ -222,7 +251,7 @@ class KryptonKEM:
 				callback=self._callback,
 				context=self._context
 			)
-		return _inner(key)
+		return _inner(secret_key)
 
 	@staticmethod
 	def _pack_header(argon: Argon2.Key, in_file: Path, kem_ct: bytes) -> bytes:
