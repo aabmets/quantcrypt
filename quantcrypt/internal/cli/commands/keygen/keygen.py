@@ -22,10 +22,9 @@ from . import helpers
 
 keygen_app = Typer(
 	name="keygen", no_args_is_help=True, help=
-	"Select a Post-Quantum Algorithm to generate keys for. "
-	"All sub-commands have identical call options. You can see the "
-	"available options by calling a sub-command with the --help option."
+	"Generates an ASCII armored keypair using a KEM or a DSS algorithm."
 )
+
 
 NameAtd = Annotated[str, Option(
 	"--name", "-n", show_default=False, help=

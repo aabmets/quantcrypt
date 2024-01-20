@@ -15,16 +15,13 @@ from quantcrypt.internal import utils
 
 
 optimize_app = Typer(
-	name="optimize",
-	invoke_without_command=True
+	name="optimize", invoke_without_command=True, help=
+	"Removes those PQA binaries which are incompatible with your platform."
 )
 
 
 @optimize_app.callback()
 def command_optimize() -> None:
-	"""
-	QuantCrypt will remove those PQA binaries which are incompatible with your platform.
-	"""
 	bin_path = utils.search_upwards(__file__, "bin")
 	remove_paths = {
 		"Windows": bin_path / "Windows",
