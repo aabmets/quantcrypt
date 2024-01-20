@@ -88,6 +88,12 @@ class BasePQAlgorithm(ABC):
 				"Unable to continue due to missing CLEAN binaries."
 			)
 
+	def _upper_name(self) -> str:
+		return '_'.join(re.findall(
+			string=self.__class__.__name__,
+			pattern='.[^A-Z]*'
+		)).upper()
+
 	def _keygen(self, algo_type: Literal["kem", "sign"]) -> tuple[bytes, bytes]:
 		ffi, params = FFI(), self.param_sizes
 		public_key = ffi.new(f"uint8_t [{params.pk_size}]")
@@ -125,10 +131,7 @@ class BasePQAlgorithm(ABC):
 			key_str[i:i + max_line_length]
 			for i in range(0, len(key_str), max_line_length)
 		]
-		algo_name = '_'.join(re.findall(
-			string=self.__class__.__name__,
-			pattern='.[^A-Z]*'
-		)).upper()
+		algo_name = self._upper_name()
 		header = f"-----BEGIN {algo_name} {key_type} KEY-----\n"
 		footer = f"\n-----END {algo_name} {key_type} KEY-----"
 		return header + '\n'.join(lines) + footer
@@ -143,20 +146,30 @@ class BasePQAlgorithm(ABC):
 		:raises - errors.PQAKeyArmorError: If dearmoring fails for any reason.
 		"""
 		dearmor_error = errors.PQAKeyArmorError("dearmor")
-		header_end = armored_key.find('\n') + 1
-		footer_start = armored_key.rfind('\n')
-		if -1 in [header_end, footer_start]:
+		algo_name = self._upper_name()
+		key_data = None
+
+		for key_type in ["PUBLIC", "SECRET"]:
+			header_pattern = rf"^-----BEGIN {algo_name} {key_type} KEY-----\n"
+			footer_pattern = rf"\n-----END {algo_name} {key_type} KEY-----$"
+			full_pattern = header_pattern + r"(.+)" + footer_pattern
+			if match := re.match(full_pattern, armored_key, re.DOTALL):
+				key_data = match.group(1).replace('\n', '')
+				break
+
+		if not key_data:
 			raise dearmor_error
+
 		try:
-			key_bytes = utils.b64(
-				armored_key[header_end:footer_start]
-				.replace('\n', '')
-			)
+			key_bytes = utils.b64(key_data)
 		except InvalidArgsError:
 			raise dearmor_error
-		if len(key_bytes) not in [
-			self.param_sizes.sk_size,
-			self.param_sizes.pk_size
-		]:
+
+		expected_size = dict(
+			PUBLIC=self.param_sizes.pk_size,
+			SECRET=self.param_sizes.sk_size
+		)[key_type]
+		if len(key_bytes) != expected_size:
 			raise dearmor_error
+
 		return key_bytes

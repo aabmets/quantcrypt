@@ -145,7 +145,7 @@ def dearmor_failure_tests():
 
 			with pytest.raises(errors.PQAKeyArmorError):
 				copy = data.copy()
-				copy.insert(center, 'abcd')
+				copy.insert(1, data[1])
 				pqa.dearmor('\n'.join(copy))
 
 			with pytest.raises(errors.PQAKeyArmorError):
