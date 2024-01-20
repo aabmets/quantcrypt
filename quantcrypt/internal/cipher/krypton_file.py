@@ -62,7 +62,7 @@ class KryptonFile:
 		ciphertext, writing the encrypted ciphertext chunks into the output_file.
 		The header data is also written into the `output_file`.
 
-		:param data_file: Path to the plaintext file, which must exist.
+		:param data_file: Path to the plaintext data file, which must exist.
 		:param output_file: Path to the ciphertext file.
 			If the file exists, it will be overwritten.
 		:param header: Associated Authenticated Data, which is included
@@ -106,7 +106,7 @@ class KryptonFile:
 		The header data can be considered authenticated when the decryption
 		process has completed successfully.
 
-		:param encrypted_file: Path to the ciphertext file, which must exist.
+		:param encrypted_file: Path to the ciphertext data file, which must exist.
 		:param output_file: Path to the plaintext file.
 			If the file exists, it will be overwritten.
 		:return: Header bytes (Associated Authenticated Data).
@@ -143,7 +143,7 @@ class KryptonFile:
 		process has completed successfully. **Note:** Do NOT decrypt large
 		files (>100MB) into memory, use your best judgement.
 
-		:param encrypted_file: Path to the ciphertext file, which must exist.
+		:param encrypted_file: Path to the ciphertext data file, which must exist.
 		:return: Instance of DecryptedFileData.
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
@@ -170,21 +170,21 @@ class KryptonFile:
 
 	@classmethod
 	@utils.input_validator()
-	def read_file_header(cls, ciphertext_file: Path) -> bytes:
+	def read_file_header(cls, encrypted_file: Path) -> bytes:
 		"""
 		Reads the header bytes from a Krypton ciphertext file.
 		The header data can be considered authenticated when
 		the file decryption process has completed successfully.
 
-		:param ciphertext_file: Path to the ciphertext file, which must exist.
+		:param encrypted_file: Path to the ciphertext file, which must exist.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not ciphertext_file.exists():
+		if not encrypted_file.exists():
 			raise FileNotFoundError
 
-		with open(ciphertext_file, 'rb') as read_file:
+		with open(encrypted_file, 'rb') as read_file:
 			return cls._unpack_metadata(read_file)[2]
 
 	def _pack_metadata(self, krypton: Krypton, header: bytes) -> bytes:
