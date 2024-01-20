@@ -27,6 +27,7 @@ from quantcrypt.errors import (
 	KDFHashingError,
 
 	PQAError,
+	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
 	KEMDecapsFailedError,
@@ -55,6 +56,8 @@ def test_error_instantiation():
 	assert KDFHashingError()
 
 	assert PQAError()
+	assert PQAKeyArmorError("armor")
+	assert PQAKeyArmorError("dearmor")
 	assert KEMKeygenFailedError()
 	assert KEMEncapsFailedError()
 	assert KEMDecapsFailedError()

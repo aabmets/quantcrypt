@@ -30,6 +30,7 @@ from .internal.kdf.errors import (
 )
 from .internal.pqa.errors import (
 	PQAError,
+	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
 	KEMDecapsFailedError,

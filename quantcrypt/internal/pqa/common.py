@@ -19,6 +19,7 @@ from typing import Literal
 from functools import lru_cache
 from ..errors import InvalidArgsError
 from .. import utils
+from . import errors
 
 
 __all__ = [
@@ -110,7 +111,7 @@ class BasePQAlgorithm(ABC):
 			case params.pk_size:
 				key_type = "PUBLIC"
 			case _:
-				raise InvalidArgsError
+				raise errors.PQAKeyArmorError("armor")
 		key_str = utils.b64(key_bytes)
 		max_line_length = 64
 		lines = [
@@ -127,17 +128,21 @@ class BasePQAlgorithm(ABC):
 
 	@utils.input_validator()
 	def dearmor(self, armored_key: str) -> bytes:
+		dearmor_error = errors.PQAKeyArmorError("dearmor")
 		header_end = armored_key.find('\n') + 1
 		footer_start = armored_key.rfind('\n')
 		if -1 in [header_end, footer_start]:
-			raise InvalidArgsError
-		key_bytes = utils.b64(
-			armored_key[header_end:footer_start]
-			.replace('\n', '')
-		)
+			raise dearmor_error
+		try:
+			key_bytes = utils.b64(
+				armored_key[header_end:footer_start]
+				.replace('\n', '')
+			)
+		except InvalidArgsError:
+			raise dearmor_error
 		if len(key_bytes) not in [
 			self.param_sizes.sk_size,
 			self.param_sizes.pk_size
 		]:
-			raise InvalidArgsError
+			raise dearmor_error
 		return key_bytes

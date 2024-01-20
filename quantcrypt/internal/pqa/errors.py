@@ -8,11 +8,13 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+from typing import Literal
 from ..errors import QuantCryptError
 
 
 __all__ = [
 	"PQAError",
+	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
 	"KEMDecapsFailedError",
@@ -24,6 +26,11 @@ __all__ = [
 
 class PQAError(QuantCryptError):
 	"""Base class for all PQC errors."""
+
+
+class PQAKeyArmorError(PQAError):
+	def __init__(self, verb: Literal["armor", "dearmor"]):
+		super().__init__(f"QuantCrypt will not {verb} a corrupted key.")
 
 
 class KEMKeygenFailedError(PQAError):

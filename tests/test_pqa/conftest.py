@@ -12,7 +12,7 @@ import pytest
 from functools import lru_cache
 from pydantic import ValidationError
 from typing import Callable, Type, cast
-from quantcrypt.errors import InvalidArgsError
+from quantcrypt.internal.pqa import errors
 from quantcrypt.internal.pqa.common import (
 	BasePQAlgorithm,
 	PQAVariant
@@ -115,11 +115,11 @@ def armor_failure_tests():
 				pqa.armor(cast(key(), bytes))
 
 		for key in [public_key + b'x', public_key[:-1]]:
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				pqa.armor(key)
 
 		for key in [secret_key + b'x', secret_key[:-1]]:
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				pqa.armor(key)
 
 	return closure
@@ -138,23 +138,23 @@ def dearmor_failure_tests():
 		def _reuse_tests(data: list[str]):
 			center = len(data) // 2
 
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				copy = data.copy()
 				copy.pop(center)
 				pqa.dearmor('\n'.join(copy))
 
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				copy = data.copy()
 				copy.insert(center, 'abcd')
 				pqa.dearmor('\n'.join(copy))
 
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				copy = data.copy()
 				line = copy.pop(center)[:-1] + '!'
 				copy.insert(center, line)
 				pqa.dearmor('\n'.join(copy))
 
-			with pytest.raises(InvalidArgsError):
+			with pytest.raises(errors.PQAKeyArmorError):
 				pqa.dearmor("")
 
 		apk = pqa.armor(public_key).split('\n')
