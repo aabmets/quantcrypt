@@ -38,3 +38,26 @@ def test_search_upwards_error():
 	with pytest.raises(RuntimeError):
 		bad_path = secrets.token_hex()
 		utils.search_upwards(__file__, bad_path)
+
+
+def test_sha3_digest_file(tmp_path: Path):
+	file_path = tmp_path / "sample.txt"
+	file_path.write_text("x" * 1024**2)
+
+	counter = []
+
+	def callback():
+		counter.append(1)
+
+	digest = utils.sha3_digest_file(file_path, callback)
+	assert isinstance(digest, bytes)
+	assert len(digest) == 64
+	assert len(counter) == 4
+	assert utils.b64(digest).startswith(
+		"iWP48uUEEjzU5gXKK8FpzC10Bs"
+	)
+
+
+def test_sha3_digest_file_errors():
+	with pytest.raises(FileNotFoundError):
+		utils.sha3_digest_file("asdfg")

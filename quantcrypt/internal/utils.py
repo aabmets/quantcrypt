@@ -11,13 +11,20 @@
 import base64
 import binascii
 import platform
-from typing import Callable, Type, Annotated
-from pydantic import Field, ConfigDict, validate_call
+from Cryptodome.Hash import SHA3_512
+from pydantic import (
+	Field, ConfigDict, validate_call
+)
+from typing import (
+	BinaryIO, Generator, Optional,
+	Callable, Type, Annotated
+)
 from pathlib import (
 	PureWindowsPath,
 	PurePosixPath,
 	Path
 )
+from .chunksize import ChunkSize
 from . import errors
 
 
@@ -26,7 +33,9 @@ __all__ = [
 	"input_validator",
 	"search_upwards",
 	"is_path_relative",
-	"annotated_bytes"
+	"annotated_bytes",
+	"read_file_chunks",
+	"sha3_digest_file"
 ]
 
 
@@ -66,9 +75,43 @@ def is_path_relative(path: Path | str) -> bool:
 			return not PureWindowsPath(path).is_absolute()
 
 
-def annotated_bytes(min_size: int = None, max_size: int = None, equal_to: int = None) -> Type[bytes]:
+def annotated_bytes(
+		min_size: int = None,
+		max_size: int = None,
+		equal_to: int = None
+) -> Type[bytes]:
 	return Annotated[bytes, Field(
 		min_length=equal_to or min_size,
 		max_length=equal_to or max_size,
 		strict=True
 	)]
+
+
+def read_file_chunks(
+		file: BinaryIO,
+		chunk_size: int,
+		callback: Optional[Callable] = None
+) -> Generator[bytes, None, None]:
+	while True:
+		chunk = file.read(chunk_size)
+		if not chunk:
+			break
+		elif callback:
+			callback()
+		yield chunk
+
+
+def sha3_digest_file(file_path: str | Path, callback: Optional[Callable] = None) -> bytes:
+	file_path = Path(file_path)
+
+	if not file_path.is_file():
+		raise FileNotFoundError
+
+	sha3 = SHA3_512.new()
+	file_size = file_path.stat().st_size
+	chunk_size = ChunkSize.determine_from_data_size(file_size)
+
+	with open(file_path, 'rb') as read_file:
+		for chunk in read_file_chunks(read_file, chunk_size.value, callback):
+			sha3.update(chunk)
+		return sha3.digest()
