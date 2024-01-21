@@ -90,8 +90,7 @@ class KryptonKEM:
 
 		:param public_key: The public key corresponding to the secret key
 			of the KEM algorithm which was used to generate the keypair.
-			If the key is a string, it is expected to be in ASCII armor
-			format, armored by the KEM algorithm that generated the key.
+			If the key is a string, it is expected to be in ASCII armor format.
 		:param data_file: Path to the plaintext file, which must exist.
 		:param output_file: Path to the ciphertext file.
 			If the file exists, it will be overwritten.
@@ -163,8 +162,7 @@ class KryptonKEM:
 
 		:param secret_key: The secret key corresponding to the public key
 			of the KEM algorithm which was used to generate the keypair.
-			If the key is a string, it is expected to be in ASCII armor
-			format, armored by the KEM algorithm that generated the key.
+			If the key is a string, it is expected to be in ASCII armor format.
 		:param encrypted_file: Path to the ciphertext data file, which must exist.
 		:param output_file: Path to the plaintext file.
 			If the file exists, it will be overwritten.
@@ -202,8 +200,7 @@ class KryptonKEM:
 
 		:param secret_key: The secret key corresponding to the public key
 			of the KEM algorithm which was used to generate the keypair.
-			If the key is a string, it is expected to be in ASCII armor
-			format, armored by the KEM algorithm that generated the key.
+			If the key is a string, it is expected to be in ASCII armor format.
 		:param encrypted_file: Path to the ciphertext data file, which must exist.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.

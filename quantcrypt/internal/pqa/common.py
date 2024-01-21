@@ -9,6 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 import re
+import string
 import platform
 import importlib
 from cffi import FFI
@@ -147,14 +148,16 @@ class BasePQAlgorithm(ABC):
 		"""
 		dearmor_error = errors.PQAKeyArmorError("dearmor")
 		algo_name = self._upper_name()
-		key_data = None
+		key_data: str = ''
 
 		for key_type in ["PUBLIC", "SECRET"]:
 			header_pattern = rf"^-----BEGIN {algo_name} {key_type} KEY-----\n"
 			footer_pattern = rf"\n-----END {algo_name} {key_type} KEY-----$"
 			full_pattern = header_pattern + r"(.+)" + footer_pattern
 			if match := re.match(full_pattern, armored_key, re.DOTALL):
-				key_data = match.group(1).replace('\n', '')
+				key_data = match.group(1) or ''
+				for c in string.whitespace:
+					key_data = key_data.replace(c, '')
 				break
 
 		if not key_data:
