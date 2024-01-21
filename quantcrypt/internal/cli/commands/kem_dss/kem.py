@@ -8,18 +8,17 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-from pathlib import Path
 from typing import Annotated
 from typer import Typer, Option
 from quantcrypt.cipher import KryptonKEM
 from . import helpers
 
 
-enc_app = Typer(
+encrypt_app = Typer(
 	name="encrypt", invoke_without_command=True, no_args_is_help=True, help=""
 	"Uses an ASCII armored KEM public key to encrypt a file with the Krypton cipher."
 )
-dec_app = Typer(
+decrypt_app = Typer(
 	name="decrypt", invoke_without_command=True, no_args_is_help=True, help=""
 	"Uses an ASCII armored KEM secret key to decrypt a file with the Krypton cipher."
 )
@@ -60,39 +59,39 @@ PTOutFileAtd = Annotated[str, Option(
 )]
 
 
-@enc_app.callback()
+@encrypt_app.callback()
 def command_encrypt(key_file: PKFileAtd, data_file: PTFileAtd, out_file: CTOutFileAtd = None) -> None:
-	paths = helpers.process_paths(key_file, data_file, out_file)
+	paths = helpers.process_paths(key_file, data_file, out_file, '.kptn')
 
-	with Path(paths.key_file).open('r') as file:
+	with paths.key_file.open('r') as file:
 		armored_key = file.read()
 
 	kem_class = helpers.determine_kem_class(
-		armored_key, expected_key_type="PUBLIC"
+		armored_key, "PUBLIC"
 	)
 	krypton = KryptonKEM(kem_class)
 	krypton.encrypt(
 		public_key=armored_key,
 		data_file=paths.data_file,
-		output_file=paths.out_file
+		output_file=paths.target_file
 	)
 	print("File encrypted successfully!")
 
 
-@dec_app.callback()
+@decrypt_app.callback()
 def command_decrypt(key_file: SK_FileAtd, data_file: CTFileAtd, out_file: PTOutFileAtd = None) -> None:
-	paths = helpers.process_paths(key_file, data_file, out_file)
+	paths = helpers.process_paths(key_file, data_file, out_file, '.kptn')
 
-	with Path(paths.key_file).open('r') as file:
+	with paths.key_file.open('r') as file:
 		armored_key = file.read()
 
 	kem_class = helpers.determine_kem_class(
-		armored_key, expected_key_type="SECRET"
+		armored_key, "SECRET"
 	)
 	krypton = KryptonKEM(kem_class)
 	krypton.decrypt_to_file(
 		secret_key=armored_key,
 		encrypted_file=paths.data_file,
-		output_file=paths.out_file
+		output_file=paths.target_file
 	)
 	print("File decrypted successfully!")

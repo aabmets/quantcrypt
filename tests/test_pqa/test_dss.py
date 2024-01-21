@@ -131,15 +131,33 @@ def fixture_sign_verify_file_tests(tmp_path: Path):
 		data_file = tmp_path / "test.txt"
 		data_file.write_text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
 
+		sf = dss.sign_file(sk, data_file)
+		dss.verify_file(pk, data_file, sf.signature)
+
+	return closure
+
+
+@pytest.fixture(name="sign_verify_file_callback_tests", scope="function")
+def fixture_sign_verify_file_callback_tests(tmp_path: Path):
+	def closure(dss_cls: Type[BaseDSS]):
+		dss = dss_cls()
+		pk, sk = dss.keygen()
+
+		data_file = tmp_path / "test.txt"
+		data_file.write_text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+
 		counter = []
 
 		def callback():
 			counter.append(1)
 
-		sf = dss.sign_file(sk, data_file, callback)
+		ask = dss.armor(sk)
+		apk = dss.armor(pk)
+
+		sf = dss.sign_file(ask, data_file, callback)
 		assert sum(counter) == 1
 
-		dss.verify_file(pk, data_file, sf.signature, callback)
+		dss.verify_file(apk, data_file, sf.signature, callback)
 		assert sum(counter) == 2
 
 	return closure
@@ -178,6 +196,10 @@ class TestDilithium:
 	def test_8(sign_verify_file_tests: Callable):
 		sign_verify_file_tests(Dilithium)
 
+	@staticmethod
+	def test_9(sign_verify_file_callback_tests: Callable):
+		sign_verify_file_callback_tests(Dilithium)
+
 
 class TestFalcon:
 	@staticmethod
@@ -211,6 +233,10 @@ class TestFalcon:
 	@staticmethod
 	def test_8(sign_verify_file_tests: Callable):
 		sign_verify_file_tests(Falcon)
+
+	@staticmethod
+	def test_9(sign_verify_file_callback_tests: Callable):
+		sign_verify_file_callback_tests(Falcon)
 
 
 class TestFastSphincs:
@@ -246,6 +272,10 @@ class TestFastSphincs:
 	def test_8(sign_verify_file_tests: Callable):
 		sign_verify_file_tests(FastSphincs)
 
+	@staticmethod
+	def test_9(sign_verify_file_callback_tests: Callable):
+		sign_verify_file_callback_tests(FastSphincs)
+
 
 class TestSmallSphincs:
 	@staticmethod
@@ -279,3 +309,7 @@ class TestSmallSphincs:
 	@staticmethod
 	def test_8(sign_verify_file_tests: Callable):
 		sign_verify_file_tests(SmallSphincs)
+
+	@staticmethod
+	def test_9(sign_verify_file_callback_tests: Callable):
+		sign_verify_file_callback_tests(SmallSphincs)
