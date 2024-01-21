@@ -16,7 +16,7 @@
     "file_name": "mit.json"
   },
   "version_cmd": {
-    "app_version": "0.3.0",
+    "app_version": "0.3.1",
     "track_descriptor": true,
     "track_chart": false,
     "components": [
@@ -24,7 +24,7 @@
         "name": "lib",
         "target": "quantcrypt",
         "ignore": [],
-        "hash": "4d62f281cd1f512375d3c4825e04cb80"
+        "hash": "b9e08006ce44baea4dc539ef3172f2e9"
       }
     ]
   },

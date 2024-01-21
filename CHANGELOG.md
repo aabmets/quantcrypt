@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [0.3.0] - 2024-01-21 - _latest_
+### [0.3.1] - 2024-01-21 - _latest_
+
+- Added sign_file and verify_file methods to BaseDSS class
+- Added sign and verify CLI commands
+
+### [0.3.0] - 2024-01-21
 
 - Reduced KryptonKEM memory cost from 2GB to 1GB. This still requires 10^77 GB of memory  
   to brute force all 256 bit combinations, which is astronomically unattainable.
@@ -28,6 +33,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[0.3.1]: https://github.com/aabmets/quantcrypt/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/aabmets/quantcrypt/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/aabmets/quantcrypt/compare/0.1.3...0.2.0
 [0.1.3]: https://github.com/aabmets/quantcrypt/compare/0.1.0...0.1.3
