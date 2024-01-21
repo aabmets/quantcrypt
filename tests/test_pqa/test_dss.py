@@ -9,6 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 import pytest
+from pathlib import Path
 from typing import Callable, Type
 from pydantic import ValidationError
 from quantcrypt.internal.pqa.dss import BaseDSS
@@ -121,6 +122,29 @@ def fixture_invalid_inputs_tests(
 	return closure
 
 
+@pytest.fixture(name="sign_verify_file_tests", scope="function")
+def fixture_sign_verify_file_tests(tmp_path: Path):
+	def closure(dss_cls: Type[BaseDSS]):
+		dss = dss_cls()
+		pk, sk = dss.keygen()
+
+		data_file = tmp_path / "test.txt"
+		data_file.write_text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+
+		counter = []
+
+		def callback():
+			counter.append(1)
+
+		sf = dss.sign_file(sk, data_file, callback)
+		assert sum(counter) == 1
+
+		dss.verify_file(pk, data_file, sf.signature, callback)
+		assert sum(counter) == 2
+
+	return closure
+
+
 class TestDilithium:
 	@staticmethod
 	def test_1(pqc_variant_tests: Callable):
@@ -149,6 +173,10 @@ class TestDilithium:
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
 		dearmor_failure_tests(Dilithium)
+
+	@staticmethod
+	def test_8(sign_verify_file_tests: Callable):
+		sign_verify_file_tests(Dilithium)
 
 
 class TestFalcon:
@@ -180,6 +208,10 @@ class TestFalcon:
 	def test_7(dearmor_failure_tests: Callable):
 		dearmor_failure_tests(Falcon)
 
+	@staticmethod
+	def test_8(sign_verify_file_tests: Callable):
+		sign_verify_file_tests(Falcon)
+
 
 class TestFastSphincs:
 	@staticmethod
@@ -210,6 +242,10 @@ class TestFastSphincs:
 	def test_7(dearmor_failure_tests: Callable):
 		dearmor_failure_tests(FastSphincs)
 
+	@staticmethod
+	def test_8(sign_verify_file_tests: Callable):
+		sign_verify_file_tests(FastSphincs)
+
 
 class TestSmallSphincs:
 	@staticmethod
@@ -239,3 +275,7 @@ class TestSmallSphincs:
 	@staticmethod
 	def test_7(dearmor_failure_tests: Callable):
 		dearmor_failure_tests(SmallSphincs)
+
+	@staticmethod
+	def test_8(sign_verify_file_tests: Callable):
+		sign_verify_file_tests(SmallSphincs)

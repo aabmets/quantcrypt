@@ -12,9 +12,12 @@ import struct
 from abc import ABC
 from cffi import FFI
 from types import ModuleType
+from pathlib import Path
 from functools import lru_cache
-from . import errors
+from dataclasses import dataclass
+from typing import Optional, Callable
 from .. import utils
+from . import errors
 from .common import (
 	BasePQAParamSizes,
 	BasePQAlgorithm,
@@ -23,6 +26,7 @@ from .common import (
 
 
 __all__ = [
+	"SignedFile",
 	"DSSParamSizes",
 	"BaseDSS",
 	"Dilithium",
@@ -30,6 +34,19 @@ __all__ = [
 	"FastSphincs",
 	"SmallSphincs"
 ]
+
+
+@dataclass
+class SignedFile:
+	"""
+	Available instance attributes:
+	1) algo_name - str
+	2) signature - bytes
+	3) file_digest - bytes
+	"""
+	algo_name: str
+	signature: bytes
+	file_digest: bytes
 
 
 class DSSParamSizes(BasePQAParamSizes):
@@ -60,7 +77,7 @@ class BaseDSS(BasePQAlgorithm, ABC):
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
 		"""
-		Tries to generate a signature for the message using the secret key.
+		Generates a signature for the message using the secret key.
 
 		:param secret_key: The secret key which is used to sign the provided message.
 		:param message: The message for which the signature will be created.
@@ -90,7 +107,14 @@ class BaseDSS(BasePQAlgorithm, ABC):
 
 		return _sign(secret_key, message)
 
-	def verify(self, public_key: bytes, message: bytes, signature: bytes, *, raises: bool = True) -> bool:
+	def verify(
+			self,
+			public_key: bytes,
+			message: bytes,
+			signature: bytes,
+			*,
+			raises: bool = True
+	) -> bool:
 		"""
 		Tries to verify the validity of the signature of the message using the public key.
 
@@ -125,6 +149,65 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			return result == 0
 
 		return _verify(public_key, message, signature, raises)
+
+	def sign_file(
+			self,
+			secret_key: bytes,
+			file_path: str | Path,
+			callback: Optional[Callable] = None
+	) -> SignedFile:
+		"""
+
+		:param secret_key: The secret key which will be used to sign the SHA3 digest of the file.
+		:param file_path: Path of the file to be signed. The file must exist.
+		:param callback: This callback, when provided, will be called for each
+			data chunk that is processed. No arguments are passed into the callback.
+			Useful for updating progress bars.
+		:returns: An instance of SignedFile.
+		:raises - FileNotFoundError: When `file_path` is not a file.
+		:raises - pydantic.ValidationError: When the user-provided
+			`secret_key` or `message` values have invalid types or the length
+			of the `secret_key` is invalid for the current DSS algorithm.
+		:raises - errors.DSSSignFailedError: When the underlying CFFI
+			library has failed to generate the signature for any reason.
+		"""
+		digest = utils.sha3_digest_file(file_path, callback)
+		return SignedFile(
+			signature=self.sign(secret_key, digest),
+			algo_name=self._upper_name(),
+			file_digest=digest,
+		)
+
+	def verify_file(
+			self,
+			public_key: bytes,
+			file_path: str | Path,
+			signature: bytes,
+			callback: Optional[Callable] = None,
+			*,
+			raises: bool = True
+	) -> bool:
+		"""
+		:param public_key: The public key which will be used to verify the signature of the file.
+		:param file_path: Path of the file to be verified. The file must exist.
+		:param signature: The signature which is being verified
+			with the `public_key` for the provided `message`.
+		:param callback: This callback, when provided, will be called for each
+			data chunk that is processed. No arguments are passed into the callback.
+			Useful for updating progress bars.
+		:param raises: Option to disable the raising of the DSSVerifyFailedError,
+			which allows the use of an if block to branch logic execution based on
+			signature verification success. By default, errors are raised.
+		:return: True or False, if `raises` parameter is False, otherwise raises a
+			DSSVerifyFailedError on signature verification failure.
+		:raises - pydantic.ValidationError: When the user-provided `public_key`,
+			`message` or `signature` values have invalid types or when `public_key`
+			or `signature` have invalid lengths for the current DSS algorithm.
+		:raises - errors.DSSVerifyFailedError: When the underlying CFFI library
+			has failed to verify the provided signature for any reason.
+		"""
+		digest = utils.sha3_digest_file(file_path, callback)
+		return self.verify(public_key, digest, signature, raises=raises)
 
 
 class Dilithium(BaseDSS):
