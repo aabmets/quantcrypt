@@ -16,44 +16,44 @@ from . import helpers
 
 
 enc_app = Typer(
-	name="encrypt", invoke_without_command=True, no_args_is_help=True, help=
+	name="encrypt", invoke_without_command=True, no_args_is_help=True, help=""
 	"Uses an ASCII armored KEM public key to encrypt a file with the Krypton cipher."
 )
 dec_app = Typer(
-	name="decrypt", invoke_without_command=True, no_args_is_help=True, help=
+	name="decrypt", invoke_without_command=True, no_args_is_help=True, help=""
 	"Uses an ASCII armored KEM secret key to decrypt a file with the Krypton cipher."
 )
 
 
 PKFileAtd = Annotated[str, Option(
-	'--key-file', '-k', show_default=False, help=
+	'--key-file', '-k', show_default=False, help=""
 	"Either an absolute or a relative path to the armored PQA public key file, "
 	"which will be encapsulated to produce the secret key for the Krypton cipher. "
 	"If the path is relative, it is evaluated from the Current Working Directory."
 )]
 SK_FileAtd = Annotated[str, Option(
-	'--key-file', '-k', show_default=False, help=
+	'--key-file', '-k', show_default=False, help=""
 	"Either an absolute or a relative path to the armored PQA secret key file, "
 	"which will be decapsulated to produce the secret key for the Krypton cipher. "
 	"If the path is relative, it is evaluated from the Current Working Directory."
 )]
 PTFileAtd = Annotated[str, Option(
-	'--data-file', '-d', show_default=False, help=
+	'--data-file', '-d', show_default=False, help=""
 	"Path to the plaintext data file, which will be encrypted with the Krypton cipher. "
 	"If the path is relative, it is evaluated from the Current Working Directory."
 )]
 CTFileAtd = Annotated[str, Option(
-	'--data-file', '-d', show_default=False, help=
+	'--data-file', '-d', show_default=False, help=""
 	"Path to the ciphertext data file, which will be decrypted with the Krypton cipher. "
 	"If the path is relative, it is evaluated from the Current Working Directory."
 )]
 CTOutFileAtd = Annotated[str, Option(
-	'--out-file', '-o', show_default=False, help=
+	'--out-file', '-o', show_default=False, help=""
 	"Path to the output file where the encrypted data will be written to, optional. "
 	"Defaults to the Current Working Directory, using the data file name with the .kptn suffix."
 )]
 PTOutFileAtd = Annotated[str, Option(
-	'--out-file', '-o', show_default=False, help=
+	'--out-file', '-o', show_default=False, help=""
 	"Path to the output file where the decrypted data will be written to, optional. "
 	"Defaults to the Current Working Directory, using the original filename of the data file "
 	"that was stored into the ciphertext file."

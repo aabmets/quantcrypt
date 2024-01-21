@@ -12,7 +12,8 @@ import timeit
 import pytest
 from typing import Type, Callable
 from pydantic import ValidationError
-from quantcrypt.kdf import KDFParams, MemCost, Argon2
+from quantcrypt.kdf import Argon2
+from quantcrypt.utils import KDFParams, MemCost
 from quantcrypt.internal.kdf import errors
 from quantcrypt.internal import utils
 

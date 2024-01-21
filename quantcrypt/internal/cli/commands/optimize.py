@@ -15,7 +15,7 @@ from quantcrypt.internal import utils
 
 
 optimize_app = Typer(
-	name="optimize", invoke_without_command=True, help=
+	name="optimize", invoke_without_command=True, help=""
 	"Removes those PQA binaries which are incompatible with your platform."
 )
 

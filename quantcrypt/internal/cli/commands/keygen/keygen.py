@@ -21,18 +21,18 @@ from . import helpers
 
 
 keygen_app = Typer(
-	name="keygen", no_args_is_help=True, help=
+	name="keygen", no_args_is_help=True, help=""
 	"Generates an ASCII armored keypair using a KEM or a DSS algorithm."
 )
 
 
 NameAtd = Annotated[str, Option(
-	"--name", "-n", show_default=False, help=
+	"--name", "-n", show_default=False, help=""
 	'Unique identifier for the keyfile names, optional. '
 	'If not provided, file names will be without a unique identifier.'
 )]
 PathAtd = Annotated[str, Option(
-	"--dir", "-d", show_default=False, help=
+	"--dir", "-d", show_default=False, help=""
 	'Directory where to save the generated keypair, optional. '
 	'If not provided, the keys are saved into the current working directory.'
 )]
