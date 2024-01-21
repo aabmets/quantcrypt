@@ -70,12 +70,15 @@ def command_sign(key_file: SKFileAtd, data_file: SignDataFileAtd, sig_file: Writ
 		armored_key, "SECRET"
 	)
 	dss = dss_class()
-	signed_file = dss.sign_file(armored_key, paths.data_file)
+	try:
+		signed_file = dss.sign_file(armored_key, paths.data_file)
 
-	with paths.target_file.open('wb') as file:
-		file.write(signed_file.signature)
+		with paths.target_file.open('wb') as file:
+			file.write(signed_file.signature)
 
-	print("File signed successfully!")
+		print("File signed successfully!")
+	except QuantCryptError:
+		print("Failed to sign file!")
 
 
 @verify_app.callback()
