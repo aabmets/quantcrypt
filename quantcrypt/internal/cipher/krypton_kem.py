@@ -9,16 +9,16 @@
 #   SPDX-License-Identifier: MIT
 #
 from pathlib import Path
-from typing import Type, Callable, Union
+from typing import Type, Callable, Optional
 from .krypton_file import KryptonFile
 from ..kdf.common import KDFParams, MemCost
 from ..kdf.argon2_kdf import Argon2
+from ..chunksize import ChunkSize
 from ..pqa.kem import BaseKEM
 from .. import utils
-from .common import (
-	ChunkSizeKB,
-	ChunkSizeMB
-)
+
+
+__all__ = ["KryptonKEM"]
 
 
 class KryptonKEM:
@@ -45,8 +45,8 @@ class KryptonKEM:
 			kem_class: Type[BaseKEM],
 			kdf_params: KDFParams = None,
 			context: bytes = b"quantcrypt",
-			chunk_size: ChunkSizeKB | ChunkSizeMB | None = None,
-			callback: Union[Callable, None] = None
+			chunk_size: ChunkSize.Atd = None,
+			callback: Optional[Callable] = None
 	) -> None:
 		"""
 		Creates a new KryptonKEM instance for encrypting and/or decrypting
@@ -104,8 +104,8 @@ class KryptonKEM:
 			CFFI library has failed to encapsulate the shared
 			secret for any reason.
 		"""
-		if not Path(data_file).exists():
-			raise FileNotFoundError
+		if not Path(data_file).is_file():
+			raise FileNotFoundError(data_file)
 
 		kem = self._kem_class()
 
@@ -219,8 +219,8 @@ class KryptonKEM:
 		return dec_data.plaintext
 
 	def _kf_decrypt(self, secret_key: str | bytes, ciphertext_file: str | Path) -> tuple[Path, KryptonFile]:
-		if not Path(ciphertext_file).exists():
-			raise FileNotFoundError
+		if not Path(ciphertext_file).is_file():
+			raise FileNotFoundError(ciphertext_file)
 
 		kem = self._kem_class()
 

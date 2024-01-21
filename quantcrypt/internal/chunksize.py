@@ -1,42 +1,27 @@
 #
 #   MIT License
-#   
+#
 #   Copyright (c) 2024, Mattias Aabmets
-#   
+#
 #   The contents of this file are subject to the terms and conditions defined in the License.
 #   You may not use, modify, or distribute this file except in compliance with the License.
-#   
+#
 #   SPDX-License-Identifier: MIT
 #
+from typing import Literal, Type, Annotated, Optional
+from pydantic import Field, validate_call
 from dataclasses import dataclass
-from pydantic import Field
-from typing import Literal, Type, Annotated
 from ..errors import InvalidUsageError
-from .. import utils
 
 
-__all__ = [
-	"DecryptedFileData",
-	"ChunkSizeKB", "ChunkSizeMB", "ChunkSize",
-	"determine_file_chunk_size"
-]
-
-
-@dataclass
-class DecryptedFileData:
-	"""
-	Contains two instance attributes:
-	plaintext (bytes) and header (bytes)
-	"""
-	plaintext: bytes = b''
-	header: bytes = b''
+__all__ = ["ChunkSizeKB", "ChunkSizeMB", "ChunkSize"]
 
 
 @dataclass(frozen=True)
 class ChunkSizeKB:
 	value: int
 
-	@utils.input_validator()
+	@validate_call
 	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256]) -> None:
 		"""
 		:param size: The chunk size in kilobytes.
@@ -50,7 +35,7 @@ class ChunkSizeKB:
 class ChunkSizeMB:
 	value: int
 
-	@utils.input_validator()
+	@validate_call
 	def __init__(self, size: Annotated[int, Field(ge=1, le=10)]) -> None:
 		"""
 		:param size: The chunk size in megabytes.
@@ -61,6 +46,11 @@ class ChunkSizeMB:
 
 
 class ChunkSize:
+	Atd = Annotated[
+		Optional[ChunkSizeKB | ChunkSizeMB],
+		Field(default=None)
+	]
+
 	def __init__(self):
 		"""
 		This class is a collection of classes and is not
@@ -75,24 +65,24 @@ class ChunkSize:
 	KB: Type[ChunkSizeKB] = ChunkSizeKB
 	MB: Type[ChunkSizeMB] = ChunkSizeMB
 
+	@staticmethod
+	def determine_from_data_size(data_size: int) -> ChunkSizeKB | ChunkSizeMB:
+		kilo_bytes = 1024
+		mega_bytes = kilo_bytes * 1024
 
-def determine_file_chunk_size(file_size: int) -> ChunkSizeKB | ChunkSizeMB:
-	kilo_bytes = 1024
-	mega_bytes = kilo_bytes * 1024
+		if data_size <= kilo_bytes * 4:
+			return ChunkSizeKB(1)
+		elif data_size <= kilo_bytes * 16:
+			return ChunkSizeKB(4)
+		elif data_size <= kilo_bytes * 64:
+			return ChunkSizeKB(16)
+		elif data_size <= kilo_bytes * 256:
+			return ChunkSizeKB(64)
+		elif data_size <= kilo_bytes * 1024:
+			return ChunkSizeKB(256)
 
-	if file_size <= kilo_bytes * 4:
-		return ChunkSizeKB(1)
-	elif file_size <= kilo_bytes * 16:
-		return ChunkSizeKB(4)
-	elif file_size <= kilo_bytes * 64:
-		return ChunkSizeKB(16)
-	elif file_size <= kilo_bytes * 256:
-		return ChunkSizeKB(64)
-	elif file_size <= kilo_bytes * 1024:
-		return ChunkSizeKB(256)
-
-	for x in range(0, 10):
-		x += 1
-		if file_size <= mega_bytes * x * 100:
-			return ChunkSizeMB(x)
-	return ChunkSizeMB(10)
+		for x in range(0, 10):
+			x += 1
+			if data_size <= mega_bytes * x * 100:
+				return ChunkSizeMB(x)
+		return ChunkSizeMB(10)

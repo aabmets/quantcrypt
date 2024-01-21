@@ -10,21 +10,26 @@
 #
 from pathlib import Path
 from pydantic import Field
+from dataclasses import dataclass
 from collections.abc import Callable
-from typing import (
-	Annotated, Optional,
-	Union, Generator, BinaryIO
-)
+from typing import Annotated, Optional, BinaryIO
+from ..chunksize import ChunkSize
 from .krypton import Krypton
-from .common import (
-	DecryptedFileData,
-	ChunkSizeKB, ChunkSizeMB,
-	determine_file_chunk_size
-)
 from .. import utils
 
 
-__all__ = ["KryptonFile"]
+__all__ = ["DecryptedFile", "KryptonFile"]
+
+
+@dataclass
+class DecryptedFile:
+	"""
+	Available instance attributes:
+	1) plaintext - bytes
+	2) header - bytes
+	"""
+	plaintext: bytes
+	header: bytes
 
 
 class KryptonFile:
@@ -33,8 +38,8 @@ class KryptonFile:
 			self,
 			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
 			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
-			chunk_size: ChunkSizeKB | ChunkSizeMB | None = None,
-			callback: Union[Callable, None] = None
+			callback: Optional[Callable] = None,
+			chunk_size: ChunkSize.Atd = None
 	) -> None:
 		"""
 		Creates a new KryptonFile instance for encrypting and/or decrypting multiple
@@ -71,12 +76,12 @@ class KryptonFile:
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `plaintext_file` does not exist.
 		"""
-		if not data_file.exists():
-			raise FileNotFoundError
+		if not data_file.is_file():
+			raise FileNotFoundError(data_file)
 
 		if self._chunk_size is None:
 			ptf_size = data_file.stat().st_size
-			self._chunk_size = determine_file_chunk_size(ptf_size)
+			self._chunk_size = ChunkSize.determine_from_data_size(ptf_size)
 
 		krypton = Krypton(self._secret_key, self._context, self._chunk_size)
 		krypton.begin_encryption(header)
@@ -90,7 +95,7 @@ class KryptonFile:
 
 			with open(data_file, 'rb') as read_file:
 				cs_int = self._chunk_size.value
-				for chunk in self._read_file_chunks(read_file, cs_int):
+				for chunk in utils.read_file_chunks(read_file, cs_int, self._callback):
 					ciphertext = krypton.encrypt(chunk)
 					write_file.write(ciphertext)
 
@@ -113,8 +118,8 @@ class KryptonFile:
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not encrypted_file.exists():
-			raise FileNotFoundError
+		if not encrypted_file.is_file():
+			raise FileNotFoundError(encrypted_file)
 
 		with open(encrypted_file, 'rb') as read_file:
 			cs_int, vdp, header = self._unpack_metadata(read_file)
@@ -127,7 +132,7 @@ class KryptonFile:
 			output_file.touch()
 
 			with output_file.open("wb") as write_file:
-				for chunk in self._read_file_chunks(read_file, cs_int + 1):
+				for chunk in utils.read_file_chunks(read_file, cs_int + 1, self._callback):
 					plaintext = krypton.decrypt(chunk)
 					write_file.write(plaintext)
 
@@ -135,7 +140,7 @@ class KryptonFile:
 		return header
 
 	@utils.input_validator()
-	def decrypt_to_memory(self, encrypted_file: Path) -> DecryptedFileData:
+	def decrypt_to_memory(self, encrypted_file: Path) -> DecryptedFile:
 		"""
 		Reads ciphertext from the `encrypted_file` in chunks and decrypts
 		them into plaintext, storing the entire decrypted plaintext into memory.
@@ -148,8 +153,8 @@ class KryptonFile:
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not encrypted_file.exists():
-			raise FileNotFoundError
+		if not encrypted_file.is_file():
+			raise FileNotFoundError(encrypted_file)
 
 		with open(encrypted_file, 'rb') as read_file:
 			cs_int, vdp, header = self._unpack_metadata(read_file)
@@ -159,11 +164,11 @@ class KryptonFile:
 			krypton.begin_decryption(vdp, header)
 
 			plaintext = bytes()
-			for chunk in self._read_file_chunks(read_file, cs_int + 1):
+			for chunk in utils.read_file_chunks(read_file, cs_int + 1, self._callback):
 				plaintext += krypton.decrypt(chunk)
 
 		krypton.finish_decryption()
-		return DecryptedFileData(
+		return DecryptedFile(
 			plaintext=plaintext,
 			header=header
 		)
@@ -201,12 +206,3 @@ class KryptonFile:
 		cs_int = int(cs.decode("utf-8"))
 		header = in_file.read(h_len_int)
 		return cs_int, vdp, header
-
-	def _read_file_chunks(self, file: BinaryIO, chunk_size: int) -> Generator[bytes, None, None]:
-		while True:
-			chunk = file.read(chunk_size)
-			if not chunk:
-				break
-			elif self._callback:
-				self._callback()
-			yield chunk

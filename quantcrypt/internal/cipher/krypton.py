@@ -17,12 +17,9 @@ from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Util.strxor import strxor
 from Cryptodome.Cipher import AES
 from ..kdf.kmac_kdf import KKDF
+from ..chunksize import ChunkSize
 from .. import utils
 from . import errors
-from .common import (
-	ChunkSizeKB,
-	ChunkSizeMB
-)
 
 
 __all__ = ["Krypton"]
@@ -45,7 +42,7 @@ class Krypton:
 			self,
 			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
 			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
-			chunk_size: ChunkSizeKB | ChunkSizeMB | None = None
+			chunk_size: ChunkSize.Atd = None
 	) -> None:
 		"""
 		Creates a new Krypton instance for encrypting and/or decrypting
