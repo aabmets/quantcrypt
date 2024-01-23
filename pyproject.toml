@@ -28,7 +28,7 @@ packages = [
 
 [tool.poetry.urls]
 "Repository" = "https://github.com/aabmets/quantcrypt"
-"Documentation" = "https://github.com/aabmets/quantcrypt/wiki/Documentation"
+"Documentation" = "https://github.com/aabmets/quantcrypt/wiki"
 "Bug Tracker" = "https://github.com/aabmets/quantcrypt/issues"
 
 [tool.poetry.scripts]

@@ -22,4 +22,4 @@
 ### Description
 
 QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries.  
-The documentation of QuantCrypt is a work in progress and can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki/Documentation).
+The documentation of QuantCrypt is a work in progress and can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).

@@ -8,7 +8,6 @@
 #
 #   SPDX-License-Identifier: MIT
 #
-from pathlib import Path
 from typing import Annotated
 from typer import Typer, Option
 from quantcrypt.errors import QuantCryptError
