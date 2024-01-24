@@ -22,4 +22,56 @@
 ### Description
 
 QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries.  
-The documentation of QuantCrypt is a work in progress and can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
+QuantCrypt contains only the **strongest** variants of the PQC algorithms from the [NIST PQC standardization process](https://csrc.nist.gov/projects/post-quantum-cryptography) as recommended by the [CNSA advisory by NSA](https://en.wikipedia.org/wiki/Commercial_National_Security_Algorithm_Suite).
+
+
+### Motivation
+
+Currently, there does not exist any pure-Python implementation of Post-Quantum Cryptographic algorithms, 
+which requires Python developers to first discover where to get reliable C source code of PQC algorithms, 
+then install the necessary C compilers on their system and then figure out how to use CFFI to compile and 
+use the C code in their Python source code. Furthermore, those binaries would be only compatible with the 
+platform that they were compiled on, making it very difficult to use separate platforms for development 
+and deployment workflows, without having to recompile the C source code each time.
+
+This library solves this problem by pre-compiling the C source code of PQC algorithms for Windows, Linux and 
+Darwin platforms in GitHub Actions using CFFI, and it also provides a nice Python wrapper around the PQC binaries. 
+Since I wanted this library to be all-encompassing, it also contains a lot of helper classes which one might need 
+when working with Post-Quantum cryptography. This library places a lot of focus on Developer Experience, aiming 
+to be powerful in features, yet easy and enjoyable to use, so it would _just work_ for your project.
+
+
+### Quickstart
+
+The full documentation of this library can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
+
+
+#### Install
+
+```shell
+pip install quantcrypt
+```
+
+#### Import
+
+```python
+from quantcrypt import (
+    kem,     # Key Encapsulation Mechanism algos   (public-key cryptography)
+    dss,     # Digital Signature Scheme algos      (secret-key signatures)
+    cipher,  # The Krypton Cipher                  (symmetric cipher based on AES-256)
+    kdf,     # Argon2 helpers + KMAC-KDF           (key derivation functions)
+    errors,  # All errors QuantCrypt may raise     (also available from other modules)
+    utils    # Helper utilities from all modules   (gathered into one module)
+)
+```
+
+
+### Credits
+
+This library would be impossible without these essential dependencies:
+
+* [PQClean](https://github.com/PQClean/PQClean) - C source code of Post-Quantum Cryptography algorithms
+* [Cryptodome](https://pypi.org/project/pycryptodome/) - AES-256 and SHA3 implementation
+* [Argon2-CFFI](https://pypi.org/project/argon2-cffi/) - Argon2 KDF implementation
+
+I thank the creators and maintainers of these libraries for their hard work.
