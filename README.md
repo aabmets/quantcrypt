@@ -41,6 +41,13 @@ when working with Post-Quantum cryptography. This library places a lot of focus 
 to be powerful in features, yet easy and enjoyable to use, so it would _just work_ for your project.
 
 
+### Security Statement
+
+The PQC algorithms used in this library inherit their security from the [PQClean](https://github.com/PQClean/PQClean) project. 
+You can read the security statement of the PQClean project from their [SECURITY.md](https://github.com/PQClean/PQClean/blob/master/SECURITY.md) file. 
+To report a security vulnerability for a PQC algorithm, please create an [issue](https://github.com/PQClean/PQClean/issues) in the PQClean repository.
+
+
 ### Quickstart
 
 The full documentation of this library can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
@@ -56,12 +63,12 @@ pip install quantcrypt
 
 ```python
 from quantcrypt import (
-    kem,     # Key Encapsulation Mechanism algos   (public-key cryptography)
-    dss,     # Digital Signature Scheme algos      (secret-key signatures)
-    cipher,  # The Krypton Cipher                  (symmetric cipher based on AES-256)
-    kdf,     # Argon2 helpers + KMAC-KDF           (key derivation functions)
-    errors,  # All errors QuantCrypt may raise     (also available from other modules)
-    utils    # Helper utilities from all modules   (gathered into one module)
+    kem,     # Key Encapsulation Mechanism algos   - public-key cryptography
+    dss,     # Digital Signature Scheme algos      - secret-key signatures
+    cipher,  # The Krypton Cipher                  - symmetric cipher based on AES-256
+    kdf,     # Argon2 helpers + KMAC-KDF           - key derivation functions
+    errors,  # All errors QuantCrypt may raise     - also available from other modules
+    utils    # Helper utilities from all modules   - gathered into one module
 )
 ```
 
