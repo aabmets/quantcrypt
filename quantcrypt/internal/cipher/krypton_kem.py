@@ -92,7 +92,10 @@ class KryptonKEM:
 			of the KEM algorithm which was used to generate the keypair.
 			If the key is a string, it is expected to be in ASCII armor format.
 		:param data_file: Path to the plaintext file, which must exist.
-		:param output_file: Path to the ciphertext file.
+			If the path is relative, it is evaluated from the Current Working Directory.
+		:param output_file: Path to the ciphertext file. If the path is relative,
+			it is evaluated from the Current Working Directory. If not provided,
+			it will be created next to the plaintext file with the `kptn` suffix.
 			If the file exists, it will be overwritten.
 		:return: None
 		:raises - FileNotFoundError: If the `plaintext_file` does not exist.
@@ -103,8 +106,22 @@ class KryptonKEM:
 			CFFI library has failed to encapsulate the shared
 			secret for any reason.
 		"""
-		if not Path(data_file).is_file():
-			raise FileNotFoundError(data_file)
+		_in_file: Path = (
+			Path.cwd() / data_file if
+			utils.is_path_relative(data_file)
+			else Path(data_file)
+		)
+		if not _in_file.is_file():
+			raise FileNotFoundError(_in_file)
+
+		if output_file is None:
+			_out_file = _in_file.with_suffix(".kptn")
+		else:
+			_out_file: Path = (
+				Path.cwd() / output_file if
+				utils.is_path_relative(output_file)
+				else Path(output_file)
+			)
 
 		kem = self._kem_class()
 
@@ -117,19 +134,6 @@ class KryptonKEM:
 
 		@utils.input_validator()
 		def _encrypt(_public_key: pk_atd) -> None:
-			_in_file: Path = (
-				Path.cwd() / data_file if
-				utils.is_path_relative(data_file)
-				else Path(data_file)
-			)
-			if output_file is None:
-				_out_file = _in_file.with_suffix(".kptn")
-			else:
-				_out_file: Path = (
-					Path.cwd() / output_file if
-					utils.is_path_relative(output_file)
-					else Path(output_file)
-				)
 			kem_ct, ss = kem.encaps(_public_key)
 			argon = Argon2.Key(
 				params=self._kdf_params,
@@ -164,7 +168,10 @@ class KryptonKEM:
 			of the KEM algorithm which was used to generate the keypair.
 			If the key is a string, it is expected to be in ASCII armor format.
 		:param encrypted_file: Path to the ciphertext data file, which must exist.
-		:param output_file: Path to the plaintext file.
+			If the path is relative, it is evaluated from the Current Working Directory.
+		:param output_file: Path to the plaintext file. If the path is relative,
+			it is evaluated from the Current Working Directory. If not provided,
+			the file will be given the name of the original plaintext file.
 			If the file exists, it will be overwritten.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
@@ -179,9 +186,11 @@ class KryptonKEM:
 		if output_file is None:
 			_out_file = self._unpack_header(in_file)[0]
 		else:
-			_out_file = output_file
-			if utils.is_path_relative(output_file):
-				_out_file = Path.cwd() / output_file
+			_out_file = (
+				Path.cwd() / output_file if
+				utils.is_path_relative(output_file)
+				else Path(output_file)
+			)
 		kf.decrypt_to_file(in_file, _out_file)
 
 	@utils.input_validator()
@@ -196,12 +205,13 @@ class KryptonKEM:
 		into a 64 byte symmetric secret key for the Krypton cipher. Then, the ciphertext
 		is read from the `encrypted_file` in chunks and decrypted into plaintext,
 		storing the entire decrypted plaintext into memory. **Note:** Do NOT decrypt
-		large files (>100MB) into memory, use your best judgement.
+		huge files (>100MB) into memory, use your best judgement.
 
 		:param secret_key: The secret key corresponding to the public key
 			of the KEM algorithm which was used to generate the keypair.
 			If the key is a string, it is expected to be in ASCII armor format.
 		:param encrypted_file: Path to the ciphertext data file, which must exist.
+			If the path is relative, it is evaluated from the Current Working Directory.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		:raises - pydantic.ValidationError: On invalid input.
@@ -216,8 +226,13 @@ class KryptonKEM:
 		return dec_data.plaintext
 
 	def _kf_decrypt(self, secret_key: str | bytes, ciphertext_file: str | Path) -> tuple[Path, KryptonFile]:
-		if not Path(ciphertext_file).is_file():
-			raise FileNotFoundError(ciphertext_file)
+		_in_file: Path = (
+			Path.cwd() / ciphertext_file if
+			utils.is_path_relative(ciphertext_file)
+			else Path(ciphertext_file)
+		)
+		if not _in_file.is_file():
+			raise FileNotFoundError(_in_file)
 
 		kem = self._kem_class()
 
@@ -230,11 +245,6 @@ class KryptonKEM:
 
 		@utils.input_validator()
 		def _inner(_secret_key: sk_atd) -> tuple[Path, KryptonFile]:
-			_in_file: Path = (
-				Path.cwd() / ciphertext_file if
-				utils.is_path_relative(ciphertext_file)
-				else Path(ciphertext_file)
-			)
 			_, salt, kem_ct = self._unpack_header(_in_file)
 			ss = kem.decaps(_secret_key, kem_ct)
 			argon = Argon2.Key(
