@@ -61,14 +61,14 @@ class KryptonFile:
 		self._callback = callback
 
 	@utils.input_validator()
-	def encrypt(self, data_file: Path, output_file: Path, header: bytes = b'') -> None:
+	def encrypt(self, data_file: str | Path, output_file: str | Path, header: bytes = b'') -> None:
 		"""
 		Reads plaintext from the `data_file` in chunks and encrypts them into
 		ciphertext, writing the encrypted ciphertext chunks into the output_file.
 		The header data is also written into the `output_file`.
 
-		:param data_file: Path to the plaintext data file, which must exist.
-		:param output_file: Path to the ciphertext file.
+		:param data_file: An absolute path to the plaintext data file, which must exist.
+		:param output_file: An absolute path to the ciphertext file.
 			If the file exists, it will be overwritten.
 		:param header: Associated Authenticated Data, which is included
 			unencrypted into the metadata field of the generated ciphertext file.
@@ -76,24 +76,27 @@ class KryptonFile:
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `plaintext_file` does not exist.
 		"""
-		if not data_file.is_file():
-			raise FileNotFoundError(data_file)
+		_data_file = Path(data_file)
+		_output_file = Path(output_file)
+
+		if not _data_file.is_file():
+			raise FileNotFoundError(_data_file)
 
 		if self._chunk_size is None:
-			ptf_size = data_file.stat().st_size
+			ptf_size = _data_file.stat().st_size
 			self._chunk_size = ChunkSize.determine_from_data_size(ptf_size)
 
 		krypton = Krypton(self._secret_key, self._context, self._chunk_size)
 		krypton.begin_encryption(header)
 
-		output_file.unlink(missing_ok=True)
-		output_file.touch()
+		_output_file.unlink(missing_ok=True)
+		_output_file.touch()
 
-		with open(output_file, 'r+b') as write_file:
+		with open(_output_file, 'r+b') as write_file:
 			reserved_space = b'0' * (180 + len(header))
 			write_file.write(reserved_space)
 
-			with open(data_file, 'rb') as read_file:
+			with open(_data_file, 'rb') as read_file:
 				cs_int = self._chunk_size.value
 				for chunk in utils.read_file_chunks(read_file, cs_int, self._callback):
 					ciphertext = krypton.encrypt(chunk)
@@ -104,34 +107,37 @@ class KryptonFile:
 			write_file.write(metadata)
 
 	@utils.input_validator()
-	def decrypt_to_file(self, encrypted_file: Path, output_file: Path) -> bytes:
+	def decrypt_to_file(self, encrypted_file: str | Path, output_file: str | Path) -> bytes:
 		"""
 		Reads ciphertext from the `encrypted_file` in chunks and decrypts them
 		into plaintext, writing the decrypted plaintext chunks into the output_file.
 		The header data can be considered authenticated when the decryption
 		process has completed successfully.
 
-		:param encrypted_file: Path to the ciphertext data file, which must exist.
-		:param output_file: Path to the plaintext file.
+		:param encrypted_file: An absolute path to the ciphertext data file, which must exist.
+		:param output_file: An absolute path to the plaintext file.
 			If the file exists, it will be overwritten.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not encrypted_file.is_file():
-			raise FileNotFoundError(encrypted_file)
+		_encrypted_file = Path(encrypted_file)
+		_output_file = Path(output_file)
 
-		with open(encrypted_file, 'rb') as read_file:
+		if not _encrypted_file.is_file():
+			raise FileNotFoundError(_encrypted_file)
+
+		with open(_encrypted_file, 'rb') as read_file:
 			cs_int, vdp, header = self._unpack_metadata(read_file)
 			krypton = Krypton(self._secret_key, self._context, None)
 			setattr(krypton, '_chunk_size', cs_int)
 
 			krypton.begin_decryption(vdp, header)
 
-			output_file.unlink(missing_ok=True)
-			output_file.touch()
+			_output_file.unlink(missing_ok=True)
+			_output_file.touch()
 
-			with output_file.open("wb") as write_file:
+			with _output_file.open("wb") as write_file:
 				for chunk in utils.read_file_chunks(read_file, cs_int + 1, self._callback):
 					plaintext = krypton.decrypt(chunk)
 					write_file.write(plaintext)
@@ -140,7 +146,7 @@ class KryptonFile:
 		return header
 
 	@utils.input_validator()
-	def decrypt_to_memory(self, encrypted_file: Path) -> DecryptedFile:
+	def decrypt_to_memory(self, encrypted_file: str | Path) -> DecryptedFile:
 		"""
 		Reads ciphertext from the `encrypted_file` in chunks and decrypts
 		them into plaintext, storing the entire decrypted plaintext into memory.
@@ -148,15 +154,17 @@ class KryptonFile:
 		process has completed successfully. **Note:** Do NOT decrypt large
 		files (>100MB) into memory, use your best judgement.
 
-		:param encrypted_file: Path to the ciphertext data file, which must exist.
+		:param encrypted_file: An absolute path to the ciphertext data file, which must exist.
 		:return: Instance of DecryptedFileData.
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not encrypted_file.is_file():
-			raise FileNotFoundError(encrypted_file)
+		_encrypted_file = Path(encrypted_file)
 
-		with open(encrypted_file, 'rb') as read_file:
+		if not _encrypted_file.is_file():
+			raise FileNotFoundError(_encrypted_file)
+
+		with open(_encrypted_file, 'rb') as read_file:
 			cs_int, vdp, header = self._unpack_metadata(read_file)
 			krypton = Krypton(self._secret_key, self._context, None)
 			setattr(krypton, '_chunk_size', cs_int)
@@ -175,21 +183,23 @@ class KryptonFile:
 
 	@classmethod
 	@utils.input_validator()
-	def read_file_header(cls, encrypted_file: Path) -> bytes:
+	def read_file_header(cls, encrypted_file: str | Path) -> bytes:
 		"""
 		Reads the header bytes from a Krypton ciphertext file.
 		The header data can be considered authenticated when
 		the file decryption process has completed successfully.
 
-		:param encrypted_file: Path to the ciphertext file, which must exist.
+		:param encrypted_file: An absolute path to the ciphertext file, which must exist.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		if not encrypted_file.exists():
+		_encrypted_file = Path(encrypted_file)
+
+		if not _encrypted_file.exists():
 			raise FileNotFoundError
 
-		with open(encrypted_file, 'rb') as read_file:
+		with open(_encrypted_file, 'rb') as read_file:
 			return cls._unpack_metadata(read_file)[2]
 
 	def _pack_metadata(self, krypton: Krypton, header: bytes) -> bytes:
