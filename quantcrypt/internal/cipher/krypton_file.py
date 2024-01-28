@@ -114,26 +114,26 @@ class KryptonFile:
 		The header data can be considered authenticated when the decryption
 		process has completed successfully.
 
-		:param encrypted_file: An absolute path to the ciphertext data file, which must exist.
+		:param encrypted_file: Path to the ciphertext data file, which must exist.
+			If the path is relative, it is evaluated from the Current Working Directory.
 		:param output_file: An absolute path to the plaintext file.
 			If the file exists, it will be overwritten.
 		:return: Header bytes (Associated Authenticated Data).
 		:raises - pydantic.ValidationError: On invalid input.
 		:raises - FileNotFoundError: If the `ciphertext_file` does not exist.
 		"""
-		_encrypted_file = Path(encrypted_file)
-		_output_file = Path(output_file)
+		_in_file = utils.resolve_relpath(encrypted_file)
+		if not _in_file.is_file():
+			raise FileNotFoundError(_in_file)
 
-		if not _encrypted_file.is_file():
-			raise FileNotFoundError(_encrypted_file)
-
-		with open(_encrypted_file, 'rb') as read_file:
+		with open(_in_file, 'rb') as read_file:
 			cs_int, vdp, header = self._unpack_metadata(read_file)
 			krypton = Krypton(self._secret_key, self._context, None)
 			setattr(krypton, '_chunk_size', cs_int)
 
 			krypton.begin_decryption(vdp, header)
 
+			_output_file = Path(output_file)
 			_output_file.unlink(missing_ok=True)
 			_output_file.touch()
 
