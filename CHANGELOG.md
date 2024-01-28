@@ -5,7 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [0.3.2] - 2024-01-23 - _latest_
+### [0.3.3] - 2024-01-28 - _latest_
+
+- Added security statement to README.md
+- KryptonKEM now accepts relative paths as parameter inputs
+- KryptonFile now accepts strings and relative paths as parameter inputs
+- DSS sign_file and verify_file now accept relative paths as parameter inputs
+
+### [0.3.2] - 2024-01-23
 
 - Updated wiki link
 
@@ -37,6 +44,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[0.3.3]: https://github.com/aabmets/quantcrypt/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/aabmets/quantcrypt/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/aabmets/quantcrypt/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/aabmets/quantcrypt/compare/0.2.0...0.3.0
