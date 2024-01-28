@@ -41,16 +41,11 @@ when working with Post-Quantum cryptography. This library places a lot of focus 
 to be powerful in features, yet easy and enjoyable to use, so it would _just work_ for your project.
 
 
-### Security Statement
-
-The PQC algorithms used in this library inherit their security from the [PQClean](https://github.com/PQClean/PQClean) project. 
-You can read the security statement of the PQClean project from their [SECURITY.md](https://github.com/PQClean/PQClean/blob/master/SECURITY.md) file. 
-To report a security vulnerability for a PQC algorithm, please create an [issue](https://github.com/PQClean/PQClean/issues) in the PQClean repository.
-
-
 ### Quickstart
 
 The full documentation of this library can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
+Because this library is rich in docstrings which provide detailed insight into the library's behavior, 
+it is suggested to use an IDE which supports autocomplete and intellisense when working with this library.
 
 
 #### Install
@@ -59,7 +54,7 @@ The full documentation of this library can be found in the [Wiki](https://github
 pip install quantcrypt
 ```
 
-#### Import
+#### Script Imports
 
 ```python
 from quantcrypt import (
@@ -71,6 +66,32 @@ from quantcrypt import (
     utils    # Helper utilities from all modules   - gathered into one module
 )
 ```
+
+#### CLI Commands
+
+The general functionality of this library is also available from the command-line, which you can access 
+with the `qclib` command. Keep in mind that if you install QuantCrypt into a venv, you will need to activate 
+the venv to access the CLI. QuantCrypt uses [Typer](https://typer.tiangolo.com/) internally to provide the 
+CLI experience. You can use the `--help` option to learn more about each command.
+
+```shell
+qclib --help
+qclib --info
+qclib --version
+
+qclib keygen --help
+qclib encrypt --help
+qclib decrypt --help
+qclib sign --help
+qclib verify --help
+qclib optimize --help
+```
+
+### Security Statement
+
+The PQC algorithms used in this library inherit their security from the [PQClean](https://github.com/PQClean/PQClean) project. 
+You can read the security statement of the PQClean project from their [SECURITY.md](https://github.com/PQClean/PQClean/blob/master/SECURITY.md) file. 
+To report a security vulnerability for a PQC algorithm, please create an [issue](https://github.com/PQClean/PQClean/issues) in the PQClean repository.
 
 
 ### Credits
