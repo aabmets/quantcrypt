@@ -11,6 +11,8 @@
 import shutil
 import platform
 from typer import Typer
+from rich.prompt import Confirm
+from rich.console import Console
 from quantcrypt.internal import utils
 
 
@@ -30,6 +32,19 @@ def command_optimize() -> None:
 	}
 	keep = platform.system()
 	remove_paths.pop(keep)
+	a, b = remove_paths.keys()
+
+	console = Console(soft_wrap=True)
+	console.print(
+		f"[deep_pink1]QuantCrypt[/] is about to remove [light_slate_blue]'{a}'[/] and "
+		f"[light_slate_blue]'{b}'[/] PQC binaries from itself.\nYou will need to reinstall "
+		"QuantCrypt if you want to restore these binaries.\n"
+	)
+	answer = Confirm.ask("Do you want to continue?")
+	if answer is False:
+		console.print("[gold3]Operation cancelled.[/]\n")
+		return
+
 	for path in remove_paths.values():
 		shutil.rmtree(path, ignore_errors=True)
-	print(f"Optimized QuantCrypt for the {keep} platform!")
+	console.print(f"[chartreuse3]Operation successful!\n")
