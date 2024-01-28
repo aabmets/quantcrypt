@@ -106,22 +106,14 @@ class KryptonKEM:
 			CFFI library has failed to encapsulate the shared
 			secret for any reason.
 		"""
-		_in_file: Path = (
-			Path.cwd() / data_file if
-			utils.is_path_relative(data_file)
-			else Path(data_file)
-		)
+		_in_file = utils.resolve_relpath(data_file)
 		if not _in_file.is_file():
 			raise FileNotFoundError(_in_file)
 
 		if output_file is None:
 			_out_file = _in_file.with_suffix(".kptn")
 		else:
-			_out_file: Path = (
-				Path.cwd() / output_file if
-				utils.is_path_relative(output_file)
-				else Path(output_file)
-			)
+			_out_file = utils.resolve_relpath(output_file)
 
 		kem = self._kem_class()
 
@@ -186,11 +178,8 @@ class KryptonKEM:
 		if output_file is None:
 			_out_file = self._unpack_header(in_file)[0]
 		else:
-			_out_file = (
-				Path.cwd() / output_file if
-				utils.is_path_relative(output_file)
-				else Path(output_file)
-			)
+			_out_file = utils.resolve_relpath(output_file)
+
 		kf.decrypt_to_file(in_file, _out_file)
 
 	@utils.input_validator()
@@ -226,11 +215,7 @@ class KryptonKEM:
 		return dec_data.plaintext
 
 	def _kf_decrypt(self, secret_key: str | bytes, ciphertext_file: str | Path) -> tuple[Path, KryptonFile]:
-		_in_file: Path = (
-			Path.cwd() / ciphertext_file if
-			utils.is_path_relative(ciphertext_file)
-			else Path(ciphertext_file)
-		)
+		_in_file = utils.resolve_relpath(ciphertext_file)
 		if not _in_file.is_file():
 			raise FileNotFoundError(_in_file)
 

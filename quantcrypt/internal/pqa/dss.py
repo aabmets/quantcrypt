@@ -172,11 +172,10 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		:raises - errors.DSSSignFailedError: When the underlying CFFI
 			library has failed to generate the signature for any reason.
 		"""
-		_in_file: Path = (
-			Path.cwd() / data_file if
-			utils.is_path_relative(data_file)
-			else Path(data_file)
-		)
+		_in_file = utils.resolve_relpath(data_file)
+		if not _in_file.is_file():
+			raise FileNotFoundError(_in_file)
+
 		if isinstance(secret_key, str):
 			secret_key = self.dearmor(secret_key)
 
@@ -217,11 +216,10 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		:raises - errors.DSSVerifyFailedError: When the underlying CFFI library
 			has failed to verify the provided signature for any reason.
 		"""
-		_in_file: Path = (
-			Path.cwd() / data_file if
-			utils.is_path_relative(data_file)
-			else Path(data_file)
-		)
+		_in_file = utils.resolve_relpath(data_file)
+		if not _in_file.is_file():
+			raise FileNotFoundError(_in_file)
+
 		if isinstance(public_key, str):
 			public_key = self.dearmor(public_key)
 

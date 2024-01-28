@@ -160,6 +160,12 @@ def fixture_sign_verify_file_callback_tests(tmp_path: Path):
 		dss.verify_file(apk, data_file, sf.signature, callback)
 		assert sum(counter) == 2
 
+		with pytest.raises(FileNotFoundError):
+			dss.sign_file(ask, Path("asdfg"))
+
+		with pytest.raises(FileNotFoundError):
+			dss.verify_file(apk, Path("asdfg"), sf.signature)
+
 	return closure
 
 

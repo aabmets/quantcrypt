@@ -25,7 +25,6 @@ from quantcrypt.dss import (
 
 
 __all__ = [
-	"resolve_unknown_file",
 	"resolve_optional_file",
 	"process_paths",
 	"determine_kem_class",
@@ -43,21 +42,15 @@ class CommandPaths:
 ExpKeyType = Literal["PUBLIC", "SECRET"]
 
 
-def resolve_unknown_file(path: str) -> Path:
-	if utils.is_path_relative(path):
-		return (Path.cwd() / path).resolve()
-	return Path(path).resolve()
-
-
 def resolve_optional_file(optional_file: str | None, from_file: Path, new_suffix: str) -> Path:
 	if optional_file is None:
 		return from_file.with_suffix(new_suffix)
-	return resolve_unknown_file(optional_file)
+	return utils.resolve_relpath(optional_file)
 
 
 def process_paths(key_file: str, data_file: str, target_file: str, new_suffix) -> CommandPaths:
-	_key_file = resolve_unknown_file(key_file)
-	_data_file = resolve_unknown_file(data_file)
+	_key_file = utils.resolve_relpath(key_file)
+	_data_file = utils.resolve_relpath(data_file)
 	_target_file = resolve_optional_file(
 		target_file, _data_file, new_suffix
 	)

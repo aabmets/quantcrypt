@@ -56,8 +56,3 @@ def test_sha3_digest_file(tmp_path: Path):
 	assert utils.b64(digest).startswith(
 		"iWP48uUEEjzU5gXKK8FpzC10Bs"
 	)
-
-
-def test_sha3_digest_file_errors():
-	with pytest.raises(FileNotFoundError):
-		utils.sha3_digest_file("asdfg")

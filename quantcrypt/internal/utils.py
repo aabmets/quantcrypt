@@ -32,10 +32,10 @@ __all__ = [
 	"b64",
 	"input_validator",
 	"search_upwards",
-	"is_path_relative",
 	"annotated_bytes",
 	"read_file_chunks",
-	"sha3_digest_file"
+	"sha3_digest_file",
+	"resolve_relpath"
 ]
 
 
@@ -67,14 +67,6 @@ def search_upwards(from_path: str, for_path: str) -> Path | None:
 	raise RuntimeError(f"Fatal Error! Path not found: {for_path}")
 
 
-def is_path_relative(path: Path | str) -> bool:
-	match platform.system():  # pragma: no cover
-		case "Linux" | "Darwin":
-			return not PurePosixPath(path).is_absolute()
-		case "Windows":
-			return not PureWindowsPath(path).is_absolute()
-
-
 def annotated_bytes(
 		min_size: int = None,
 		max_size: int = None,
@@ -101,12 +93,7 @@ def read_file_chunks(
 		yield chunk
 
 
-def sha3_digest_file(file_path: str | Path, callback: Optional[Callable] = None) -> bytes:
-	file_path = Path(file_path)
-
-	if not file_path.is_file():
-		raise FileNotFoundError
-
+def sha3_digest_file(file_path: Path, callback: Optional[Callable] = None) -> bytes:
 	sha3 = SHA3_512.new()
 	file_size = file_path.stat().st_size
 	chunk_size = ChunkSize.determine_from_data_size(file_size)
@@ -115,3 +102,15 @@ def sha3_digest_file(file_path: str | Path, callback: Optional[Callable] = None)
 		for chunk in read_file_chunks(read_file, chunk_size.value, callback):
 			sha3.update(chunk)
 		return sha3.digest()
+
+
+def resolve_relpath(path: str | Path) -> Path:
+	match platform.system():  # pragma: no cover
+		case "Windows":
+			pure_path = PureWindowsPath(path)
+		case _:
+			pure_path = PurePosixPath(path)
+
+	if pure_path.is_absolute():
+		return Path(path)
+	return (Path.cwd() / path).resolve()
