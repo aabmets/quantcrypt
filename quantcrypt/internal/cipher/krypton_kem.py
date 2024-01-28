@@ -45,8 +45,8 @@ class KryptonKEM:
 			kem_class: Type[BaseKEM],
 			kdf_params: KDFParams = None,
 			context: bytes = b"quantcrypt",
-			chunk_size: ChunkSize.Atd = None,
-			callback: Optional[Callable] = None
+			callback: Optional[Callable] = None,
+			chunk_size: ChunkSize.Atd = None
 	) -> None:
 		"""
 		Creates a new KryptonKEM instance for encrypting and/or decrypting

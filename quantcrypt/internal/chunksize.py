@@ -36,7 +36,7 @@ class ChunkSizeMB:
 	value: int
 
 	@validate_call
-	def __init__(self, size: Annotated[int, Field(ge=1, le=10)]) -> None:
+	def __init__(self, size: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) -> None:
 		"""
 		:param size: The chunk size in megabytes.
 		:raises - pydantic.ValidationError:

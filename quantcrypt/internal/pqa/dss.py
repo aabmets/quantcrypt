@@ -159,7 +159,8 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		"""
 		:param secret_key: The secret key which will be used to sign the SHA3 digest of the file.
 			If the key is a string, it is expected to be in ASCII armor format.
-		:param data_file: Path of the file to be signed. The file must exist.
+		:param data_file: Path to the target file, which must exist. If the path
+			is relative, it is evaluated from the Current Working Directory.
 		:param callback: This callback, when provided, will be called for each
 			data chunk that is processed. No arguments are passed into the callback.
 			Useful for updating progress bars.
@@ -171,10 +172,15 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		:raises - errors.DSSSignFailedError: When the underlying CFFI
 			library has failed to generate the signature for any reason.
 		"""
+		_in_file: Path = (
+			Path.cwd() / data_file if
+			utils.is_path_relative(data_file)
+			else Path(data_file)
+		)
 		if isinstance(secret_key, str):
 			secret_key = self.dearmor(secret_key)
 
-		digest = utils.sha3_digest_file(data_file, callback)
+		digest = utils.sha3_digest_file(_in_file, callback)
 		return SignedFile(
 			signature=self.sign(secret_key, digest),
 			algo_name=self._upper_name(),
@@ -193,7 +199,8 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		"""
 		:param public_key: The public key which will be used to verify the signature of the file.
 			If the key is a string, it is expected to be in ASCII armor format.
-		:param data_file: Path of the file to be verified. The file must exist.
+		:param data_file: Path to the target file, which must exist. If the path
+			is relative, it is evaluated from the Current Working Directory.
 		:param signature: The signature which is being verified
 			with the `public_key` for the provided `message`.
 		:param callback: This callback, when provided, will be called for each
@@ -210,10 +217,15 @@ class BaseDSS(BasePQAlgorithm, ABC):
 		:raises - errors.DSSVerifyFailedError: When the underlying CFFI library
 			has failed to verify the provided signature for any reason.
 		"""
+		_in_file: Path = (
+			Path.cwd() / data_file if
+			utils.is_path_relative(data_file)
+			else Path(data_file)
+		)
 		if isinstance(public_key, str):
 			public_key = self.dearmor(public_key)
 
-		digest = utils.sha3_digest_file(data_file, callback)
+		digest = utils.sha3_digest_file(_in_file, callback)
 		return self.verify(public_key, digest, signature, raises=raises)
 
 
