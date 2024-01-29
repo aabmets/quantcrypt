@@ -71,8 +71,8 @@ from quantcrypt import (
 
 The general functionality of this library is also available from the command-line, which you can access 
 with the `qclib` command. Keep in mind that if you install QuantCrypt into a venv, you will need to activate 
-the venv to access the CLI. QuantCrypt uses [Typer](https://typer.tiangolo.com/) internally to provide the 
-CLI experience. You can use the `--help` option to learn more about each command.
+the venv to access the CLI. QuantCrypt uses [Typer](https://typer.tiangolo.com/) internally to provide the CLI experience. 
+You can use the `--help` option to learn more about each command and subcommand.
 
 ```shell
 qclib --help
