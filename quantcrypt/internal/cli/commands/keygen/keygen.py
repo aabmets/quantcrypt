@@ -26,73 +26,78 @@ keygen_app = Typer(
 )
 
 
-NameAtd = Annotated[str, Option(
-	"--name", "-n", show_default=False, help=""
-	'Unique identifier for the keyfile names, optional. '
-	'If not provided, file names will be without a unique identifier.'
+IdentifierAtd = Annotated[str, Option(
+	"--id", "-i", show_default=False, help=""
+	"Unique identifier to prepend to the names of the keyfiles, optional."
 )]
-PathAtd = Annotated[str, Option(
+DirectoryAtd = Annotated[str, Option(
 	"--dir", "-d", show_default=False, help=""
-	'Directory where to save the generated keypair, optional. '
-	'If not provided, the keys are saved into the current working directory.'
+	"Directory where to save the generated keypair, optional. "
+	"If the directory doesn't exist, it will be created with parents. "
+	"If not provided, the keys are saved into the Current Working Directory."
+)]
+OverwriteAtd = Annotated[bool, Option(
+	"--overwrite", "-o", show_default=False, help=""
+	"Disables interactive confirmation prompt for overwriting files."
+)]
+NonInteractiveAtd = Annotated[bool, Option(
+	"--non-interactive", "-n", show_default=False, help=""
+	"Disables interactive prompts. If the program is going to overwrite "
+	"files and the --overwrite option is not separately provided, the "
+	"program will exit with an exit code of 1."
 )]
 
 
 @keygen_app.command(name="kyber")
-def command_kyber(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
-	"""
-	[KEM] Generates Kyber keys and writes them to disk.
-	"""
-	helpers.keygen_interactive_flow(
-		name_arg, dir_arg,
-		algo_name="kyber",
-		algo_cls=Kyber
-	)
+def command_kyber(
+		_name: IdentifierAtd = None,
+		_dir: DirectoryAtd = None,
+		_ovr: OverwriteAtd = False,
+		_ni: NonInteractiveAtd = False
+	) -> None:
+	"""[KEM] Generates Kyber keys and writes them to disk."""
+	helpers.interactive_flow(_name, _dir, _ovr, _ni, Kyber)
 
 
 @keygen_app.command(name="dilithium")
-def command_dilithium(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
-	"""
-	[DSS] Generates Dilithium keys and writes them to disk.
-	"""
-	helpers.keygen_interactive_flow(
-		name_arg, dir_arg,
-		algo_name="dilithium",
-		algo_cls=Dilithium
-	)
+def command_dilithium(
+		_name: IdentifierAtd = None,
+		_dir: DirectoryAtd = None,
+		_ovr: OverwriteAtd = False,
+		_ni: NonInteractiveAtd = False
+	) -> None:
+	"""[DSS] Generates Dilithium keys and writes them to disk."""
+	helpers.interactive_flow(_name, _dir, _ovr, _ni, Dilithium)
 
 
 @keygen_app.command(name="falcon")
-def command_falcon(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
-	"""
-	[DSS] Generates Falcon keys and writes them to disk.
-	"""
-	helpers.keygen_interactive_flow(
-		name_arg, dir_arg,
-		algo_name="falcon",
-		algo_cls=Falcon
-	)
+def command_falcon(
+		_name: IdentifierAtd = None,
+		_dir: DirectoryAtd = None,
+		_ovr: OverwriteAtd = False,
+		_ni: NonInteractiveAtd = False
+	) -> None:
+	"""[DSS] Generates Falcon keys and writes them to disk."""
+	helpers.interactive_flow(_name, _dir, _ovr, _ni, Falcon)
 
 
 @keygen_app.command(name="smallsphincs")
-def command_smallsphincs(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
-	"""
-	[DSS] Generates SmallSphincs keys and writes them to disk.
-	"""
-	helpers.keygen_interactive_flow(
-		name_arg, dir_arg,
-		algo_name="smallsphincs",
-		algo_cls=SmallSphincs
-	)
+def command_smallsphincs(
+		_name: IdentifierAtd = None,
+		_dir: DirectoryAtd = None,
+		_ovr: OverwriteAtd = False,
+		_ni: NonInteractiveAtd = False
+	) -> None:
+	"""[DSS] Generates SmallSphincs keys and writes them to disk."""
+	helpers.interactive_flow(_name, _dir, _ovr, _ni, SmallSphincs)
 
 
 @keygen_app.command(name="fastsphincs")
-def command_fastsphincs(name_arg: NameAtd = None, dir_arg: PathAtd = None) -> None:
-	"""
-	[DSS] Generates FastSphincs keys and writes them to disk.
-	"""
-	helpers.keygen_interactive_flow(
-		name_arg, dir_arg,
-		algo_name="fastsphincs",
-		algo_cls=FastSphincs
-	)
+def command_fastsphincs(
+		_name: IdentifierAtd = None,
+		_dir: DirectoryAtd = None,
+		_ovr: OverwriteAtd = False,
+		_ni: NonInteractiveAtd = False
+	) -> None:
+	"""[DSS] Generates FastSphincs keys and writes them to disk."""
+	helpers.interactive_flow(_name, _dir, _ovr, _ni, FastSphincs)
