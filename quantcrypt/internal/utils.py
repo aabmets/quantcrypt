@@ -104,7 +104,10 @@ def sha3_digest_file(file_path: Path, callback: Optional[Callable] = None) -> by
 		return sha3.digest()
 
 
-def resolve_relpath(path: str | Path) -> Path:
+def resolve_relpath(path: str | Path | None) -> Path:
+	if path is None:
+		path = Path('')
+
 	match platform.system():  # pragma: no cover
 		case "Windows":
 			pure_path = PureWindowsPath(path)

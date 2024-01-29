@@ -11,9 +11,8 @@
 import shutil
 import platform
 from typer import Typer
-from rich.prompt import Confirm
-from rich.console import Console
 from quantcrypt.internal import utils
+from quantcrypt.internal.cli.models import StyledConsole
 
 
 optimize_app = Typer(
@@ -32,19 +31,15 @@ def command_optimize() -> None:
 	}
 	keep = platform.system()
 	remove_paths.pop(keep)
-	a, b = remove_paths.keys()
 
-	console = Console(soft_wrap=True)
-	console.print(
-		f"[deep_pink1]QuantCrypt[/] is about to remove [light_slate_blue]'{a}'[/] and "
-		f"[light_slate_blue]'{b}'[/] PQC binaries from itself.\nYou will need to reinstall "
-		"QuantCrypt if you want to restore these binaries.\n"
+	a, b = [f"[sky_blue2]{x}[/]" for x in remove_paths.keys()]
+	StyledConsole.print(
+		f"QuantCrypt is about to remove {a} and {b} PQC binaries from itself.\n"
+		f"You will need to reinstall QuantCrypt if you want to restore these binaries.\n"
 	)
-	answer = Confirm.ask("Do you want to continue?")
-	if answer is False:
-		console.print("[gold3]Operation cancelled.[/]\n")
-		return
+	StyledConsole.ask_continue(exit_on_false=True)
 
 	for path in remove_paths.values():
 		shutil.rmtree(path, ignore_errors=True)
-	console.print(f"[chartreuse3]Operation successful!\n")
+
+	StyledConsole.print_success()
