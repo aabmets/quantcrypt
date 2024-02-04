@@ -90,7 +90,7 @@ class BasePQAlgorithm(ABC):
 			)
 
 	def _upper_name(self) -> str:
-		return '_'.join(re.findall(
+		return ''.join(re.findall(
 			string=self.__class__.__name__,
 			pattern='.[^A-Z]*'
 		)).upper()
