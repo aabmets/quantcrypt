@@ -105,8 +105,8 @@ def determine_dss_class(armored_key: str, exp_kt: ExpKeyType) -> Type[BaseDSS]:
 		sup_algos=dict(
 			DILITHIUM=Dilithium,
 			FALCON=Falcon,
-			FAST_SPHINCS=FastSphincs,
-			SMALL_SPHINCS=SmallSphincs
+			FASTSPHINCS=FastSphincs,
+			SMALLSPHINCS=SmallSphincs
 		),
 		pqa_type="DSS"
 	)
