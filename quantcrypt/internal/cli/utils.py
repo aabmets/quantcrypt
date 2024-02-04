@@ -17,29 +17,22 @@ from typer import Typer
 from .. import utils
 
 
-__all__ = [
-	"add_typer_apps",
-	"find_command_modules"
-]
+__all__ = ["add_commands"]
 
 
-def add_typer_apps(app: Typer) -> None:
-	for module in find_command_modules():
+def add_commands(app: Typer) -> Typer:
+	for module in _find_command_modules():
 		for _, obj in inspect.getmembers(module):
 			if not isinstance(obj, Typer):
 				continue
-			elif not isinstance(obj.info.name, str):
-				continue
-			elif len(obj.info.name) == 0:
-				continue
-			else:
-				app.add_typer(
-					typer_instance=obj,
-					name=obj.info.name
-				)
+			app.add_typer(
+				typer_instance=obj,
+				name=obj.info.name
+			)
+	return app
 
 
-def find_command_modules() -> Generator[ModuleType, None, None]:
+def _find_command_modules() -> Generator[ModuleType, None, None]:
 	package_path = utils.search_upwards(__file__, "__init__.py").parent
 	import_dir = Path(__file__).with_name("commands")
 

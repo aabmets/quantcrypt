@@ -12,17 +12,20 @@ import shutil
 import platform
 from typer import Typer
 from quantcrypt.internal import utils
-from quantcrypt.internal.cli.models import StyledConsole
+from .. import common as com
+from .. import console
 
 
-optimize_app = Typer(
+app = Typer(
 	name="optimize", invoke_without_command=True, help=""
-	"Removes those PQA binaries which are incompatible with your platform."
+	"Removes those PQA binaries which are incompatible with the host platform."
 )
 
 
-@optimize_app.callback()
-def command_optimize() -> None:
+@app.callback()
+def command_optimize(dry_run: com.DryRunAtd = False) -> None:
+	console.notify_dry_run(dry_run)
+
 	bin_path = utils.search_upwards(__file__, "bin")
 	remove_paths = {
 		"Windows": bin_path / "Windows",
@@ -33,13 +36,16 @@ def command_optimize() -> None:
 	remove_paths.pop(keep)
 
 	a, b = [f"[sky_blue2]{x}[/]" for x in remove_paths.keys()]
-	StyledConsole.print(
+	console.styled_print(
 		f"QuantCrypt is about to remove {a} and {b} PQC binaries from itself.\n"
 		f"You will need to reinstall QuantCrypt if you want to restore these binaries.\n"
 	)
-	StyledConsole.ask_continue(exit_on_false=True)
+	console.ask_continue(exit_on_false=True)
 
-	for path in remove_paths.values():
-		shutil.rmtree(path, ignore_errors=True)
-
-	StyledConsole.print_success()
+	if dry_run:
+		console.styled_print("QuantCrypt would have removed these directories: ")
+		console.pretty_print([p.as_posix() for p in remove_paths.values()])
+	else:  # pragma: no cover
+		for path in remove_paths.values():
+			shutil.rmtree(path, ignore_errors=True)
+		console.print_success()

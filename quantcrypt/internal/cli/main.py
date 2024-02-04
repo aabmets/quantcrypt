@@ -8,47 +8,32 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from typing import Annotated
-from typer import Typer, Option
-from rich.console import Console
-from .models import PackageInfo
-from . import utils
+from typer import Typer
+from .info import PackageInfo
+from . import utils, console
 
 
-app = Typer(
+app = utils.add_commands(Typer(
     name="qclib",
     invoke_without_command=True,
     no_args_is_help=True
-)
-utils.add_typer_apps(app)
+))
 
 
-VersionAtd = Annotated[bool, Option(
-    '--version', '-v', show_default=False,
-    help='Print the package version to console and exit.'
-)]
-InfoAtd = Annotated[bool, Option(
-    '--info', '-i', show_default=False,
-    help='Print package info to console and exit.'
-)]
+@app.command(name="version", help="Prints package version to the console and exits.")
+def version():
+    print(PackageInfo().Version)
 
 
-@app.callback()
-def main(version: VersionAtd = False, info: InfoAtd = False) -> None:
-    if version:
-        pkg_info = PackageInfo()
-        print(pkg_info.Version)
-    elif info:
-        title_color = "[{}]".format("#ff5fff")
-        key_color = "[{}]".format("#87d7d7")
-        value_color = "[{}]".format("#ffd787")
+@app.command(name="info", help="Pretty-prints package info to the console and exits.")
+def info() -> None:
+    title_color = "[{}]".format("#ff5fff")
+    key_color = "[{}]".format("#87d7d7")
+    value_color = "[{}]".format("#ffd787")
 
-        pkg_info = PackageInfo()
-        console = Console(soft_wrap=True)
-        console.print(f"{title_color}Package Info:")
-
-        for k, v in pkg_info.toDict().items():
-            k = f"{key_color}{k}"
-            v = f"{value_color}{v}"
-            console.print(f"{2 * ' '}{k}: {v}")
-        console.print('')
+    console.styled_print(f"{title_color}Package Info:")
+    for k, v in PackageInfo().toDict().items():
+        k = f"{key_color}{k}"
+        v = f"{value_color}{v}"
+        console.styled_print(f"{2 * ' '}{k}: {v}")
+    console.styled_print('')

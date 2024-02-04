@@ -13,6 +13,9 @@ from pathlib import Path
 from dotmap import DotMap
 
 
+__all__ = ["PackageInfo"]
+
+
 class PackageInfo(DotMap):
     _PACKAGE_NAME = "quantcrypt"
 
@@ -29,16 +32,15 @@ class PackageInfo(DotMap):
                     continue
 
                 meta = child / 'METADATA'
-                if meta.is_file():
-                    with meta.open("r") as file:
-                        lines = file.readlines()
-                    self._set_fields(lines)
+                with meta.open("r") as file:
+                    lines = file.readlines()
+                self._set_fields(lines)
 
     def _set_fields(self, lines: list[str]) -> None:
         fields = ["Name", "Version", "Summary", "License", "Author"]
-        for line in lines:
-            line = line.strip()
-            if line == '':
+        while True:
+            line = lines.pop(0).strip()
+            if line == '' or len(lines) == 0:
                 break
             k, v = line.split(':', maxsplit=1)
             v = v.strip()
