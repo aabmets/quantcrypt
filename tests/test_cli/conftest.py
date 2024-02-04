@@ -17,6 +17,15 @@ from typer.testing import CliRunner
 from quantcrypt.internal.cli.main import app
 
 
+@pytest.fixture(scope="package")
+def cli_message() -> DotMap:
+	return DotMap(
+		success="Operation successful!",
+		cancelled="Operation cancelled.",
+		ow_error="Must explicitly enable file overwriting"
+	)
+
+
 @pytest.fixture(scope="function")
 def get_paths(tmp_path: Path) -> Callable:
 	def closure(algo_name: str) -> DotMap:
@@ -40,7 +49,7 @@ def get_paths(tmp_path: Path) -> Callable:
 
 
 @pytest.fixture(scope="function")
-def success(get_paths: Callable, get_args: Callable) -> Callable:
+def success(get_paths: Callable, get_args: Callable, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str, mode: str) -> None:
 		paths = get_paths(algo_name)
 		args = get_args(paths, mode)
@@ -48,11 +57,11 @@ def success(get_paths: Callable, get_args: Callable) -> Callable:
 
 		result = runner.invoke(app, args, input="n\n")
 		assert result.exit_code == 0
-		assert "Operation cancelled." in result.stdout
+		assert cli_message.cancelled in result.stdout
 
 		result = runner.invoke(app, args, input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 	return closure
 
@@ -72,7 +81,7 @@ def dry_run(get_paths: Callable, get_args: Callable) -> Callable:
 
 
 @pytest.fixture(scope="function")
-def overwrite(get_paths: Callable, get_args: Callable) -> Callable:
+def overwrite(get_paths: Callable, get_args: Callable, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str, mode: str) -> None:
 		paths = get_paths(algo_name)
 		args = get_args(paths, mode)
@@ -80,22 +89,22 @@ def overwrite(get_paths: Callable, get_args: Callable) -> Callable:
 
 		result = runner.invoke(app, args, input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		result = runner.invoke(app, args, input="y\nn\n")
 		assert result.exit_code == 0
-		assert "Operation cancelled." in result.stdout
+		assert cli_message.cancelled in result.stdout
 
 		result = runner.invoke(app, args, input="y\ny\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		result = runner.invoke(app, args + ['-N'])
 		assert result.exit_code == 1
-		assert "Must explicitly enable file overwriting" in result.stdout
+		assert cli_message.ow_error in result.stdout
 
 		result = runner.invoke(app, args + ['-N', '-W'])
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 	return closure

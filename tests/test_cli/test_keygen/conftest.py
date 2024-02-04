@@ -11,6 +11,7 @@
 import os
 import pytest
 from pathlib import Path
+from dotmap import DotMap
 from typing import Callable, Literal, cast
 from typer.testing import CliRunner
 from quantcrypt.internal.cli.commands.keygen import app
@@ -18,18 +19,18 @@ from quantcrypt.internal.cli.commands import helpers as hlp
 
 
 @pytest.fixture(scope="function")
-def success(tmp_path: Path) -> Callable:
+def success(tmp_path: Path, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str) -> None:
 		os.chdir(tmp_path)
 		runner = CliRunner()
 
 		result = runner.invoke(app, [algo_name], input="n\n")
 		assert result.exit_code == 0
-		assert "Operation cancelled." in result.stdout
+		assert cli_message.cancelled in result.stdout
 
 		result = runner.invoke(app, [algo_name], input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		pk_file = tmp_path / f"{algo_name}-pubkey.qc"
 		sk_file = tmp_path / f"{algo_name}-seckey.qc"
@@ -54,43 +55,43 @@ def dry_run(tmp_path: Path) -> Callable:
 
 
 @pytest.fixture(scope="function")
-def overwrite(tmp_path: Path) -> Callable:
+def overwrite(tmp_path: Path, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str) -> None:
 		os.chdir(tmp_path)
 		runner = CliRunner()
 
 		result = runner.invoke(app, [algo_name], input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		result = runner.invoke(app, [algo_name], input="y\nn\n")
 		assert result.exit_code == 0
-		assert "Operation cancelled." in result.stdout
+		assert cli_message.cancelled in result.stdout
 
 		result = runner.invoke(app, [algo_name], input="y\ny\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		result = runner.invoke(app, [algo_name, "-N"])
 		assert result.exit_code == 1
-		assert "Must explicitly enable file overwriting" in result.stdout
+		assert cli_message.ow_error in result.stdout
 
 		result = runner.invoke(app, [algo_name, "-N", "-W"])
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 	return closure
 
 
 @pytest.fixture(scope="function")
-def identifier(tmp_path: Path) -> Callable:
+def identifier(tmp_path: Path, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str) -> None:
 		os.chdir(tmp_path)
 		runner = CliRunner()
 
 		result = runner.invoke(app, [algo_name, "-i", "pytest"], input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		pk_file = tmp_path / f"pytest-{algo_name}-pubkey.qc"
 		sk_file = tmp_path / f"pytest-{algo_name}-seckey.qc"
@@ -110,14 +111,14 @@ def identifier(tmp_path: Path) -> Callable:
 
 
 @pytest.fixture(scope="function")
-def directory(tmp_path: Path) -> Callable:
+def directory(tmp_path: Path, cli_message: DotMap) -> Callable:
 	def closure(algo_name: str) -> None:
 		os.chdir(tmp_path)
 		runner = CliRunner()
 
 		result = runner.invoke(app, [algo_name, "-d", "pytest"], input="y\n")
 		assert result.exit_code == 0
-		assert "Operation successful!" in result.stdout
+		assert cli_message.success in result.stdout
 
 		pk_file = tmp_path / f"pytest/{algo_name}-pubkey.qc"
 		sk_file = tmp_path / f"pytest/{algo_name}-seckey.qc"

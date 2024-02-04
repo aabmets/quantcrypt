@@ -135,4 +135,9 @@ def _determine_pqa_class(
 			f"Expected a {exp_kt.lower()} key, but received "
 			f"a {fm.hdr_type.lower()} key instead."
 		)
-	return sup_algos[fm.hdr_name]
+	if fm is not None:
+		return sup_algos[fm.hdr_name]
+
+	console.raise_error(  # pragma: no cover
+		"Unspecified error with the armored keyfile."
+	)
