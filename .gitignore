@@ -162,3 +162,7 @@ fabric.properties
 # Only allow compile.py script
 scripts/
 !scripts/compile.py
+
+# Exclude compiled binaries
+quantcrypt/internal/bin/**/*
+!quantcrypt/internal/bin/**/.gitkeep
