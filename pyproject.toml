@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantcrypt"
-version = "0.3.3"
+version = "0.3.4"
 description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries"
 authors = ["Mattias Aabmets <mattias.aabmets@gmail.com>"]
 license = "MIT"
