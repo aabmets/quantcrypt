@@ -5,7 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [0.3.4] - 2024-02-04 - _latest_
+### [0.4.0] - 2024-02-04 - _latest_
+
+- Prettified encrypt and decrypt CLI commands
+- Prettified sign and verify CLI commands
+- Added pytests for all CLI commands
+- FastSphincs and SmallSphincs now generate armored keyfiles  
+  without underscores in their names in the keyfile envelopes
+
+### [0.3.4] - 2024-02-04
 
 - Updated PQClean dependency to commit 3b43bc6
 - Prettified keygen and optimize CLI command
@@ -51,6 +59,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[0.4.0]: https://github.com/aabmets/quantcrypt/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/aabmets/quantcrypt/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/aabmets/quantcrypt/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/aabmets/quantcrypt/compare/0.3.1...0.3.2
