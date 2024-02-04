@@ -73,7 +73,7 @@ def command_sign(
 		with paths.sig_file.open('wb') as file:
 			file.write(signed_file.signature)
 		console.print_success()
-	except QuantCryptError:
+	except QuantCryptError:  # pragma: no cover
 		console.raise_error(
 			"Unable to sign the data file. "
 			"Is the secret key valid?"
@@ -97,7 +97,7 @@ def command_verify(
 			signature = file.read()
 		dss.verify_file(armored_key, paths.in_file, signature)
 		console.print_success()
-	except QuantCryptError:
+	except QuantCryptError:  # pragma: no cover
 		console.raise_error(
 			"Unable to verify the signature with the "
 			"data file! Is the public key valid?"
