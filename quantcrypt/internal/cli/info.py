@@ -23,7 +23,7 @@ class PackageInfo(DotMap):
         super().__init__()
 
         for site_dir in site.getsitepackages():
-            if "site-packages" not in site_dir:
+            if "site-packages" not in site_dir:  # pragma: no cover
                 continue
 
             for child in Path(site_dir).iterdir():
