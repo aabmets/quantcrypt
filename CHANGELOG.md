@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [0.4.0] - 2024-02-04 - _latest_
+### [0.4.2] - 2024-02-05 - _latest_
+
+- Restored --version and --info options to qclib CLI command
+
+### [0.4.1] - 2024-02-04
 
 - Prettified encrypt and decrypt CLI commands
 - Prettified sign and verify CLI commands
@@ -59,6 +63,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[0.4.2]: https://github.com/aabmets/quantcrypt/compare/0.4.0...0.4.2
 [0.4.0]: https://github.com/aabmets/quantcrypt/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/aabmets/quantcrypt/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/aabmets/quantcrypt/compare/0.3.2...0.3.3
