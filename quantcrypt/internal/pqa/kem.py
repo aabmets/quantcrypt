@@ -46,10 +46,7 @@ class BaseKEM(BasePQAlgorithm, ABC):
 			library has failed to generate the keys for the current
 			KEM algorithm for any reason.
 		"""
-		result = self._keygen("kem")
-		if not result:  # pragma: no cover
-			raise errors.KEMKeygenFailedError
-		return result
+		return self._keygen("kem", errors.KEMKeygenFailedError)
 
 	def encaps(self, public_key: bytes) -> tuple[bytes, bytes]:
 		"""

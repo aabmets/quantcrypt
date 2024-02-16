@@ -70,10 +70,7 @@ class BaseDSS(BasePQAlgorithm, ABC):
 			library has failed to generate the keys for the current
 			DSS algorithm for any reason.
 		"""
-		result = self._keygen("sign")
-		if not result:  # pragma: no cover
-			raise errors.DSSKeygenFailedError
-		return result
+		return self._keygen("sign", errors.DSSKeygenFailedError)
 
 	def sign(self, secret_key: bytes, message: bytes) -> bytes:
 		"""

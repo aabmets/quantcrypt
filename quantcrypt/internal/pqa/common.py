@@ -16,7 +16,7 @@ from cffi import FFI
 from enum import Enum
 from abc import ABC, abstractmethod
 from types import ModuleType
-from typing import Literal
+from typing import Literal, Type
 from functools import lru_cache
 from ..errors import InvalidArgsError
 from .. import utils
@@ -26,13 +26,23 @@ from . import errors
 __all__ = [
 	"PQAVariant",
 	"BasePQAParamSizes",
-	"BasePQAlgorithm",
+	"BasePQAlgorithm"
 ]
 
 
 class PQAVariant(Enum):
-	CLEAN = "clean"
-	AVX2 = "avx2"
+	"""
+	Available binaries:
+
+	REF - Clean reference binaries for the x86_64 architecture.
+
+	OPT - Speed-optimized binaries for the x86_64 architecture.
+
+	ARM - Binaries for the aarch64 architecture.
+	"""
+	REF = "clean"
+	OPT = "avx2"
+	ARM = "aarch64"
 
 
 class BasePQAParamSizes:
@@ -71,18 +81,18 @@ class BasePQAlgorithm(ABC):
 	def __init__(self, variant: PQAVariant = None):
 		# variant is None -> auto-select mode
 		try:
-			_var = variant or PQAVariant.AVX2
+			_var = variant or PQAVariant.OPT
 			self._lib = self._import(_var)
 			self.variant = _var
 		except ModuleNotFoundError as ex:
 			if variant is None:
 				try:
-					self._lib = self._import(PQAVariant.CLEAN)
-					self.variant = PQAVariant.CLEAN
+					self._lib = self._import(PQAVariant.REF)
+					self.variant = PQAVariant.REF
 					return
 				except ModuleNotFoundError:  # pragma: no cover
 					pass
-			elif variant == PQAVariant.AVX2:  # pragma: no cover
+			elif variant == PQAVariant.OPT:  # pragma: no cover
 				raise ex
 			raise SystemExit(  # pragma: no cover
 				"Quantcrypt Fatal Error:\n"
@@ -95,7 +105,11 @@ class BasePQAlgorithm(ABC):
 			pattern='.[^A-Z]*'
 		)).upper()
 
-	def _keygen(self, algo_type: Literal["kem", "sign"]) -> tuple[bytes, bytes]:
+	def _keygen(
+			self,
+			algo_type: Literal["kem", "sign"],
+			error_cls: Type[errors.PQAError]
+		) -> tuple[bytes, bytes]:
 		ffi, params = FFI(), self.param_sizes
 		public_key = ffi.new(f"uint8_t [{params.pk_size}]")
 		secret_key = ffi.new(f"uint8_t [{params.sk_size}]")
@@ -103,7 +117,7 @@ class BasePQAlgorithm(ABC):
 		name = f"_crypto_{algo_type}_keypair"
 		func = getattr(self._lib, self._namespace + name)
 		if func(public_key, secret_key) != 0:  # pragma: no cover
-			return tuple()
+			raise error_cls
 
 		pk = ffi.buffer(public_key, params.pk_size)
 		sk = ffi.buffer(secret_key, params.sk_size)
