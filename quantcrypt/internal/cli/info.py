@@ -37,16 +37,15 @@ class PackageInfo(DotMap):
                 self._set_fields(lines)
 
     def _set_fields(self, lines: list[str]) -> None:
-        fields = ["Name", "Version", "Summary", "License", "Author"]
-        while True:
-            line = lines.pop(0).strip()
-            if line == '' or len(lines) == 0:
+        for line in lines:
+            if line.startswith("\n"):
                 break
-            k, v = line.split(':', maxsplit=1)
-            v = v.strip()
-            if k in fields:
-                setattr(self, k, v)
-            if v.startswith('Repository'):
-                k, v = v.split(', ')
-                k = "Homepage"
-                setattr(self, k, v)
+            k, v = line.split(": ", maxsplit=1)
+            if k in ["Name", "Version", "Summary"]:
+                setattr(self, k, v.rstrip())
+            elif k == "License-Expression":
+                setattr(self, "License", v.rstrip())
+            elif k == "Author-email":
+                setattr(self, "Author", v.rstrip())
+            elif v.startswith("Repository"):
+                setattr(self, "Homepage", v.split(', ')[1].rstrip())
