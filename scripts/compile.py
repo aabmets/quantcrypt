@@ -27,6 +27,7 @@ class UnsupportedPlatformError(Exception):
 
 
 class Variant(Enum):
+	AARCH64 = "aarch64"
 	CLEAN = "clean"
 	AVX2 = "avx2"
 
@@ -129,8 +130,13 @@ class DssAlgorithm(BaseAlgorithm):
 
 def get_supported_algorithms(variant: Variant) -> Iterator[KemAlgorithm | DssAlgorithm]:
 	for cls, name in [
-		(KemAlgorithm, "kyber1024"),
-		(DssAlgorithm, "dilithium5"),
+		(KemAlgorithm, "ml-kem-512"),
+		(KemAlgorithm, "ml-kem-768"),
+		(KemAlgorithm, "ml-kem-1024"),
+		(DssAlgorithm, "ml-dsa-44"),
+		(DssAlgorithm, "ml-dsa-65"),
+		(DssAlgorithm, "ml-dsa-87"),
+		(DssAlgorithm, "falcon-512"),
 		(DssAlgorithm, "falcon-1024"),
 		(DssAlgorithm, "sphincs-shake-256f-simple"),
 		(DssAlgorithm, "sphincs-shake-256s-simple")
@@ -156,14 +162,26 @@ def find_abs_path(rel_path: str, from_file: str = __file__) -> Path:
 
 def get_common_files(variant: Variant) -> tuple[str, list[str]]:
 	path = find_abs_path(rel_path="pqclean/common")
-	common, keccak = list(), list()
+	common, keccak2x, keccak4x = list(), list(), list()
 
 	for file in path.rglob("**/*"):
 		if file.is_file() and file.suffix == '.c':
-			files = keccak if 'keccak4x' in file.as_posix() else common
-			files.append(file.as_posix())
+			if "keccak2x" in file.as_posix():
+				continue
+			file = file.as_posix()
+			if 'keccak4x' in file:
+				files_list = keccak4x
+			elif 'keccak2x' in file:
+				files_list = keccak2x
+			else:
+				files_list = common
+			files_list.append(file)
 
-	common.extend(keccak if variant == Variant.AVX2 else [])
+	if variant == Variant.AVX2:
+		common.extend(keccak4x)
+	elif variant == Variant.AARCH64:
+		common.extend(keccak2x)
+
 	return path.as_posix(), common
 
 
