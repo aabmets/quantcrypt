@@ -14,10 +14,9 @@ from zxcvbn import zxcvbn
 from argon2 import PasswordHasher
 from typing import Type, Optional
 from argon2 import exceptions as aex
-from ..errors import InvalidUsageError
-from .common import MemCost, KDFParams
-from . import errors
-from .. import utils
+from quantcrypt.internal import errors
+from quantcrypt.internal import utils
+from quantcrypt.internal.kdf import common as com
 
 
 __all__ = ["Argon2"]
@@ -26,14 +25,14 @@ __all__ = ["Argon2"]
 class BaseArgon2(ABC):
 	_testing: bool = False
 	_engine: PasswordHasher
-	params: KDFParams
+	params: com.KDFParams
 
 	@staticmethod
 	@abstractmethod
-	def _default_params() -> KDFParams: ...
+	def _default_params() -> com.KDFParams: ...
 
-	def __init__(self, params: KDFParams | None) -> None:
-		if isinstance(params, KDFParams):
+	def __init__(self, params: com.KDFParams | None) -> None:
+		if isinstance(params, com.KDFParams):
 			self.params = params
 		else:
 			self.params = self._default_params()
@@ -58,9 +57,9 @@ class Argon2Hash(BaseArgon2):
 	verified: bool = False
 
 	@staticmethod
-	def _default_params() -> KDFParams:
-		return KDFParams(
-			memory_cost=MemCost.GB(2),
+	def _default_params() -> com.KDFParams:
+		return com.KDFParams(
+			memory_cost=com.MemCost.GB(2),
 			parallelism=8,
 			time_cost=1,
 			hash_len=64,
@@ -74,7 +73,7 @@ class Argon2Hash(BaseArgon2):
 			verif_hash: str | bytes = None,
 			*,
 			min_years: int = 1,
-			params: KDFParams = None
+			params: com.KDFParams = None
 	) -> None:
 		"""
 		This class is designed to be used as a hasher and verifier of user-provided
@@ -135,9 +134,9 @@ class Argon2Key(BaseArgon2):
 	public_salt: Optional[str] = None
 
 	@staticmethod
-	def _default_params() -> KDFParams:
-		return KDFParams(
-			memory_cost=MemCost.GB(8),
+	def _default_params() -> com.KDFParams:
+		return com.KDFParams(
+			memory_cost=com.MemCost.GB(8),
 			parallelism=8,
 			time_cost=4,
 			hash_len=64,
@@ -151,7 +150,7 @@ class Argon2Key(BaseArgon2):
 			public_salt: str | bytes = None,
 			*,
 			min_years: int = 10,
-			params: KDFParams = None
+			params: com.KDFParams = None
 	) -> None:
 		"""
 		This class is designed to be used as a generator of secret keys from user-provided
@@ -215,7 +214,7 @@ class Argon2:
 		the contained **Hash** and **Key** classes as
 		attributes of this class.
 		"""
-		raise InvalidUsageError(
+		raise errors.InvalidUsageError(
 			"Argon2 class is a collection of classes and "
 			"is not intended to be instantiated directly."
 		)

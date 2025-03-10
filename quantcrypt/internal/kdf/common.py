@@ -11,8 +11,8 @@
 from dotmap import DotMap
 from pydantic import Field
 from typing import Type, Annotated, Literal
-from ..errors import InvalidUsageError
-from .. import utils
+from quantcrypt.internal import errors
+from quantcrypt.internal import utils
 
 
 __all__ = ["MemCostMB", "MemCostGB", "MemCost", "KDFParams"]
@@ -54,7 +54,7 @@ class MemCost:
 		the contained **MB** and **GB** classes as attributes
 		of this class.
 		"""
-		raise InvalidUsageError(
+		raise errors.InvalidUsageError(
 			"MemCost class is a collection of classes and "
 			"is not intended to be instantiated directly."
 		)

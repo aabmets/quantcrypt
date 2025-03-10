@@ -12,8 +12,8 @@ import struct
 from pydantic import Field
 from typing import Annotated, Optional
 from Cryptodome.Hash import KMAC256
-from . import errors
-from .. import utils
+from quantcrypt.internal import errors
+from quantcrypt.internal import utils
 
 
 __all__ = ["KKDF"]
