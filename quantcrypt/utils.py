@@ -15,10 +15,10 @@ from .internal.kdf.common import (
 	MemCost,
 	KDFParams
 )
-from .internal.pqa.common import (
+from .internal.constants import (
 	PQAVariant
 )
-from .internal.pqa.dss import (
+from .internal.pqa.base_dss import (
 	SignedFile
 )
 from .internal.chunksize import (
