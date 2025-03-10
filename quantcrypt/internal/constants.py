@@ -36,6 +36,10 @@ class PQAVariant(Enum):
     OPT = "avx2"
     ARM = "aarch64"
 
+    @classmethod
+    def values(cls) -> t.List[str]:
+        return vars(cls)["_hashable_values_"]
+
 
 class PQAType(Enum):
     """

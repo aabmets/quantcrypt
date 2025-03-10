@@ -25,6 +25,7 @@ from quantcrypt.internal import utils
 
 __all__ = [
     "filter_archive_contents",
+    "check_sources_exist",
     "download_extract_pqclean",
     "get_common_filepaths",
     "PQASupportedPlatform",
@@ -55,6 +56,17 @@ def filter_archive_contents(members: t.List[zipfile.ZipInfo]) -> t.List[t.Tuple[
         filtered_members.append((member, file_path))
 
     return filtered_members
+
+
+def check_sources_exist() -> bool:
+    pqclean = utils.search_upwards('pqclean')
+    check_dirs: t.List[bool] = []
+    variants = const.PQAVariant.values()
+    for spec in const.SupportedAlgos.iterate():
+        for variant in variants:
+            path = pqclean / spec.type.value / spec.name / variant
+            check_dirs.append(path.exists())
+    return all(check_dirs)
 
 
 def download_extract_pqclean() -> None:
