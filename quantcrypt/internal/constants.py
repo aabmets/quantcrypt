@@ -15,15 +15,13 @@ from enum import Enum
 
 
 __all__ = [
-    "PQCLEAN_REPO_URL",
     "PQAVariant",
     "PQAType",
     "AlgoSpec",
-    "SupportedAlgos"
+    "SupportedAlgos",
+    "SupportedVariants",
+    "PQCleanRepoArchiveURL"
 ]
-
-
-PQCLEAN_REPO_URL = "https://github.com/PQClean/PQClean/archive/448c71a8f590343e681d0d0cec94f29947b0ff18.zip"
 
 
 class PQAVariant(Enum):
@@ -78,3 +76,7 @@ class SupportedAlgos:
     FALCON_1024 = AlgoSpec.DSS("falcon-1024")
     FAST_SPHINCS = AlgoSpec.DSS("sphincs-shake-256f-simple")
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
+
+
+SupportedVariants = [PQAVariant.REF]
+PQCleanRepoArchiveURL = "https://github.com/PQClean/PQClean/archive/448c71a8f590343e681d0d0cec94f29947b0ff18.zip"
