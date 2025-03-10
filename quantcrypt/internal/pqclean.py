@@ -24,16 +24,29 @@ from quantcrypt.internal import utils
 
 
 __all__ = [
-    "filter_archive_contents",
     "check_sources_exist",
+    "filter_archive_contents",
     "download_extract_pqclean",
     "get_common_filepaths",
     "PQASupportedPlatform",
     "PQAImplementation",
     "PQAMetaData",
     "read_algo_metadata",
+    "check_opsys_support",
+    "check_arch_support",
     "check_platform_support"
 ]
+
+
+def check_sources_exist() -> bool:
+    pqclean = utils.search_upwards('pqclean')
+    check_dirs: t.List[bool] = []
+    variants = const.PQAVariant.values()
+    for spec in const.SupportedAlgos.iterate():
+        for variant in variants:
+            path = pqclean / spec.type.value / spec.name / variant
+            check_dirs.append(path.exists())
+    return all(check_dirs)
 
 
 def filter_archive_contents(members: t.List[zipfile.ZipInfo]) -> t.List[t.Tuple[zipfile.ZipInfo, Path]]:
@@ -50,23 +63,12 @@ def filter_archive_contents(members: t.List[zipfile.ZipInfo]) -> t.List[t.Tuple[
         file_path = Path(match.group(1))
         parts = file_path.parts
         if parts[0] not in accepted_dirs:
-            continue
+            continue  # NOSONAR
         elif parts[0] != "common" and parts[1] not in supported_algos:
             continue
         filtered_members.append((member, file_path))
 
     return filtered_members
-
-
-def check_sources_exist() -> bool:
-    pqclean = utils.search_upwards('pqclean')
-    check_dirs: t.List[bool] = []
-    variants = const.PQAVariant.values()
-    for spec in const.SupportedAlgos.iterate():
-        for variant in variants:
-            path = pqclean / spec.type.value / spec.name / variant
-            check_dirs.append(path.exists())
-    return all(check_dirs)
 
 
 def download_extract_pqclean() -> None:
@@ -135,10 +137,27 @@ class PQAMetaData(BaseModel):
 @lru_cache
 def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
     pqclean = utils.search_upwards('pqclean')
-    algo_dir = pqclean / f"{spec.type.value}/{spec.name}"
+    algo_dir = pqclean / spec.type.value / spec.name
     with (algo_dir / "META.yml").open('r') as file:
         data: dict = yaml.full_load(file)
     return PQAMetaData(**data)
+
+
+def check_opsys_support(spf: PQASupportedPlatform) -> t.Optional[str]:
+    for opsys in spf.operating_systems:
+        if platform.system().lower() == opsys.lower():
+            return opsys
+    return None
+
+
+def check_arch_support(impl: PQAImplementation) -> t.Optional[PQASupportedPlatform]:
+    supported_arches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
+    if impl.name == const.PQAVariant.ARM.value:
+        supported_arches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
+    for spf in impl.supported_platforms:
+        if platform.machine().lower() in supported_arches:
+            return spf
+    return None
 
 
 def check_platform_support(
@@ -152,29 +171,18 @@ def check_platform_support(
     if not impl:
         return None
     elif impl.supported_platforms:
-        supported_arches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
-        if impl.name == const.PQAVariant.ARM.value:
-            supported_arches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
-        found_platform: t.Optional[PQASupportedPlatform] = None
-        for spf in impl.supported_platforms:
-            if platform.machine().lower() in supported_arches:
-                found_platform = spf
-                break
-        if not found_platform:
+        spf = check_arch_support(impl)
+        if not spf:
             return None
-        if found_platform.operating_systems:
-            found_opsys: t.Optional[str] = None
-            for pos in found_platform.operating_systems:
-                if platform.system().lower() == pos.lower():
-                    found_opsys = pos
-                    break
-            if not found_opsys:
+        if spf.operating_systems:
+            opsys = check_opsys_support(spf)
+            if not opsys:
                 return None
-        if found_platform.required_flags:
-            required_flags = found_platform.required_flags
+        if spf.required_flags:
+            required_flags = spf.required_flags
 
     pqclean = utils.search_upwards('pqclean')
-    variant_path = pqclean / f"{spec.type.value}/{spec.name}/{variant.value}"
+    variant_path = pqclean / spec.type.value / spec.name / variant.value
     if variant_path.exists():
         return variant_path, required_flags
     return None
