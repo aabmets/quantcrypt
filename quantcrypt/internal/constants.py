@@ -10,8 +10,9 @@
 #
 
 from __future__ import annotations
-from dataclasses import dataclass
+import typing as t
 from enum import Enum
+from dataclasses import dataclass
 
 
 __all__ = [
@@ -76,6 +77,12 @@ class SupportedAlgos:
     FALCON_1024 = AlgoSpec.DSS("falcon-1024")
     FAST_SPHINCS = AlgoSpec.DSS("sphincs-shake-256f-simple")
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
+
+    @classmethod
+    def iterate(cls) -> t.Iterator[AlgoSpec]:
+        for k, v in vars(cls).items():
+            if isinstance(v, AlgoSpec):
+                yield v
 
 
 SupportedVariants = [PQAVariant.REF]
