@@ -43,8 +43,8 @@ class PQAType(Enum):
     * KEM - Key Encapsulation Mechanism
     * DSS - Digital Signature Scheme
     """
-    KEM = "kem"
-    DSS = "dss"
+    KEM = "crypto_kem"
+    DSS = "crypto_sign"
 
 
 @dataclass(frozen=True)
