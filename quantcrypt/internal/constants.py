@@ -61,6 +61,11 @@ class AlgoSpec:
     def DSS(cls, name: str) -> AlgoSpec:  # NOSONAR
         return cls(type=PQAType.DSS, name=name)
 
+    def cdef_name(self, variant: PQAVariant) -> str:
+        name = self.name.replace('-', '').upper()
+        variant = variant.value.upper()
+        return f"PQCLEAN_{name}_{variant}"
+
 
 class SupportedAlgos:
     MLKEM_512 = AlgoSpec.KEM("ml-kem-512")
