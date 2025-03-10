@@ -19,10 +19,7 @@ from dataclasses import dataclass
 from typing import Optional, Callable
 from quantcrypt.internal import utils
 from quantcrypt.internal import errors
-from quantcrypt.internal.pqa.common import (
-	BasePQAParamSizes,
-	BasePQAlgorithm
-)
+from quantcrypt.internal.pqa import common as com
 
 
 __all__ = ["SignedFile", "DSSParamSizes", "BaseDSS"]
@@ -41,13 +38,13 @@ class SignedFile:
 	file_digest: bytes
 
 
-class DSSParamSizes(BasePQAParamSizes):
+class DSSParamSizes(com.BasePQAParamSizes):
 	def __init__(self, lib: ModuleType, ns: str):
 		self.sig_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
 		super().__init__(lib, ns)
 
 
-class BaseDSS(BasePQAlgorithm, ABC):
+class BaseDSS(com.BasePQAlgorithm, ABC):
 	@property
 	@lru_cache
 	def param_sizes(self) -> DSSParamSizes:

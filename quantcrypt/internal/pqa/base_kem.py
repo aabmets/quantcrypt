@@ -15,23 +15,20 @@ from types import ModuleType
 from functools import lru_cache
 from quantcrypt.internal import errors
 from quantcrypt.internal import utils
-from quantcrypt.internal.pqa.common import (
-	BasePQAParamSizes,
-	BasePQAlgorithm,
-)
+from quantcrypt.internal.pqa import common as com
 
 
 __all__ = ["KEMParamSizes", "BaseKEM"]
 
 
-class KEMParamSizes(BasePQAParamSizes):
+class KEMParamSizes(com.BasePQAParamSizes):
 	def __init__(self, lib: ModuleType, ns: str):
 		self.ct_size = getattr(lib, f"{ns}_CRYPTO_CIPHERTEXTBYTES")
 		self.ss_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
 		super().__init__(lib, ns)
 
 
-class BaseKEM(BasePQAlgorithm, ABC):
+class BaseKEM(com.BasePQAlgorithm, ABC):
 	@property
 	@lru_cache
 	def param_sizes(self) -> KEMParamSizes:
