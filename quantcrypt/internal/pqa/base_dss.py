@@ -17,9 +17,9 @@ from pathlib import Path
 from functools import lru_cache
 from dataclasses import dataclass
 from typing import Optional, Callable
-from .. import utils
-from .. import errors
-from .common import (
+from quantcrypt.internal import utils
+from quantcrypt.internal import errors
+from quantcrypt.internal.pqa.common import (
 	BasePQAParamSizes,
 	BasePQAlgorithm
 )

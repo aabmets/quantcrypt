@@ -18,9 +18,9 @@ from abc import ABC, abstractmethod
 from types import ModuleType
 from typing import Literal, Type
 from functools import lru_cache
-from .. import constants as const
-from .. import utils
-from .. import errors
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import utils
+from quantcrypt.internal import errors
 
 
 __all__ = ["BasePQAParamSizes", "BasePQAlgorithm"]

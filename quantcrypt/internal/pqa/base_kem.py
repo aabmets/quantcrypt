@@ -13,9 +13,9 @@ from abc import ABC
 from cffi import FFI
 from types import ModuleType
 from functools import lru_cache
-from .. import errors
-from .. import utils
-from .common import (
+from quantcrypt.internal import errors
+from quantcrypt.internal import utils
+from quantcrypt.internal.pqa.common import (
 	BasePQAParamSizes,
 	BasePQAlgorithm,
 )

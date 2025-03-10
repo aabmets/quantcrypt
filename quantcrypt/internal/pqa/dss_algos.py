@@ -9,9 +9,9 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from .. import constants as const
-from .. import utils
-from .base_dss import BaseDSS
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import utils
+from quantcrypt.internal.pqa.base_dss import BaseDSS
 
 
 __all__ = [

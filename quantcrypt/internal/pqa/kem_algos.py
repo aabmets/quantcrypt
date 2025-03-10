@@ -9,9 +9,9 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from .. import constants as const
-from .. import utils
-from .base_kem import BaseKEM
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import utils
+from quantcrypt.internal.pqa.base_kem import BaseKEM
 
 
 __all__ = ["MLKEM_512", "MLKEM_768", "MLKEM_1024"]
