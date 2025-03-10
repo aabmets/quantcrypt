@@ -18,6 +18,7 @@ __all__ = [
 	"InvalidUsageError",
 	"InvalidArgsError",
 	"UnsupportedPlatformError",
+
 	"PQAError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
@@ -26,12 +27,19 @@ __all__ = [
 	"DSSKeygenFailedError",
 	"DSSSignFailedError",
 	"DSSVerifyFailedError",
+
 	"KDFError",
 	"KDFOutputLimitError",
 	"KDFWeakPasswordError",
 	"KDFVerificationError",
 	"KDFInvalidHashError",
 	"KDFHashingError",
+
+	"CipherError",
+	"CipherStateError",
+	"CipherVerifyError",
+	"CipherChunkSizeError",
+	"CipherPaddingError"
 ]
 
 
@@ -120,3 +128,27 @@ class KDFInvalidHashError(KDFError):
 class KDFHashingError(KDFError):
 	def __init__(self):
 		super().__init__("KDF was unable to hash the password due to an internal error.")
+
+
+class CipherError(QuantCryptError):
+	"""Base class for all Cipher errors."""
+
+
+class CipherStateError(CipherError):
+	def __init__(self):
+		super().__init__("Cannot call this method in the current cipher state.")
+
+
+class CipherVerifyError(CipherError):
+	def __init__(self):
+		super().__init__("Cannot verify the decrypted data with the provided digest.")
+
+
+class CipherChunkSizeError(CipherError):
+	def __init__(self):
+		super().__init__("Data is larger than the allowed chunk size.")
+
+
+class CipherPaddingError(CipherError):
+	def __init__(self):
+		super().__init__("The padding of the decrypted plaintext is incorrect.")
