@@ -8,41 +8,22 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import re
 import string
 import platform
 import importlib
 from cffi import FFI
-from enum import Enum
 from abc import ABC, abstractmethod
 from types import ModuleType
 from typing import Literal, Type
 from functools import lru_cache
-from ..errors import InvalidArgsError
+from .. import constants as const
 from .. import utils
-from . import errors
+from .. import errors
 
 
-__all__ = [
-	"PQAVariant",
-	"BasePQAParamSizes",
-	"BasePQAlgorithm"
-]
-
-
-class PQAVariant(Enum):
-	"""
-	Available binaries:
-
-	REF - Clean reference binaries for the x86_64 architecture.
-
-	OPT - Speed-optimized binaries for the x86_64 architecture.
-
-	ARM - Binaries for the aarch64 architecture.
-	"""
-	REF = "clean"
-	OPT = "avx2"
-	ARM = "aarch64"
+__all__ = ["BasePQAParamSizes", "BasePQAlgorithm"]
 
 
 class BasePQAParamSizes:
@@ -53,7 +34,7 @@ class BasePQAParamSizes:
 
 class BasePQAlgorithm(ABC):
 	_lib: ModuleType
-	variant: PQAVariant
+	variant: const.PQAVariant
 
 	@property
 	@abstractmethod
@@ -72,27 +53,27 @@ class BasePQAlgorithm(ABC):
 		return f"PQCLEAN_{name}_{self.variant.name}"
 
 	@lru_cache
-	def _import(self, variant: PQAVariant) -> ModuleType:
+	def _import(self, variant: const.PQAVariant) -> ModuleType:
 		return importlib.import_module(
 			f"quantcrypt.internal.bin.{platform.system()}" +
 			f".{variant.value}.{self.name.replace('-', '_')}"
 		).lib
 
-	def __init__(self, variant: PQAVariant = None):
+	def __init__(self, variant: const.PQAVariant = None):
 		# variant is None -> auto-select mode
 		try:
-			_var = variant or PQAVariant.OPT
+			_var = variant or const.PQAVariant.OPT
 			self._lib = self._import(_var)
 			self.variant = _var
 		except ModuleNotFoundError as ex:
 			if variant is None:
 				try:
-					self._lib = self._import(PQAVariant.REF)
-					self.variant = PQAVariant.REF
+					self._lib = self._import(const.PQAVariant.REF)
+					self.variant = const.PQAVariant.REF
 					return
 				except ModuleNotFoundError:  # pragma: no cover
 					pass
-			elif variant == PQAVariant.OPT:  # pragma: no cover
+			elif variant == const.PQAVariant.OPT:  # pragma: no cover
 				raise ex
 			raise SystemExit(  # pragma: no cover
 				"Quantcrypt Fatal Error:\n"
@@ -170,8 +151,8 @@ class BasePQAlgorithm(ABC):
 			full_pattern = header_pattern + r"(.+)" + footer_pattern
 			if match := re.match(full_pattern, armored_key, re.DOTALL):
 				key_data = match.group(1) or ''
-				for c in string.whitespace:
-					key_data = key_data.replace(c, '')
+				for char in string.whitespace:
+					key_data = key_data.replace(char, '')
 				break
 
 		if not key_data:
@@ -179,7 +160,7 @@ class BasePQAlgorithm(ABC):
 
 		try:
 			key_bytes = utils.b64(key_data)
-		except InvalidArgsError:
+		except errors.InvalidArgsError:
 			raise dearmor_error
 
 		expected_size = dict(
