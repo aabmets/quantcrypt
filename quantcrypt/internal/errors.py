@@ -9,6 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 
+import platform
 from typing import Literal
 
 
@@ -16,6 +17,7 @@ __all__ = [
 	"QuantCryptError",
 	"InvalidUsageError",
 	"InvalidArgsError",
+	"UnsupportedPlatformError",
 	"PQAError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
@@ -39,6 +41,11 @@ class InvalidUsageError(QuantCryptError):
 class InvalidArgsError(QuantCryptError):
 	def __init__(self, message: str = None):
 		super().__init__(message or "Method received invalid arguments.")
+
+
+class UnsupportedPlatformError(QuantCryptError):
+	def __init__(self):
+		super().__init__(f"Operating system '{platform.system()}' not supported!")
 
 
 class PQAError(QuantCryptError):
