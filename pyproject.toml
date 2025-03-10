@@ -32,6 +32,7 @@ dependencies = [
    "orjson>=3.10.0",
    "pycryptodomex>=3.20.0",
    "pydantic>=2.10.0",
+   "requests>=2.27.0",
    "rich>=13.9.0",
    "typer>=0.15.0",
    "types-zxcvbn>=4.5.0",
