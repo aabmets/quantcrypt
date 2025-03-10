@@ -8,27 +8,13 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .internal.errors import (
+
+from quantcrypt.internal.errors import (
 	QuantCryptError,
 	InvalidUsageError,
-	InvalidArgsError
-)
-from .internal.cipher.errors import (
-	CipherError,
-	CipherStateError,
-	CipherVerifyError,
-	CipherChunkSizeError,
-	CipherPaddingError
-)
-from .internal.kdf.errors import (
-	KDFError,
-	KDFOutputLimitError,
-	KDFWeakPasswordError,
-	KDFVerificationError,
-	KDFInvalidHashError,
-	KDFHashingError
-)
-from .internal.pqa.errors import (
+	InvalidArgsError,
+	UnsupportedPlatformError,
+
 	PQAError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
@@ -36,7 +22,20 @@ from .internal.pqa.errors import (
 	KEMDecapsFailedError,
 	DSSKeygenFailedError,
 	DSSSignFailedError,
-	DSSVerifyFailedError
+	DSSVerifyFailedError,
+
+	KDFError,
+	KDFOutputLimitError,
+	KDFWeakPasswordError,
+	KDFVerificationError,
+	KDFInvalidHashError,
+	KDFHashingError,
+
+	CipherError,
+	CipherStateError,
+	CipherVerifyError,
+	CipherChunkSizeError,
+	CipherPaddingError
 )
 
 
@@ -44,17 +43,8 @@ __all__ = [
 	"QuantCryptError",
 	"InvalidUsageError",
 	"InvalidArgsError",
-	"CipherError",
-	"CipherStateError",
-	"CipherVerifyError",
-	"CipherChunkSizeError",
-	"CipherPaddingError",
-	"KDFError",
-	"KDFOutputLimitError",
-	"KDFWeakPasswordError",
-	"KDFVerificationError",
-	"KDFInvalidHashError",
-	"KDFHashingError",
+	"UnsupportedPlatformError",
+
 	"PQAError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
@@ -62,5 +52,18 @@ __all__ = [
 	"KEMDecapsFailedError",
 	"DSSKeygenFailedError",
 	"DSSSignFailedError",
-	"DSSVerifyFailedError"
+	"DSSVerifyFailedError",
+
+	"KDFError",
+	"KDFOutputLimitError",
+	"KDFWeakPasswordError",
+	"KDFVerificationError",
+	"KDFInvalidHashError",
+	"KDFHashingError",
+
+	"CipherError",
+	"CipherStateError",
+	"CipherVerifyError",
+	"CipherChunkSizeError",
+	"CipherPaddingError"
 ]

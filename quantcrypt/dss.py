@@ -9,24 +9,10 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from .internal.chunksize import (
-	ChunkSize
-)
-from .internal.constants import (
-	PQAVariant
-)
-from .internal.errors import (
-	PQAError,
-	PQAKeyArmorError,
-	DSSKeygenFailedError,
-	DSSSignFailedError,
-	DSSVerifyFailedError
-)
-from .internal.pqa.base_dss import (
-	DSSParamSizes,
-	BaseDSS,
-)
-from .internal.pqa.dss_algos import (
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal.constants import PQAVariant
+from quantcrypt.internal.pqa.base_dss import DSSParamSizes, BaseDSS
+from quantcrypt.internal.pqa.dss_algos import (
 	MLDSA_44,
 	MLDSA_65,
 	MLDSA_87,
@@ -35,16 +21,18 @@ from .internal.pqa.dss_algos import (
 	FAST_SPHINCS,
 	SMALL_SPHINCS
 )
+from quantcrypt.internal.errors import (
+	PQAError,
+	PQAKeyArmorError,
+	DSSKeygenFailedError,
+	DSSSignFailedError,
+	DSSVerifyFailedError
+)
 
 
 __all__ = [
 	"ChunkSize",
 	"PQAVariant",
-	"PQAError",
-	"PQAKeyArmorError",
-	"DSSKeygenFailedError",
-	"DSSSignFailedError",
-	"DSSVerifyFailedError",
 	"DSSParamSizes",
 	"BaseDSS",
 	"MLDSA_44",
@@ -53,5 +41,10 @@ __all__ = [
 	"FALCON_512",
 	"FALCON_1024",
 	"FAST_SPHINCS",
-	"SMALL_SPHINCS"
+	"SMALL_SPHINCS",
+	"PQAError",
+	"PQAKeyArmorError",
+	"DSSKeygenFailedError",
+	"DSSSignFailedError",
+	"DSSVerifyFailedError"
 ]

@@ -8,17 +8,11 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .internal.kdf.common import (
-	MemCost,
-	KDFParams
-)
-from .internal.kdf.argon2_kdf import (
-	Argon2
-)
-from .internal.kdf.kmac_kdf import (
-	KKDF
-)
-from .internal.kdf.errors import (
+
+from quantcrypt.internal.kdf.common import MemCost, KDFParams
+from quantcrypt.internal.kdf.argon2_kdf import Argon2
+from quantcrypt.internal.kdf.kmac_kdf import KKDF
+from quantcrypt.internal.errors import (
 	KDFOutputLimitError,
 	KDFWeakPasswordError,
 	KDFVerificationError,

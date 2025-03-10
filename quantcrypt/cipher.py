@@ -8,20 +8,12 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .internal.chunksize import (
-	ChunkSize
-)
-from .internal.cipher.krypton import (
-	Krypton
-)
-from .internal.cipher.krypton_file import (
-	KryptonFile,
-	DecryptedFile
-)
-from .internal.cipher.krypton_kem import (
-	KryptonKEM
-)
-from .internal.cipher.errors import (
+
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal.cipher.krypton import Krypton
+from quantcrypt.internal.cipher.krypton_file import KryptonFile, DecryptedFile
+from quantcrypt.internal.cipher.krypton_kem import KryptonKEM
+from quantcrypt.internal.errors import (
 	CipherError,
 	CipherStateError,
 	CipherVerifyError,

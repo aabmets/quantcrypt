@@ -8,37 +8,33 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .internal.constants import (
-	PQAVariant
+
+from quantcrypt.internal.constants import PQAVariant
+from quantcrypt.internal.pqa.base_kem import KEMParamSizes, BaseKEM
+from quantcrypt.internal.pqa.kem_algos import (
+	MLKEM_512,
+	MLKEM_768,
+	MLKEM_1024
 )
-from .internal.errors import (
+from quantcrypt.internal.errors import (
 	PQAError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
 	KEMDecapsFailedError
 )
-from .internal.pqa.base_kem import (
-	KEMParamSizes,
-	BaseKEM
-)
-from .internal.pqa.kem_algos import (
-	MLKEM_512,
-	MLKEM_768,
-	MLKEM_1024
-)
 
 
 __all__ = [
 	"PQAVariant",
-	"PQAError",
-	"PQAKeyArmorError",
-	"KEMKeygenFailedError",
-	"KEMEncapsFailedError",
-	"KEMDecapsFailedError",
 	"KEMParamSizes",
 	"BaseKEM",
 	"MLKEM_512",
 	"MLKEM_768",
 	"MLKEM_1024",
+	"PQAError",
+	"PQAKeyArmorError",
+	"KEMKeygenFailedError",
+	"KEMEncapsFailedError",
+	"KEMDecapsFailedError"
 ]
