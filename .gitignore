@@ -158,7 +158,3 @@ fabric.properties
 
 # General exclude folder
 .exclude
-
-# Only allow compile.py script
-scripts/
-!scripts/compile.py
