@@ -8,10 +8,11 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+
 from typing import Literal, Type, Annotated, Optional
 from pydantic import Field, validate_call
 from dataclasses import dataclass
-from ..errors import InvalidUsageError
+from .. import errors
 
 
 __all__ = ["ChunkSizeKB", "ChunkSizeMB", "ChunkSize"]
@@ -58,7 +59,7 @@ class ChunkSize:
 		the contained **KB** and **MB** classes as attributes
 		of this class.
 		"""
-		raise InvalidUsageError(
+		raise errors.InvalidUsageError(
 			"ChunkSize class is a collection of classes and "
 			"is not intended to be instantiated directly."
 		)
