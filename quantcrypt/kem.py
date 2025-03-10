@@ -8,31 +8,37 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from .internal.pqa.common import (
+from .internal.constants import (
 	PQAVariant
 )
-from .internal.pqa.kem import (
-	KEMParamSizes,
-	BaseKEM,
-	Kyber
-)
-from .internal.pqa.errors import (
+from .internal.errors import (
 	PQAError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
 	KEMDecapsFailedError
 )
+from .internal.pqa.base_kem import (
+	KEMParamSizes,
+	BaseKEM
+)
+from .internal.pqa.kem_algos import (
+	MLKEM_512,
+	MLKEM_768,
+	MLKEM_1024
+)
 
 
 __all__ = [
 	"PQAVariant",
-	"KEMParamSizes",
-	"BaseKEM",
-	"Kyber",
 	"PQAError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
-	"KEMDecapsFailedError"
+	"KEMDecapsFailedError",
+	"KEMParamSizes",
+	"BaseKEM",
+	"MLKEM_512",
+	"MLKEM_768",
+	"MLKEM_1024",
 ]

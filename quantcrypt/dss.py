@@ -8,41 +8,50 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 from .internal.chunksize import (
 	ChunkSize
 )
-from .internal.pqa.common import (
+from .internal.constants import (
 	PQAVariant
 )
-from .internal.pqa.dss import (
-	DSSParamSizes,
-	BaseDSS,
-	Dilithium,
-	Falcon,
-	FastSphincs,
-	SmallSphincs
-)
-from .internal.pqa.errors import (
+from .internal.errors import (
 	PQAError,
 	PQAKeyArmorError,
 	DSSKeygenFailedError,
 	DSSSignFailedError,
 	DSSVerifyFailedError
 )
+from .internal.pqa.base_dss import (
+	DSSParamSizes,
+	BaseDSS,
+)
+from .internal.pqa.dss_algos import (
+	MLDSA_44,
+	MLDSA_65,
+	MLDSA_87,
+	FALCON_512,
+	FALCON_1024,
+	FAST_SPHINCS,
+	SMALL_SPHINCS
+)
 
 
 __all__ = [
 	"ChunkSize",
 	"PQAVariant",
-	"DSSParamSizes",
-	"BaseDSS",
-	"Dilithium",
-	"Falcon",
-	"FastSphincs",
-	"SmallSphincs",
 	"PQAError",
 	"PQAKeyArmorError",
 	"DSSKeygenFailedError",
 	"DSSSignFailedError",
-	"DSSVerifyFailedError"
+	"DSSVerifyFailedError",
+	"DSSParamSizes",
+	"BaseDSS",
+	"MLDSA_44",
+	"MLDSA_65",
+	"MLDSA_87",
+	"FALCON_512",
+	"FALCON_1024",
+	"FAST_SPHINCS",
+	"SMALL_SPHINCS"
 ]
