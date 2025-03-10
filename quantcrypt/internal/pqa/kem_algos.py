@@ -17,7 +17,7 @@ from .base_kem import BaseKEM
 __all__ = ["MLKEM_512", "MLKEM_768", "MLKEM_1024"]
 
 
-class MLKEM_512(BaseKEM):
+class MLKEM_512(BaseKEM):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -44,7 +44,7 @@ class MLKEM_512(BaseKEM):
 		return const.SupportedAlgos.MLKEM_512.name
 
 
-class MLKEM_768(BaseKEM):
+class MLKEM_768(BaseKEM):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -71,7 +71,7 @@ class MLKEM_768(BaseKEM):
 		return const.SupportedAlgos.MLKEM_768.name
 
 
-class MLKEM_1024(BaseKEM):
+class MLKEM_1024(BaseKEM):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""

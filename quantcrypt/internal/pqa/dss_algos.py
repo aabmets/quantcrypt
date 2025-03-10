@@ -25,7 +25,7 @@ __all__ = [
 ]
 
 
-class MLDSA_44(BaseDSS):
+class MLDSA_44(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -52,7 +52,7 @@ class MLDSA_44(BaseDSS):
 		return const.SupportedAlgos.MLDSA_44.name
 
 
-class MLDSA_65(BaseDSS):
+class MLDSA_65(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -79,7 +79,7 @@ class MLDSA_65(BaseDSS):
 		return const.SupportedAlgos.MLDSA_65.name
 
 
-class MLDSA_87(BaseDSS):
+class MLDSA_87(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -106,7 +106,7 @@ class MLDSA_87(BaseDSS):
 		return const.SupportedAlgos.MLDSA_87.name
 
 
-class FALCON_512(BaseDSS):
+class FALCON_512(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -133,7 +133,7 @@ class FALCON_512(BaseDSS):
 		return const.SupportedAlgos.FALCON_512.name
 
 
-class FALCON_1024(BaseDSS):
+class FALCON_1024(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -160,7 +160,7 @@ class FALCON_1024(BaseDSS):
 		return const.SupportedAlgos.FALCON_1024.name
 
 
-class FAST_SPHINCS(BaseDSS):
+class FAST_SPHINCS(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
@@ -187,7 +187,7 @@ class FAST_SPHINCS(BaseDSS):
 		return const.SupportedAlgos.FAST_SPHINCS.name
 
 
-class SMALL_SPHINCS(BaseDSS):
+class SMALL_SPHINCS(BaseDSS):  # NOSONAR
 	@utils.input_validator()
 	def __init__(self, variant: const.PQAVariant = None) -> None:
 		"""
