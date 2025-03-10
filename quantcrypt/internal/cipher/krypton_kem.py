@@ -10,12 +10,12 @@
 #
 from pathlib import Path
 from typing import Type, Callable, Optional
-from .krypton_file import KryptonFile
-from ..kdf.common import KDFParams, MemCost
-from ..kdf.argon2_kdf import Argon2
-from ..chunksize import ChunkSize
-from ..pqa.kem import BaseKEM
-from .. import utils
+from quantcrypt.internal.cipher.krypton_file import KryptonFile
+from quantcrypt.internal.kdf.common import KDFParams, MemCost
+from quantcrypt.internal.kdf.argon2_kdf import Argon2
+from quantcrypt.internal.pqa.base_kem import BaseKEM
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal import utils
 
 
 __all__ = ["KryptonKEM"]

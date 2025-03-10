@@ -16,10 +16,10 @@ from Cryptodome.Hash.cSHAKE128 import cSHAKE_XOF
 from Cryptodome.Util.Padding import pad, unpad
 from Cryptodome.Util.strxor import strxor
 from Cryptodome.Cipher import AES
-from ..kdf.kmac_kdf import KKDF
-from ..chunksize import ChunkSize
-from .. import utils
-from . import errors
+from quantcrypt.internal.kdf.kmac_kdf import KKDF
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal import utils
+from quantcrypt.internal import errors
 
 
 __all__ = ["Krypton"]

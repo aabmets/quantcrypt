@@ -13,9 +13,9 @@ from pydantic import Field
 from dataclasses import dataclass
 from collections.abc import Callable
 from typing import Annotated, Optional, BinaryIO
-from ..chunksize import ChunkSize
-from .krypton import Krypton
-from .. import utils
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal.cipher.krypton import Krypton
+from quantcrypt.internal import utils
 
 
 __all__ = ["DecryptedFile", "KryptonFile"]
