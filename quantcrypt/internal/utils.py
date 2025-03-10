@@ -11,6 +11,7 @@
 import base64
 import binascii
 import platform
+from functools import lru_cache
 from Cryptodome.Hash import SHA3_512
 from pydantic import (
 	Field, ConfigDict, validate_call
@@ -57,14 +58,17 @@ def input_validator() -> Callable:
 	))
 
 
-def search_upwards(from_path: str, for_path: str) -> Path | None:
-	current_path = Path(from_path)
+@lru_cache
+def search_upwards(for_path: str, from_path: str = __file__) -> Path:
+	current_path = Path(from_path).parent.resolve()
 	while current_path != current_path.parent:
-		new_path = current_path / for_path
-		if new_path.exists():
-			return new_path
+		search_path = current_path / for_path
+		if search_path.exists():
+			return search_path
+		elif (current_path / ".git").exists():
+			break
 		current_path = current_path.parent
-	raise RuntimeError(f"Fatal Error! Path not found: {for_path}")
+	raise RuntimeError(f"Cannot find path '{for_path}' upwards from '{from_path}'")
 
 
 def annotated_bytes(
