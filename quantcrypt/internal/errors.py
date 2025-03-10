@@ -25,7 +25,13 @@ __all__ = [
 	"KEMDecapsFailedError",
 	"DSSKeygenFailedError",
 	"DSSSignFailedError",
-	"DSSVerifyFailedError"
+	"DSSVerifyFailedError",
+	"KDFError",
+	"KDFOutputLimitError",
+	"KDFWeakPasswordError",
+	"KDFVerificationError",
+	"KDFInvalidHashError",
+	"KDFHashingError",
 ]
 
 
@@ -85,3 +91,32 @@ class DSSSignFailedError(PQAError):
 class DSSVerifyFailedError(PQAError):
 	def __init__(self):
 		super().__init__("QuantCrypt DSS verify failed.")
+
+
+class KDFError(QuantCryptError):
+	"""Base class for all KDF errors."""
+
+
+class KDFOutputLimitError(KDFError):
+	def __init__(self, limit: int):
+		super().__init__(f"Not allowed to derive more than {limit} bytes of keys from one master key.")
+
+
+class KDFWeakPasswordError(KDFError):
+	def __init__(self):
+		super().__init__("Weak passwords are not allowed.")
+
+
+class KDFVerificationError(KDFError):
+	def __init__(self):
+		super().__init__("KDF failed to verify the password against the provided public hash.")
+
+
+class KDFInvalidHashError(KDFError):
+	def __init__(self):
+		super().__init__("KDF was provided with an invalid hash for verification.")
+
+
+class KDFHashingError(KDFError):
+	def __init__(self):
+		super().__init__("KDF was unable to hash the password due to an internal error.")
