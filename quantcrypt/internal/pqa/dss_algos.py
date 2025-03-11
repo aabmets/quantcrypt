@@ -40,16 +40,16 @@ class MLDSA_44(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLDSA_44.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLDSA_44
 
 
 class MLDSA_65(BaseDSS):  # NOSONAR
@@ -67,16 +67,16 @@ class MLDSA_65(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLDSA_65.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLDSA_65
 
 
 class MLDSA_87(BaseDSS):  # NOSONAR
@@ -94,16 +94,16 @@ class MLDSA_87(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLDSA_87.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLDSA_87
 
 
 class FALCON_512(BaseDSS):  # NOSONAR
@@ -121,16 +121,16 @@ class FALCON_512(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.FALCON_512.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.FALCON_512
 
 
 class FALCON_1024(BaseDSS):  # NOSONAR
@@ -148,16 +148,16 @@ class FALCON_1024(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.FALCON_1024.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.FALCON_1024
 
 
 class FAST_SPHINCS(BaseDSS):  # NOSONAR
@@ -175,16 +175,16 @@ class FAST_SPHINCS(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.FAST_SPHINCS.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.FAST_SPHINCS
 
 
 class SMALL_SPHINCS(BaseDSS):  # NOSONAR
@@ -202,13 +202,13 @@ class SMALL_SPHINCS(BaseDSS):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.SMALL_SPHINCS.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.SMALL_SPHINCS

@@ -39,16 +39,16 @@ class SignedFile:
 
 
 class DSSParamSizes(com.BasePQAParamSizes):
-	def __init__(self, lib: ModuleType, ns: str):
-		self.sig_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
-		super().__init__(lib, ns)
+	def __init__(self, lib: ModuleType, cdef_name: str):
+		self.sig_size = getattr(lib, f"{cdef_name}_CRYPTO_BYTES")
+		super().__init__(lib, cdef_name)
 
 
 class BaseDSS(com.BasePQAlgorithm, ABC):
 	@property
 	@lru_cache
 	def param_sizes(self) -> DSSParamSizes:
-		return DSSParamSizes(self._lib, self._namespace)
+		return DSSParamSizes(self._lib, self._cdef_name)
 
 	def keygen(self) -> tuple[bytes, bytes]:
 		"""
@@ -84,7 +84,7 @@ class BaseDSS(com.BasePQAlgorithm, ABC):
 			sig_buf = ffi.new(f"uint8_t [{params.sig_size}]")
 			sig_len = ffi.new("size_t *", params.sig_size)
 
-			func = getattr(self._lib, self._namespace + "_crypto_sign_signature")
+			func = getattr(self._lib, self._cdef_name + "_crypto_sign_signature")
 			if 0 != func(sig_buf, sig_len, msg, len(msg), sk):  # pragma: no cover
 				raise errors.DSSSignFailedError
 
@@ -128,7 +128,7 @@ class BaseDSS(com.BasePQAlgorithm, ABC):
 
 		@utils.input_validator()
 		def _verify(pk: pk_atd, msg: msg_atd, sig: sig_atd, _raises: bool) -> bool:
-			func = getattr(self._lib, self._namespace + "_crypto_sign_verify")
+			func = getattr(self._lib, self._cdef_name + "_crypto_sign_verify")
 			result = func(sig, len(sig), msg, len(msg), pk)
 			if result != 0 and _raises:
 				raise errors.DSSVerifyFailedError

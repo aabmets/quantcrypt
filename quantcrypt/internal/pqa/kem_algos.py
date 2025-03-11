@@ -32,16 +32,16 @@ class MLKEM_512(BaseKEM):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLKEM_512.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLKEM_512
 
 
 class MLKEM_768(BaseKEM):  # NOSONAR
@@ -59,16 +59,16 @@ class MLKEM_768(BaseKEM):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLKEM_768.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLKEM_768
 
 
 class MLKEM_1024(BaseKEM):  # NOSONAR
@@ -86,13 +86,13 @@ class MLKEM_1024(BaseKEM):  # NOSONAR
 		:raises - ImportError: When an unknown import error has occurred.
 		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
 			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for
-			the current platform *(any-select mode)*. This is a fatal error
-			which requires the library to be reinstalled, because all platforms
-			should have CLEAN binaries available.
+		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
+			current platform *(any-select mode)*. This is a fatal error which
+			requires either the library to be reinstalled or the binaries to be
+			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
 
 	@property
-	def name(self) -> str:
-		return const.SupportedAlgos.MLKEM_1024.name
+	def spec(self) -> const.AlgoSpec:
+		return const.SupportedAlgos.MLKEM_1024

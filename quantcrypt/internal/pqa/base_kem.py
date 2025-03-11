@@ -22,17 +22,17 @@ __all__ = ["KEMParamSizes", "BaseKEM"]
 
 
 class KEMParamSizes(com.BasePQAParamSizes):
-	def __init__(self, lib: ModuleType, ns: str):
-		self.ct_size = getattr(lib, f"{ns}_CRYPTO_CIPHERTEXTBYTES")
-		self.ss_size = getattr(lib, f"{ns}_CRYPTO_BYTES")
-		super().__init__(lib, ns)
+	def __init__(self, lib: ModuleType, cdef_name: str):
+		self.ct_size = getattr(lib, f"{cdef_name}_CRYPTO_CIPHERTEXTBYTES")
+		self.ss_size = getattr(lib, f"{cdef_name}_CRYPTO_BYTES")
+		super().__init__(lib, cdef_name)
 
 
 class BaseKEM(com.BasePQAlgorithm, ABC):
 	@property
 	@lru_cache
 	def param_sizes(self) -> KEMParamSizes:
-		return KEMParamSizes(self._lib, self._namespace)
+		return KEMParamSizes(self._lib, self._cdef_name)
 
 	def keygen(self) -> tuple[bytes, bytes]:
 		"""
@@ -69,7 +69,7 @@ class BaseKEM(com.BasePQAlgorithm, ABC):
 			cipher_text = ffi.new(f"uint8_t [{params.ct_size}]")
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
-			func = getattr(self._lib, self._namespace + "_crypto_kem_enc")
+			func = getattr(self._lib, self._cdef_name + "_crypto_kem_enc")
 			if 0 != func(cipher_text, shared_secret, pk):  # pragma: no cover
 				raise errors.KEMEncapsFailedError
 
@@ -105,7 +105,7 @@ class BaseKEM(com.BasePQAlgorithm, ABC):
 			ffi = FFI()
 			shared_secret = ffi.new(f"uint8_t [{params.ss_size}]")
 
-			func = getattr(self._lib, self._namespace + "_crypto_kem_dec")
+			func = getattr(self._lib, self._cdef_name + "_crypto_kem_dec")
 			if 0 != func(shared_secret, ct, sk):  # pragma: no cover
 				raise errors.KEMDecapsFailedError
 

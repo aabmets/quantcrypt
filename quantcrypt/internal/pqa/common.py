@@ -27,9 +27,9 @@ __all__ = ["BasePQAParamSizes", "BasePQAlgorithm"]
 
 
 class BasePQAParamSizes:
-	def __init__(self, lib: ModuleType, ns: str):
-		self.sk_size = getattr(lib, f"{ns}_CRYPTO_SECRETKEYBYTES")
-		self.pk_size = getattr(lib, f"{ns}_CRYPTO_PUBLICKEYBYTES")
+	def __init__(self, lib: ModuleType, cdef_name: str):
+		self.sk_size = getattr(lib, f"{cdef_name}_CRYPTO_SECRETKEYBYTES")
+		self.pk_size = getattr(lib, f"{cdef_name}_CRYPTO_PUBLICKEYBYTES")
 
 
 class BasePQAlgorithm(ABC):
@@ -38,7 +38,7 @@ class BasePQAlgorithm(ABC):
 
 	@property
 	@abstractmethod
-	def name(self) -> str: ...
+	def spec(self) -> const.AlgoSpec: ...
 
 	@property
 	@abstractmethod
@@ -48,37 +48,37 @@ class BasePQAlgorithm(ABC):
 	def keygen(self) -> tuple[bytes, bytes]: ...
 
 	@property
-	def _namespace(self) -> str:
-		name = self.name.replace('-', '').upper()
-		return f"PQCLEAN_{name}_{self.variant.name}"
+	def _cdef_name(self) -> str:
+		return self.spec.cdef_name(self.variant)
+
+	@property
+	def _auto_select_variant(self) -> const.PQAVariant:
+		opsys = platform.machine().lower()
+		if opsys in const.ARMArches:
+			return const.PQAVariant.ARM
+		elif opsys in const.AMDArches:
+			return const.PQAVariant.OPT
+		return const.PQAVariant.REF
 
 	@lru_cache
 	def _import(self, variant: const.PQAVariant) -> ModuleType:
-		return importlib.import_module(
-			f"quantcrypt.internal.bin.{platform.system()}" +
-			f".{variant.value}.{self.name.replace('-', '_')}"
-		).lib
+		module_name = self.spec.module_name(variant)
+		module_path = f"quantcrypt.internal.bin.{module_name}"
+		return importlib.import_module(module_path).lib
 
-	def __init__(self, variant: const.PQAVariant = None):
-		# variant is None -> auto-select mode
+	def __init__(self, variant: const.PQAVariant | None = None) -> None:
 		try:
-			_var = variant or const.PQAVariant.OPT
-			self._lib = self._import(_var)
-			self.variant = _var
-		except ModuleNotFoundError as ex:
-			if variant is None:
+			self.variant = variant or self._auto_select_variant
+			self._lib = self._import(self.variant)
+		except ModuleNotFoundError:
+			if self.variant != const.PQAVariant.REF:
 				try:
-					self._lib = self._import(const.PQAVariant.REF)
 					self.variant = const.PQAVariant.REF
+					self._lib = self._import(const.PQAVariant.REF)
 					return
 				except ModuleNotFoundError:  # pragma: no cover
 					pass
-			elif variant == const.PQAVariant.OPT:  # pragma: no cover
-				raise ex
-			raise SystemExit(  # pragma: no cover
-				"Quantcrypt Fatal Error:\n"
-				"Unable to continue due to missing CLEAN binaries."
-			)
+			raise errors.MissingBinariesError(self.variant)
 
 	def _upper_name(self) -> str:
 		return ''.join(re.findall(
@@ -95,8 +95,8 @@ class BasePQAlgorithm(ABC):
 		public_key = ffi.new(f"uint8_t [{params.pk_size}]")
 		secret_key = ffi.new(f"uint8_t [{params.sk_size}]")
 
-		name = f"_crypto_{algo_type}_keypair"
-		func = getattr(self._lib, self._namespace + name)
+		func_name = f"_crypto_{algo_type}_keypair"
+		func = getattr(self._lib, self._cdef_name + func_name)
 		if func(public_key, secret_key) != 0:  # pragma: no cover
 			raise error_cls
 
