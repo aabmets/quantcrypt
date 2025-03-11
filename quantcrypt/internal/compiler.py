@@ -86,8 +86,8 @@ class Target:
         return self.spec.cdef_name(self.variant)
 
     @property
-    def py_name(self) -> str:
-        return self.spec.py_name(self.variant)
+    def module_name(self) -> str:
+        return self.spec.module_name(self.variant)
 
     @property
     def ffi_cdefs(self) -> str:
@@ -103,8 +103,35 @@ class Target:
         ]
 
     @property
-    def header_file(self) -> str:
-        return (self.source_dir / "api.h").as_posix()
+    def include_directive(self) -> str:
+        header_file = self.source_dir / "api.h"
+        return f'#include "{header_file.as_posix()}"'
+
+    @property
+    def compiler_args(self) -> t.List[str]:
+        opsys = platform.system().lower()
+        if opsys == "windows":
+            extra_flags = [f"/arch:{flag.upper()}" for flag in self.required_flags]
+            return ["/O2", "/MD", "/nologo", *extra_flags]
+        elif opsys in ["linux", "darwin"]:
+            extra_flags = [f"-m{flag.lower()}" for flag in self.required_flags]
+            return [
+                "-flto", "-fdata-sections", "-ffunction-sections",
+                "-s", "-Os", "-O3", "-std=c99", *extra_flags,
+            ]
+        raise errors.UnsupportedPlatformError
+
+    @property
+    def linker_args(self) -> t.List[str]:
+        if platform.system().lower() == "windows":
+            return ["/NODEFAULTLIB:MSVCRTD"]
+        return []
+
+    @property
+    def libraries(self) -> t.List[str]:
+        if platform.system().lower() == "windows":
+            return ["advapi32"]
+        return []
 
 
 class Compiler:
@@ -135,7 +162,7 @@ class Compiler:
         new_cwd.mkdir(parents=True, exist_ok=True)
         os.chdir(new_cwd)
         yield
-        for path in (new_cwd / "bin").rglob("*.*"):
+        for path in new_cwd.rglob("*.*"):
             if path.is_file() and path.suffix in [".pyd", ".so"]:
                 shutil.move(path, bin_path)
         os.chdir(old_cwd)
@@ -144,37 +171,16 @@ class Compiler:
     @staticmethod
     def compile(target: Target) -> None:
         com_dir, com_files = pqclean.get_common_filepaths(target.variant)
-        compiler_args = list()
-        linker_args = list()
-        libraries = list()
-
-        match platform.system().lower():
-            case "linux" | "darwin":
-                compiler_args.extend([
-                    "-s", "-flto", "-std=c99",
-                    "-Os", "-ffunction-sections",
-                    "-O3", "-fdata-sections",
-                    *target.required_flags,
-                ])
-            case "windows":
-                compiler_args.extend(["/O2", "/MD", "/nologo"])
-                if target.variant == const.PQAVariant.OPT:
-                    compiler_args.append("/arch:AVX2")
-                linker_args.append("/NODEFAULTLIB:MSVCRTD")
-                libraries.append("advapi32")
-            case _:
-                raise errors.UnsupportedPlatformError
-
         ffi = FFI()
         ffi.cdef(target.ffi_cdefs)
         ffi.set_source(
-            module_name=f"bin.{target.py_name}",
-            source=f'#include "{target.header_file}"',
+            module_name=target.module_name,
+            source=target.include_directive,
             sources=[*com_files, *target.variant_files],
             include_dirs=[com_dir],
-            extra_compile_args=compiler_args,
-            extra_link_args=linker_args,
-            libraries=libraries,
+            extra_compile_args=target.compiler_args,
+            extra_link_args=target.linker_args,
+            libraries=target.libraries,
         )
         ffi.compile(verbose=False)
 
