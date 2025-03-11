@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import timeit
 import pytest
 from typing import Type, Callable

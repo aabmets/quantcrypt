@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import pytest
 from typing import Literal, cast
 from pydantic import ValidationError
