@@ -8,15 +8,14 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import pytest
 from functools import lru_cache
 from pydantic import ValidationError
 from typing import Callable, Type, cast
-from quantcrypt.internal.pqa import errors
-from quantcrypt.internal.pqa.common import (
-	BasePQAlgorithm,
-	PQAVariant
-)
+from quantcrypt.internal import errors
+from quantcrypt.internal import constants as const
+from quantcrypt.internal.pqa.common import BasePQAlgorithm
 
 
 @pytest.fixture(scope="package")
@@ -70,14 +69,9 @@ def invalid_ciphertexts() -> Callable:
 def pqc_variant_tests():
 	def closure(algo_cls: Type[BasePQAlgorithm]):
 		obj = algo_cls()
-		assert obj.variant == PQAVariant.CLEAN
-
-		obj = algo_cls(PQAVariant.CLEAN)
-		assert obj.variant == PQAVariant.CLEAN
-
-		with pytest.raises(ModuleNotFoundError):
-			algo_cls(PQAVariant.AVX2)
-
+		assert obj.variant == const.PQAVariant.REF
+		obj = algo_cls(const.PQAVariant.REF)
+		assert obj.variant == const.PQAVariant.REF
 	return closure
 
 

@@ -8,13 +8,16 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import pytest
 from typing import Callable, Type
 from secrets import compare_digest
 from pydantic import ValidationError
-from quantcrypt.internal.pqa.kem import BaseKEM
+from quantcrypt.internal.pqa.base_kem import BaseKEM
+from quantcrypt.internal import constants as const
 from quantcrypt.kem import (
-	Kyber, PQAVariant, KEMParamSizes
+	MLKEM_512, MLKEM_768, MLKEM_1024,
+	KEMParamSizes
 )
 
 
@@ -23,11 +26,11 @@ def fixture_attribute_tests():
 	def closure(kem_cls: Type[BaseKEM]):
 		kem = kem_cls()
 
-		assert hasattr(kem, "name")
-		assert isinstance(kem.name, str)
+		assert hasattr(kem, "spec")
+		assert isinstance(kem.spec, const.AlgoSpec)
 
 		assert hasattr(kem, "variant")
-		assert isinstance(kem.variant, PQAVariant)
+		assert isinstance(kem.variant, const.PQAVariant)
 
 		assert hasattr(kem, "param_sizes")
 		assert isinstance(kem.param_sizes, KEMParamSizes)
@@ -105,31 +108,40 @@ def fixture_invalid_inputs_tests(
 	return closure
 
 
-class TestKyber:
-	@staticmethod
-	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(Kyber)
+class Test_KEM_Algorithms:
+	algos = [MLKEM_512, MLKEM_768, MLKEM_1024]
 
-	@staticmethod
-	def test_2(attribute_tests: Callable):
-		attribute_tests(Kyber)
+	@classmethod
+	def test_1(cls, pqc_variant_tests: Callable):
+		for algo in cls.algos:
+			pqc_variant_tests(algo)
 
-	@staticmethod
-	def test_3(cryptography_tests: Callable):
-		cryptography_tests(Kyber)
+	@classmethod
+	def test_2(cls, attribute_tests: Callable):
+		for algo in cls.algos:
+			attribute_tests(algo)
 
-	@staticmethod
-	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(Kyber)
+	@classmethod
+	def test_3(cls, cryptography_tests: Callable):
+		for algo in cls.algos:
+			cryptography_tests(algo)
 
-	@staticmethod
-	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(Kyber)
+	@classmethod
+	def test_4(cls, invalid_inputs_tests: Callable):
+		for algo in cls.algos:
+			invalid_inputs_tests(algo)
 
-	@staticmethod
-	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(Kyber)
+	@classmethod
+	def test_5(cls, armoring_success_tests: Callable):
+		for algo in cls.algos:
+			armoring_success_tests(algo)
 
-	@staticmethod
-	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(Kyber)
+	@classmethod
+	def test_6(cls, armor_failure_tests: Callable):
+		for algo in cls.algos:
+			armor_failure_tests(algo)
+
+	@classmethod
+	def test_7(cls, dearmor_failure_tests: Callable):
+		for algo in cls.algos:
+			dearmor_failure_tests(algo)

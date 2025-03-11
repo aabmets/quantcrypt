@@ -8,16 +8,19 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import pytest
 from pathlib import Path
 from typing import Callable, Type
 from pydantic import ValidationError
-from quantcrypt.internal.pqa.dss import BaseDSS
-from quantcrypt.internal.pqa import errors
+from quantcrypt.internal.pqa.base_dss import BaseDSS
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import errors
 from quantcrypt.dss import (
-	Dilithium, Falcon,
-	FastSphincs, SmallSphincs,
-	PQAVariant, DSSParamSizes
+	MLDSA_44, MLDSA_65, MLDSA_87,
+	FALCON_512, FALCON_1024,
+	FAST_SPHINCS, SMALL_SPHINCS,
+	DSSParamSizes
 )
 
 
@@ -26,11 +29,11 @@ def fixture_attribute_tests():
 	def closure(dss_cls: Type[BaseDSS]):
 		dss = dss_cls()
 
-		assert hasattr(dss, "name")
-		assert isinstance(dss.name, str)
+		assert hasattr(dss, "spec")
+		assert isinstance(dss.spec, const.AlgoSpec)
 
 		assert hasattr(dss, "variant")
-		assert isinstance(dss.variant, PQAVariant)
+		assert isinstance(dss.variant, const.PQAVariant)
 
 		assert hasattr(dss, "param_sizes")
 		assert isinstance(dss.param_sizes, DSSParamSizes)
@@ -169,153 +172,58 @@ def fixture_sign_verify_file_callback_tests(tmp_path: Path):
 	return closure
 
 
-class TestDilithium:
-	@staticmethod
-	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(Dilithium)
+class Test_DSS_Algorithms:
+	algos = [
+		MLDSA_44,
+		MLDSA_65,
+		MLDSA_87,
+		FALCON_512,
+		FALCON_1024,
+		SMALL_SPHINCS,
+		FAST_SPHINCS
+	]
 
-	@staticmethod
-	def test_2(attribute_tests: Callable):
-		attribute_tests(Dilithium)
+	@classmethod
+	def test_1(cls, pqc_variant_tests: Callable):
+		for algo in cls.algos:
+			pqc_variant_tests(algo)
 
-	@staticmethod
-	def test_3(cryptography_tests: Callable):
-		cryptography_tests(Dilithium)
+	@classmethod
+	def test_2(cls, attribute_tests: Callable):
+		for algo in cls.algos:
+			attribute_tests(algo)
 
-	@staticmethod
-	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(Dilithium)
+	@classmethod
+	def test_3(cls, cryptography_tests: Callable):
+		for algo in cls.algos:
+			cryptography_tests(algo)
 
-	@staticmethod
-	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(Dilithium)
+	@classmethod
+	def test_4(cls, invalid_inputs_tests: Callable):
+		for algo in cls.algos:
+			invalid_inputs_tests(algo)
 
-	@staticmethod
-	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(Dilithium)
+	@classmethod
+	def test_5(cls, armoring_success_tests: Callable):
+		for algo in cls.algos:
+			armoring_success_tests(algo)
 
-	@staticmethod
-	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(Dilithium)
+	@classmethod
+	def test_6(cls, armor_failure_tests: Callable):
+		for algo in cls.algos:
+			armor_failure_tests(algo)
 
-	@staticmethod
-	def test_8(sign_verify_file_tests: Callable):
-		sign_verify_file_tests(Dilithium)
+	@classmethod
+	def test_7(cls, dearmor_failure_tests: Callable):
+		for algo in cls.algos:
+			dearmor_failure_tests(algo)
 
-	@staticmethod
-	def test_9(sign_verify_file_callback_tests: Callable):
-		sign_verify_file_callback_tests(Dilithium)
+	@classmethod
+	def test_8(cls, sign_verify_file_tests: Callable):
+		for algo in cls.algos:
+			sign_verify_file_tests(algo)
 
-
-class TestFalcon:
-	@staticmethod
-	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(Falcon)
-
-	@staticmethod
-	def test_2(attribute_tests: Callable):
-		attribute_tests(Falcon)
-
-	@staticmethod
-	def test_3(cryptography_tests: Callable):
-		cryptography_tests(Falcon)
-
-	@staticmethod
-	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(Falcon)
-
-	@staticmethod
-	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(Falcon)
-
-	@staticmethod
-	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(Falcon)
-
-	@staticmethod
-	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(Falcon)
-
-	@staticmethod
-	def test_8(sign_verify_file_tests: Callable):
-		sign_verify_file_tests(Falcon)
-
-	@staticmethod
-	def test_9(sign_verify_file_callback_tests: Callable):
-		sign_verify_file_callback_tests(Falcon)
-
-
-class TestFastSphincs:
-	@staticmethod
-	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(FastSphincs)
-
-	@staticmethod
-	def test_2(attribute_tests: Callable):
-		attribute_tests(FastSphincs)
-
-	@staticmethod
-	def test_3(cryptography_tests: Callable):
-		cryptography_tests(FastSphincs)
-
-	@staticmethod
-	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(FastSphincs)
-
-	@staticmethod
-	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(FastSphincs)
-
-	@staticmethod
-	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(FastSphincs)
-
-	@staticmethod
-	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(FastSphincs)
-
-	@staticmethod
-	def test_8(sign_verify_file_tests: Callable):
-		sign_verify_file_tests(FastSphincs)
-
-	@staticmethod
-	def test_9(sign_verify_file_callback_tests: Callable):
-		sign_verify_file_callback_tests(FastSphincs)
-
-
-class TestSmallSphincs:
-	@staticmethod
-	def test_1(pqc_variant_tests: Callable):
-		pqc_variant_tests(SmallSphincs)
-
-	@staticmethod
-	def test_2(attribute_tests: Callable):
-		attribute_tests(SmallSphincs)
-
-	@staticmethod
-	def test_3(cryptography_tests: Callable):
-		cryptography_tests(SmallSphincs)
-
-	@staticmethod
-	def test_4(invalid_inputs_tests: Callable):
-		invalid_inputs_tests(SmallSphincs)
-
-	@staticmethod
-	def test_5(armoring_success_tests: Callable):
-		armoring_success_tests(SmallSphincs)
-
-	@staticmethod
-	def test_6(armor_failure_tests: Callable):
-		armor_failure_tests(SmallSphincs)
-
-	@staticmethod
-	def test_7(dearmor_failure_tests: Callable):
-		dearmor_failure_tests(SmallSphincs)
-
-	@staticmethod
-	def test_8(sign_verify_file_tests: Callable):
-		sign_verify_file_tests(SmallSphincs)
-
-	@staticmethod
-	def test_9(sign_verify_file_callback_tests: Callable):
-		sign_verify_file_callback_tests(SmallSphincs)
+	@classmethod
+	def test_9(cls, sign_verify_file_callback_tests: Callable):
+		for algo in cls.algos:
+			sign_verify_file_callback_tests(algo)
