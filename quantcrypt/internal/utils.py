@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import base64
 import binascii
 import typing as t
