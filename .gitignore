@@ -161,3 +161,6 @@ fabric.properties
 
 # PQClean source code
 quantcrypt/internal/pqclean/
+
+# Compiled PQClean binaries
+quantcrypt/internal/bin/
