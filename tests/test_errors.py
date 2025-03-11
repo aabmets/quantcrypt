@@ -8,23 +8,14 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
+from quantcrypt.internal import constants as const
 from quantcrypt.errors import (
 	QuantCryptError,
 	InvalidUsageError,
 	InvalidArgsError,
-
-	CipherError,
-	CipherStateError,
-	CipherVerifyError,
-	CipherChunkSizeError,
-	CipherPaddingError,
-
-	KDFError,
-	KDFOutputLimitError,
-	KDFWeakPasswordError,
-	KDFVerificationError,
-	KDFInvalidHashError,
-	KDFHashingError,
+	UnsupportedPlatformError,
+	MissingBinariesError,
 
 	PQAError,
 	PQAKeyArmorError,
@@ -33,7 +24,20 @@ from quantcrypt.errors import (
 	KEMDecapsFailedError,
 	DSSKeygenFailedError,
 	DSSSignFailedError,
-	DSSVerifyFailedError
+	DSSVerifyFailedError,
+
+	KDFError,
+	KDFOutputLimitError,
+	KDFWeakPasswordError,
+	KDFVerificationError,
+	KDFInvalidHashError,
+	KDFHashingError,
+
+	CipherError,
+	CipherStateError,
+	CipherVerifyError,
+	CipherChunkSizeError,
+	CipherPaddingError
 )
 
 
@@ -41,19 +45,10 @@ def test_error_instantiation():
 	assert QuantCryptError()
 	assert InvalidUsageError()
 	assert InvalidArgsError()
-
-	assert CipherError()
-	assert CipherStateError()
-	assert CipherVerifyError()
-	assert CipherChunkSizeError()
-	assert CipherPaddingError()
-
-	assert KDFError()
-	assert KDFOutputLimitError(0)
-	assert KDFWeakPasswordError()
-	assert KDFVerificationError()
-	assert KDFInvalidHashError()
-	assert KDFHashingError()
+	assert UnsupportedPlatformError()
+	assert MissingBinariesError(const.PQAVariant.REF)
+	assert MissingBinariesError(const.PQAVariant.OPT)
+	assert MissingBinariesError(const.PQAVariant.ARM)
 
 	assert PQAError()
 	assert PQAKeyArmorError("armor")
@@ -64,3 +59,16 @@ def test_error_instantiation():
 	assert DSSKeygenFailedError()
 	assert DSSSignFailedError()
 	assert DSSVerifyFailedError()
+
+	assert KDFError()
+	assert KDFOutputLimitError(0)
+	assert KDFWeakPasswordError()
+	assert KDFVerificationError()
+	assert KDFInvalidHashError()
+	assert KDFHashingError()
+
+	assert CipherError()
+	assert CipherStateError()
+	assert CipherVerifyError()
+	assert CipherChunkSizeError()
+	assert CipherPaddingError()
