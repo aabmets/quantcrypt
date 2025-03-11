@@ -91,9 +91,9 @@ class SupportedAlgos:
 
     @classmethod
     def iterate(cls) -> Iterator[AlgoSpec]:
-        for k, v in vars(cls).items():
-            if isinstance(v, AlgoSpec):
-                yield v
+        for value in vars(cls).values():
+            if isinstance(value, AlgoSpec):
+                yield value
 
 
 SupportedVariants = [PQAVariant.REF]
