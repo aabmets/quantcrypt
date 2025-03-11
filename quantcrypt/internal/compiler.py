@@ -110,14 +110,24 @@ class Target:
     @property
     def compiler_args(self) -> list[str]:
         opsys = platform.system().lower()
-        if opsys == "windows":
-            extra_flags = [f"/arch:{flag.upper()}" for flag in self.required_flags]
+        arch = platform.machine().lower()
+        extra_flags: list[str] = []
+        if opsys == "windows" and arch in const.AMDArches:
+            for flag in self.required_flags:
+                extra_flags.append(f"/arch:{flag.upper()}")
             return ["/O2", "/MD", "/nologo", *extra_flags]
         elif opsys in ["linux", "darwin"]:
-            extra_flags = [f"-m{flag.lower()}" for flag in self.required_flags]
+            if arch in const.AMDArches:
+                for flag in self.required_flags:
+                    extra_flags.append(f"-m{flag.lower()}")
+            elif arch in const.ARMArches:
+                extra_flag = "-march=armv8.5-a"
+                for flag in self.required_flags:
+                    extra_flag += f"+{flag.lower()}"
+                extra_flags.append(extra_flag)
             return [
-                "-flto", "-fdata-sections", "-ffunction-sections",
-                "-s", "-Os", "-O3", "-std=c99", *extra_flags,
+                "-s", "-fdata-sections", "-ffunction-sections",
+                "-O3", "-flto", "-std=c99", *extra_flags,
             ]
         raise errors.UnsupportedPlatformError
 
