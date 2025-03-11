@@ -163,26 +163,26 @@ def check_arch_support(impl: PQAImplementation) -> t.Optional[PQASupportedPlatfo
 def check_platform_support(
         spec: const.AlgoSpec,
         variant: const.PQAVariant
-) -> t.Optional[t.Tuple[Path, t.List[str]]]:
+) -> t.Union[t.Tuple[Path, t.List[str]], t.Tuple[None, None]]:
     required_flags: t.List[str] = []
     meta = read_algo_metadata(spec)
     impl = meta.filter(variant)
 
     if not impl:
-        return None
+        return None, None
     elif impl.supported_platforms:
         spf = check_arch_support(impl)
         if not spf:
-            return None
+            return None, None
         if spf.operating_systems:
             opsys = check_opsys_support(spf)
             if not opsys:
-                return None
+                return None, None
         if spf.required_flags:
             required_flags = spf.required_flags
 
     pqclean = utils.search_upwards('pqclean')
-    variant_path = pqclean / spec.type.value / spec.name / variant.value
-    if variant_path.exists():
-        return variant_path, required_flags
-    return None
+    source_dir = pqclean / spec.type.value / spec.name / variant.value
+    if source_dir.exists():
+        return source_dir, required_flags
+    return None, None
