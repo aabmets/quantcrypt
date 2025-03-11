@@ -10,23 +10,13 @@
 #
 import base64
 import binascii
-import platform
+import typing as t
+from pathlib import Path
 from functools import lru_cache
 from Cryptodome.Hash import SHA3_512
-from pydantic import (
-	Field, ConfigDict, validate_call
-)
-from typing import (
-	BinaryIO, Generator, Optional,
-	Callable, Type, Annotated
-)
-from pathlib import (
-	PureWindowsPath,
-	PurePosixPath,
-	Path
-)
-from .chunksize import ChunkSize
-from . import errors
+from pydantic import Field, ConfigDict, validate_call
+from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal import errors
 
 
 __all__ = [
@@ -51,7 +41,7 @@ def b64(data: str | bytes) -> str | bytes:
 		raise errors.InvalidArgsError
 
 
-def input_validator() -> Callable:
+def input_validator() -> t.Callable:
 	return validate_call(config=ConfigDict(
 		arbitrary_types_allowed=True,
 		validate_return=True
@@ -59,7 +49,7 @@ def input_validator() -> Callable:
 
 
 @lru_cache
-def search_upwards(for_path: str, from_path: str = __file__) -> Path:
+def search_upwards(for_path: str | Path, from_path: str | Path = __file__) -> Path:
 	current_path = Path(from_path).parent.resolve()
 	while current_path != current_path.parent:
 		search_path = current_path / for_path
@@ -75,8 +65,8 @@ def annotated_bytes(
 		min_size: int = None,
 		max_size: int = None,
 		equal_to: int = None
-) -> Type[bytes]:
-	return Annotated[bytes, Field(
+) -> t.Type[bytes]:
+	return t.Annotated[bytes, Field(
 		min_length=equal_to or min_size,
 		max_length=equal_to or max_size,
 		strict=True
@@ -84,10 +74,10 @@ def annotated_bytes(
 
 
 def read_file_chunks(
-		file: BinaryIO,
+		file: t.BinaryIO,
 		chunk_size: int,
-		callback: Optional[Callable] = None
-) -> Generator[bytes, None, None]:
+		callback: t.Callable | None = None
+) -> t.Generator[bytes, None, None]:
 	while True:
 		chunk = file.read(chunk_size)
 		if not chunk:
@@ -97,7 +87,7 @@ def read_file_chunks(
 		yield chunk
 
 
-def sha3_digest_file(file_path: Path, callback: Optional[Callable] = None) -> bytes:
+def sha3_digest_file(file_path: Path, callback: t.Callable | None = None) -> bytes:
 	sha3 = SHA3_512.new()
 	file_size = file_path.stat().st_size
 	chunk_size = ChunkSize.determine_from_data_size(file_size)
@@ -108,16 +98,8 @@ def sha3_digest_file(file_path: Path, callback: Optional[Callable] = None) -> by
 		return sha3.digest()
 
 
-def resolve_relpath(path: str | Path | None) -> Path:
-	if path is None:
-		path = Path('')
-
-	match platform.system():  # pragma: no cover
-		case "Windows":
-			pure_path = PureWindowsPath(path)
-		case _:
-			pure_path = PurePosixPath(path)
-
-	if pure_path.is_absolute():
-		return Path(path)
-	return (Path.cwd() / path).resolve()
+def resolve_relpath(path: str | Path | None = None) -> Path:
+	_path = Path(path or '')
+	if _path.is_absolute():
+		return Path(_path)
+	return (Path.cwd() / _path).resolve()
