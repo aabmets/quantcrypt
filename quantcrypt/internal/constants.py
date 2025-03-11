@@ -37,8 +37,12 @@ class PQAVariant(Enum):
     ARM = "aarch64"
 
     @classmethod
+    def members(cls) -> t.List[PQAVariant]:
+        return list(vars(cls)["_member_map_"].values())
+
+    @classmethod
     def values(cls) -> t.List[str]:
-        return vars(cls)["_hashable_values_"]
+        return [m.value for m in cls.members()]
 
 
 class PQAType(Enum):
