@@ -72,7 +72,7 @@ class AlgoSpec:
         name = self.name.replace('-', '')
         return f"PQCLEAN_{name}_{variant.value}".upper()
 
-    def py_name(self, variant: PQAVariant) -> str:
+    def module_name(self, variant: PQAVariant) -> str:
         name = self.name.replace('-', '_')
         return f"{name}_{variant.value}".lower()
 
