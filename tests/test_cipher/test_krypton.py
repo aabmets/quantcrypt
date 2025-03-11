@@ -12,7 +12,7 @@ import pytest
 from typing import Callable
 from pydantic import ValidationError
 from quantcrypt.cipher import Krypton, ChunkSize
-from quantcrypt.internal.cipher import errors
+from quantcrypt.internal import errors
 
 
 def test_krypton_attributes():

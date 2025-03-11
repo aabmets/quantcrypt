@@ -16,11 +16,11 @@ from dotmap import DotMap
 from typing import Callable
 from quantcrypt.cipher import KryptonKEM, ChunkSize
 from quantcrypt.kdf import KDFParams, MemCost
-from quantcrypt.kem import Kyber
+from quantcrypt.kem import MLKEM_512
 
 
 def test_krypton_kem_attributes():
-	krypton = KryptonKEM(Kyber)
+	krypton = KryptonKEM(MLKEM_512)
 
 	assert hasattr(krypton, "encrypt")
 	assert hasattr(krypton, "decrypt_to_file")
@@ -34,9 +34,9 @@ def test_krypton_kem_attributes():
 def test_krypton_kem_enc_dec(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber, KDFParams(
+	krypton = KryptonKEM(MLKEM_512, KDFParams(
 		memory_cost=MemCost.MB(32),
 		parallelism=8,
 		time_cost=1,
@@ -60,9 +60,9 @@ def test_krypton_kem_output_file(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 	os.chdir(kfh.tmp_path)
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber)
+	krypton = KryptonKEM(MLKEM_512)
 	setattr(krypton, "_testing", True)
 
 	ct_file = kfh.pt_file.with_suffix(".kptn")
@@ -87,9 +87,9 @@ def test_krypton_kem_output_file(krypton_file_helpers: DotMap):
 def test_krypton_kem_enc_dec_callback(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber, callback=kfh.callback)
+	krypton = KryptonKEM(MLKEM_512, callback=kfh.callback)
 	setattr(krypton, "_testing", True)
 
 	krypton.encrypt(pk, kfh.pt_file, kfh.ct_file)
@@ -101,9 +101,9 @@ def test_krypton_kem_enc_dec_callback(krypton_file_helpers: DotMap):
 def test_krypton_kem_enc_dec_into_memory(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber)
+	krypton = KryptonKEM(MLKEM_512)
 	setattr(krypton, "_testing", True)
 
 	krypton.encrypt(pk, kfh.pt_file, kfh.ct_file)
@@ -114,9 +114,9 @@ def test_krypton_kem_enc_dec_into_memory(krypton_file_helpers: DotMap):
 def test_krypton_kem_enc_dec_chunk_size_override(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber, chunk_size=ChunkSize.KB(1), callback=kfh.callback)
+	krypton = KryptonKEM(MLKEM_512, chunk_size=ChunkSize.KB(1), callback=kfh.callback)
 	setattr(krypton, "_testing", True)
 
 	krypton.encrypt(pk, kfh.pt_file, kfh.ct_file)
@@ -129,9 +129,9 @@ def test_krypton_kem_enc_dec_chunk_size_override(krypton_file_helpers: DotMap):
 def test_krypton_kem_enc_dec_errors(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber)
+	krypton = KryptonKEM(MLKEM_512)
 
 	kfh.ct_file.touch()
 	kfh.pt2_file.touch()
@@ -147,9 +147,9 @@ def test_krypton_kem_enc_dec_errors(krypton_file_helpers: DotMap):
 def test_krypton_kem_argon2_delay(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
-	krypton = KryptonKEM(Kyber)
+	krypton = KryptonKEM(MLKEM_512)
 
 	def test():
 		krypton.encrypt(pk, kfh.pt_file, kfh.ct_file)
@@ -168,10 +168,10 @@ def test_krypton_kem_argon2_delay(krypton_file_helpers: DotMap):
 def test_krypton_kem_armored_keys(krypton_file_helpers: DotMap):
 	kfh = krypton_file_helpers
 
-	kem = Kyber()
+	kem = MLKEM_512()
 	pk, sk = kem.keygen()
 
-	krypton = KryptonKEM(Kyber, KDFParams(
+	krypton = KryptonKEM(MLKEM_512, KDFParams(
 		memory_cost=MemCost.MB(32),
 		parallelism=8,
 		time_cost=1,
