@@ -11,6 +11,7 @@
 
 import platform
 from typing import Literal
+from quantcrypt.internal import constants as const
 
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
 	"InvalidUsageError",
 	"InvalidArgsError",
 	"UnsupportedPlatformError",
+	"MissingBinariesError",
 
 	"PQAError",
 	"PQAKeyArmorError",
@@ -60,6 +62,11 @@ class InvalidArgsError(QuantCryptError):
 class UnsupportedPlatformError(QuantCryptError):
 	def __init__(self):
 		super().__init__(f"Operating system '{platform.system()}' not supported!")
+
+
+class MissingBinariesError(QuantCryptError):
+	def __init__(self, variant: const.PQAVariant):
+		super().__init__(f"{variant.value.upper()} binaries not found!")
 
 
 class PQAError(QuantCryptError):

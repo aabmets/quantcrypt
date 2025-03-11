@@ -14,6 +14,7 @@ from quantcrypt.internal.errors import (
 	InvalidUsageError,
 	InvalidArgsError,
 	UnsupportedPlatformError,
+	MissingBinariesError,
 
 	PQAError,
 	PQAKeyArmorError,
@@ -44,6 +45,7 @@ __all__ = [
 	"InvalidUsageError",
 	"InvalidArgsError",
 	"UnsupportedPlatformError",
+	"MissingBinariesError",
 
 	"PQAError",
 	"PQAKeyArmorError",
