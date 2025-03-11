@@ -10,8 +10,8 @@
 #
 
 from __future__ import annotations
-import typing as t
 from enum import Enum
+from typing import Iterator
 from dataclasses import dataclass
 
 
@@ -37,11 +37,11 @@ class PQAVariant(Enum):
     ARM = "aarch64"
 
     @classmethod
-    def members(cls) -> t.List[PQAVariant]:
+    def members(cls) -> list[PQAVariant]:
         return list(vars(cls)["_member_map_"].values())
 
     @classmethod
-    def values(cls) -> t.List[str]:
+    def values(cls) -> list[str]:
         return [m.value for m in cls.members()]
 
 
@@ -90,11 +90,13 @@ class SupportedAlgos:
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
 
     @classmethod
-    def iterate(cls) -> t.Iterator[AlgoSpec]:
+    def iterate(cls) -> Iterator[AlgoSpec]:
         for k, v in vars(cls).items():
             if isinstance(v, AlgoSpec):
                 yield v
 
 
 SupportedVariants = [PQAVariant.REF]
+AMDArches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
+ARMArches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
 PQCleanRepoArchiveURL = "https://github.com/PQClean/PQClean/archive/448c71a8f590343e681d0d0cec94f29947b0ff18.zip"

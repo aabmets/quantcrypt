@@ -12,12 +12,12 @@
 from __future__ import annotations
 import re
 import yaml
-import zipfile
 import requests
-import typing as t
 import platform
-from pydantic import BaseModel
+from typing import Literal
+from zipfile import ZipFile, ZipInfo
 from pathlib import Path
+from pydantic import BaseModel
 from functools import cache
 from quantcrypt.internal import constants as const
 from quantcrypt.internal import utils
@@ -40,7 +40,7 @@ __all__ = [
 
 def check_sources_exist() -> bool:
     pqclean = utils.search_upwards('pqclean')
-    check_dirs: t.List[bool] = []
+    check_dirs: list[bool] = []
     variants = const.PQAVariant.values()
     for spec in const.SupportedAlgos.iterate():
         for variant in variants:
@@ -49,7 +49,7 @@ def check_sources_exist() -> bool:
     return all(check_dirs)
 
 
-def filter_archive_contents(members: t.List[zipfile.ZipInfo]) -> t.List[t.Tuple[zipfile.ZipInfo, Path]]:
+def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]]:
     supported_algos = [spec.name for spec in const.SupportedAlgos.iterate()]
     accepted_dirs = ["common", "crypto_kem", "crypto_sign"]
     filtered_members = []
@@ -83,7 +83,7 @@ def download_extract_pqclean() -> None:
             if chunk:
                 f.write(chunk)
 
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    with ZipFile(zip_path, 'r') as zip_ref:
         for member, file_path in filter_archive_contents(zip_ref.infolist()):
             full_path = pqclean / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -117,20 +117,20 @@ def get_common_filepaths(variant: const.PQAVariant) -> tuple[str, list[str]]:
 
 
 class PQASupportedPlatform(BaseModel):
-    architecture: t.Literal["x86_64", "arm_8"]
-    required_flags: t.Optional[t.List[str]] = None
-    operating_systems: t.Optional[t.List[str]] = None
+    architecture: Literal["x86_64", "arm_8"]
+    required_flags: list[str] | None = None
+    operating_systems: list[str] | None = None
 
 
 class PQAImplementation(BaseModel):
     name: str
-    supported_platforms: t.Optional[t.List[PQASupportedPlatform]] = None
+    supported_platforms: list[PQASupportedPlatform] | None = None
 
 
 class PQAMetaData(BaseModel):
-    implementations: t.List[PQAImplementation]
+    implementations: list[PQAImplementation]
 
-    def filter(self, variant: const.PQAVariant) -> t.Optional[PQAImplementation]:
+    def filter(self, variant: const.PQAVariant) -> PQAImplementation | None:
         impl = [i for i in self.implementations if i.name == variant.value]
         return impl[0] if impl else None
 
@@ -144,17 +144,17 @@ def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
     return PQAMetaData(**data)
 
 
-def check_opsys_support(spf: PQASupportedPlatform) -> t.Optional[str]:
+def check_opsys_support(spf: PQASupportedPlatform) -> str | None:
     for opsys in spf.operating_systems:
         if platform.system().lower() == opsys.lower():
             return opsys
     return None
 
 
-def check_arch_support(impl: PQAImplementation) -> t.Optional[PQASupportedPlatform]:
-    supported_arches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
+def check_arch_support(impl: PQAImplementation) -> PQASupportedPlatform | None:
+    supported_arches = const.AMDArches
     if impl.name == const.PQAVariant.ARM.value:
-        supported_arches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
+        supported_arches = const.ARMArches
     for spf in impl.supported_platforms:
         if platform.machine().lower() in supported_arches:
             return spf
@@ -164,8 +164,8 @@ def check_arch_support(impl: PQAImplementation) -> t.Optional[PQASupportedPlatfo
 def check_platform_support(
         spec: const.AlgoSpec,
         variant: const.PQAVariant
-) -> t.Union[t.Tuple[Path, t.List[str]], t.Tuple[None, None]]:
-    required_flags: t.List[str] = []
+) -> tuple[Path, list[str]] | tuple[None, None]:
+    required_flags: list[str] = []
     meta = read_algo_metadata(spec)
     impl = meta.filter(variant)
 

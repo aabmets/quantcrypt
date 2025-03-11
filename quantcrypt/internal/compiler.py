@@ -14,10 +14,10 @@ import os
 import shutil
 import platform
 import itertools
-import typing as t
 from cffi import FFI
-from textwrap import dedent
+from typing import Generator
 from pathlib import Path
+from textwrap import dedent
 from dataclasses import dataclass
 from contextlib import contextmanager
 from quantcrypt.internal import constants as const
@@ -30,8 +30,8 @@ from quantcrypt.internal import utils
 class Target:
     spec: const.AlgoSpec
     variant: const.PQAVariant
-    source_dir: t.Optional[Path]
-    required_flags: t.Optional[list[str]]
+    source_dir: Path | None
+    required_flags: list[str] | None
     accepted: bool
 
     @property
@@ -96,7 +96,7 @@ class Target:
         return self._dss_cdefs
 
     @property
-    def variant_files(self) -> t.List[str]:
+    def variant_files(self) -> list[str]:
         return [
             file.as_posix() for file in self.source_dir.rglob("**/*")
             if file.is_file() and file.name.endswith(".c")
@@ -108,7 +108,7 @@ class Target:
         return f'#include "{header_file.as_posix()}"'
 
     @property
-    def compiler_args(self) -> t.List[str]:
+    def compiler_args(self) -> list[str]:
         opsys = platform.system().lower()
         if opsys == "windows":
             extra_flags = [f"/arch:{flag.upper()}" for flag in self.required_flags]
@@ -122,13 +122,13 @@ class Target:
         raise errors.UnsupportedPlatformError
 
     @property
-    def linker_args(self) -> t.List[str]:
+    def linker_args(self) -> list[str]:
         if platform.system().lower() == "windows":
             return ["/NODEFAULTLIB:MSVCRTD"]
         return []
 
     @property
-    def libraries(self) -> t.List[str]:
+    def libraries(self) -> list[str]:
         if platform.system().lower() == "windows":
             return ["advapi32"]
         return []
@@ -136,9 +136,9 @@ class Target:
 
 class Compiler:
     @staticmethod
-    def get_compile_targets() -> t.Tuple[t.List[Target], t.List[Target]]:
-        accepted: t.List[Target] = []
-        rejected: t.List[Target] = []
+    def get_compile_targets() -> tuple[list[Target], list[Target]]:
+        accepted: list[Target] = []
+        rejected: list[Target] = []
         algos = const.SupportedAlgos.iterate()
         variants = const.PQAVariant.members()
         for spec, variant in itertools.product(algos, variants):
@@ -155,7 +155,7 @@ class Compiler:
 
     @classmethod
     @contextmanager
-    def build_path(cls) -> t.Generator[None, None, None]:
+    def build_path(cls) -> Generator[None, None, None]:
         old_cwd = os.getcwd()
         bin_path = utils.search_upwards("bin")
         new_cwd = bin_path / "build"
