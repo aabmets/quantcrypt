@@ -63,9 +63,9 @@ def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]
         file_path = Path(match.group(1))
         parts = file_path.parts
         if parts[0] not in accepted_dirs:
-            continue  # NOSONAR
-        elif parts[0] != "common" and parts[1] not in supported_algos:
             continue
+        elif parts[0] != "common" and parts[1] not in supported_algos:
+            continue  # NOSONAR
         filtered_members.append((member, file_path))
 
     return filtered_members
