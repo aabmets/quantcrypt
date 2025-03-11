@@ -1,0 +1,190 @@
+#
+#   MIT License
+#
+#   Copyright (c) 2024, Mattias Aabmets
+#
+#   The contents of this file are subject to the terms and conditions defined in the License.
+#   You may not use, modify, or distribute this file except in compliance with the License.
+#
+#   SPDX-License-Identifier: MIT
+#
+
+from __future__ import annotations
+import os
+import shutil
+import platform
+import itertools
+import typing as t
+from cffi import FFI
+from textwrap import dedent
+from pathlib import Path
+from dataclasses import dataclass
+from contextlib import contextmanager
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import pqclean
+from quantcrypt.internal import errors
+from quantcrypt.internal import utils
+
+
+@dataclass(frozen=True)
+class Target:
+    spec: const.AlgoSpec
+    variant: const.PQAVariant
+    source_dir: t.Optional[Path]
+    required_flags: t.Optional[list[str]]
+    accepted: bool
+
+    @property
+    def _kem_cdefs(self) -> str:
+        return dedent("""
+            #define {cdef_name}_CRYPTO_SECRETKEYBYTES ...
+            #define {cdef_name}_CRYPTO_PUBLICKEYBYTES ...
+            #define {cdef_name}_CRYPTO_CIPHERTEXTBYTES ...
+            #define {cdef_name}_CRYPTO_BYTES ...
+
+            int {cdef_name}_crypto_kem_keypair(
+                uint8_t *pk, uint8_t *sk
+            );
+            int {cdef_name}_crypto_kem_enc(
+                uint8_t *ct, uint8_t *ss, const uint8_t *pk
+            );
+            int {cdef_name}_crypto_kem_dec(
+                uint8_t *ss, const uint8_t *ct, const uint8_t *sk
+            );
+        """.format(cdef_name=self.cdef_name))
+
+    @property
+    def _dss_cdefs(self) -> str:
+        return dedent("""
+            #define {cdef_name}_CRYPTO_SECRETKEYBYTES ...
+			#define {cdef_name}_CRYPTO_PUBLICKEYBYTES ...
+			#define {cdef_name}_CRYPTO_BYTES ...
+
+			int {cdef_name}_crypto_sign_keypair(
+				uint8_t *pk, uint8_t *sk
+			);
+			int {cdef_name}_crypto_sign_signature(
+				uint8_t *sig, size_t *siglen, 
+				const uint8_t *m, size_t mlen, const uint8_t *sk
+			);
+			int {cdef_name}_crypto_sign_verify(
+				const uint8_t *sig, size_t siglen, 
+				const uint8_t *m, size_t mlen, const uint8_t *pk
+			);
+			int {cdef_name}_crypto_sign(
+				uint8_t *sm, size_t *smlen, 
+				const uint8_t *m, size_t mlen, const uint8_t *sk
+			);
+			int {cdef_name}_crypto_sign_open(
+				uint8_t *m, size_t *mlen, 
+				const uint8_t *sm, size_t smlen, const uint8_t *pk
+			);
+        """.format(cdef_name=self.cdef_name))
+
+    @property
+    def cdef_name(self) -> str:
+        return self.spec.cdef_name(self.variant)
+
+    @property
+    def py_name(self) -> str:
+        return self.spec.py_name(self.variant)
+
+    @property
+    def ffi_cdefs(self) -> str:
+        if self.spec.type == const.PQAType.KEM:
+            return self._kem_cdefs
+        return self._dss_cdefs
+
+    @property
+    def variant_files(self) -> t.List[str]:
+        return [
+            file.as_posix() for file in self.source_dir.rglob("**/*")
+            if file.is_file() and file.name.endswith(".c")
+        ]
+
+    @property
+    def header_file(self) -> str:
+        return (self.source_dir / "api.h").as_posix()
+
+
+class Compiler:
+    @staticmethod
+    def get_compile_targets() -> t.Tuple[t.List[Target], t.List[Target]]:
+        accepted: t.List[Target] = []
+        rejected: t.List[Target] = []
+        algos = const.SupportedAlgos.iterate()
+        variants = const.PQAVariant.members()
+        for spec, variant in itertools.product(algos, variants):
+            source_dir, required_flags = pqclean.check_platform_support(spec, variant)
+            acceptable = source_dir and variant in const.SupportedVariants
+            (accepted if acceptable else rejected).append(Target(
+                spec=spec,
+                variant=variant,
+                source_dir=source_dir,
+                required_flags=required_flags,
+                accepted=acceptable
+            ))
+        return accepted, rejected
+
+    @classmethod
+    @contextmanager
+    def build_path(cls) -> t.Generator[None, None, None]:
+        old_cwd = os.getcwd()
+        bin_path = utils.search_upwards("bin")
+        new_cwd = bin_path / "build"
+        new_cwd.mkdir(parents=True, exist_ok=True)
+        os.chdir(new_cwd)
+        yield
+        for path in (new_cwd / "bin").rglob("*.*"):
+            if path.is_file() and path.suffix in [".pyd", ".so"]:
+                shutil.move(path, bin_path)
+        os.chdir(old_cwd)
+        shutil.rmtree(new_cwd, ignore_errors=True)
+
+    @staticmethod
+    def compile(target: Target) -> None:
+        com_dir, com_files = pqclean.get_common_filepaths(target.variant)
+        compiler_args = list()
+        linker_args = list()
+        libraries = list()
+
+        match platform.system().lower():
+            case "linux" | "darwin":
+                compiler_args.extend([
+                    "-s", "-flto", "-std=c99",
+                    "-Os", "-ffunction-sections",
+                    "-O3", "-fdata-sections",
+                    *target.required_flags,
+                ])
+            case "windows":
+                compiler_args.extend(["/O2", "/MD", "/nologo"])
+                if target.variant == const.PQAVariant.OPT:
+                    compiler_args.append("/arch:AVX2")
+                linker_args.append("/NODEFAULTLIB:MSVCRTD")
+                libraries.append("advapi32")
+            case _:
+                raise errors.UnsupportedPlatformError
+
+        ffi = FFI()
+        ffi.cdef(target.ffi_cdefs)
+        ffi.set_source(
+            module_name=f"bin.{target.py_name}",
+            source=f'#include "{target.header_file}"',
+            sources=[*com_files, *target.variant_files],
+            include_dirs=[com_dir],
+            extra_compile_args=compiler_args,
+            extra_link_args=linker_args,
+            libraries=libraries,
+        )
+        ffi.compile(verbose=False)
+
+    @classmethod
+    def run(cls) -> None:
+        accepted, rejected = cls.get_compile_targets()
+        if not accepted:
+            return
+        elif not pqclean.check_sources_exist():
+            pqclean.download_extract_pqclean()
+        with cls.build_path():
+            for target in accepted:
+                cls.compile(target)
