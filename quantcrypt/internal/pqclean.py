@@ -18,7 +18,7 @@ import typing as t
 import platform
 from pydantic import BaseModel
 from pathlib import Path
-from functools import lru_cache
+from functools import cache
 from quantcrypt.internal import constants as const
 from quantcrypt.internal import utils
 
@@ -93,7 +93,8 @@ def download_extract_pqclean() -> None:
     zip_path.unlink()
 
 
-def get_common_filepaths(self) -> tuple[str, list[str]]:
+@cache
+def get_common_filepaths(variant: const.PQAVariant) -> tuple[str, list[str]]:
     path = utils.search_upwards("pqclean/common")
     common, keccak2x, keccak4x = list(), list(), list()
 
@@ -107,9 +108,9 @@ def get_common_filepaths(self) -> tuple[str, list[str]]:
                 files_list = keccak4x
             files_list.append(file)
 
-    if self.variant == const.PQAVariant.OPT:
+    if variant == const.PQAVariant.OPT:
         common.extend(keccak4x)
-    elif self.variant == const.PQAVariant.ARM:
+    elif variant == const.PQAVariant.ARM:
         common.extend(keccak2x)
 
     return path.as_posix(), common
@@ -134,7 +135,7 @@ class PQAMetaData(BaseModel):
         return impl[0] if impl else None
 
 
-@lru_cache
+@cache
 def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
     pqclean = utils.search_upwards('pqclean')
     algo_dir = pqclean / spec.type.value / spec.name
