@@ -9,13 +9,17 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from typing import Literal, Type, Annotated, Optional
+import typing as t
 from pydantic import Field, validate_call
 from dataclasses import dataclass
-from .. import errors
+from quantcrypt.internal import errors
 
 
-__all__ = ["ChunkSizeKB", "ChunkSizeMB", "ChunkSize"]
+__all__ = ["KBLiteral", "MBLiteral", "ChunkSizeKB", "ChunkSizeMB", "ChunkSize"]
+
+
+KBLiteral = t.Literal[1, 2, 4, 8, 16, 32, 64, 128, 256]
+MBLiteral = t.Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 @dataclass(frozen=True)
@@ -23,7 +27,7 @@ class ChunkSizeKB:
 	value: int
 
 	@validate_call
-	def __init__(self, size: Literal[1, 2, 4, 8, 16, 32, 64, 128, 256]) -> None:
+	def __init__(self, size: KBLiteral) -> None:
 		"""
 		:param size: The chunk size in kilobytes.
 		:raises - pydantic.ValidationError:
@@ -37,7 +41,7 @@ class ChunkSizeMB:
 	value: int
 
 	@validate_call
-	def __init__(self, size: Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) -> None:
+	def __init__(self, size: MBLiteral) -> None:
 		"""
 		:param size: The chunk size in megabytes.
 		:raises - pydantic.ValidationError:
@@ -47,8 +51,8 @@ class ChunkSizeMB:
 
 
 class ChunkSize:
-	Atd = Annotated[
-		Optional[ChunkSizeKB | ChunkSizeMB],
+	Atd = t.Annotated[
+		t.Optional[ChunkSizeKB | ChunkSizeMB],
 		Field(default=None)
 	]
 
@@ -63,8 +67,8 @@ class ChunkSize:
 			"ChunkSize class is a collection of classes and "
 			"is not intended to be instantiated directly."
 		)
-	KB: Type[ChunkSizeKB] = ChunkSizeKB
-	MB: Type[ChunkSizeMB] = ChunkSizeMB
+	KB: t.Type[ChunkSizeKB] = ChunkSizeKB
+	MB: t.Type[ChunkSizeMB] = ChunkSizeMB
 
 	@staticmethod
 	def determine_from_data_size(data_size: int) -> ChunkSizeKB | ChunkSizeMB:
@@ -85,5 +89,5 @@ class ChunkSize:
 		for x in range(0, 10):
 			x += 1
 			if data_size <= mega_bytes * x * 100:
-				return ChunkSizeMB(x)
+				return ChunkSizeMB(t.cast(MBLiteral, x))
 		return ChunkSizeMB(10)
