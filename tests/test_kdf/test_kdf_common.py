@@ -12,7 +12,7 @@ import pytest
 from typing import Literal, cast
 from pydantic import ValidationError
 from quantcrypt.kdf import MemCost, Argon2
-from quantcrypt.internal.errors import InvalidUsageError
+from quantcrypt.internal import errors
 
 
 def test_mem_cost_mb_values():
@@ -37,7 +37,7 @@ def test_mem_cost_gb_values():
 
 
 def test_invalid_usage():
-	with pytest.raises(InvalidUsageError):
+	with pytest.raises(errors.InvalidUsageError):
 		MemCost()
-	with pytest.raises(InvalidUsageError):
+	with pytest.raises(errors.InvalidUsageError):
 		Argon2()

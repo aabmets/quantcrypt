@@ -10,7 +10,7 @@
 #
 import pytest
 from quantcrypt.kdf import KKDF
-from quantcrypt.internal.kdf import errors
+from quantcrypt.internal import errors
 
 
 def test_kkdf_instantiation_with_minimum_args():
