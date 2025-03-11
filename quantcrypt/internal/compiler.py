@@ -168,13 +168,18 @@ class Compiler:
     def build_path(cls) -> Generator[None, None, None]:
         old_cwd = os.getcwd()
         bin_path = utils.search_upwards("bin")
+        for path in bin_path.iterdir():
+            if path.is_dir():
+                shutil.rmtree(path, ignore_errors=True)
+            elif path.is_file():
+                path.unlink()
         new_cwd = bin_path / "build"
         new_cwd.mkdir(parents=True, exist_ok=True)
         os.chdir(new_cwd)
         yield
-        for path in new_cwd.rglob("*.*"):
+        for path in new_cwd.iterdir():  # type: Path
             if path.is_file() and path.suffix in [".pyd", ".so"]:
-                shutil.move(path, bin_path)
+                shutil.copyfile(path, bin_path / path.name)
         os.chdir(old_cwd)
         shutil.rmtree(new_cwd, ignore_errors=True)
 
@@ -196,11 +201,11 @@ class Compiler:
 
     @classmethod
     def run(cls) -> None:
+        if not pqclean.check_sources_exist():
+            pqclean.download_extract_pqclean()
         accepted, rejected = cls.get_compile_targets()
         if not accepted:
             return
-        elif not pqclean.check_sources_exist():
-            pqclean.download_extract_pqclean()
         with cls.build_path():
             for target in accepted:
                 cls.compile(target)
