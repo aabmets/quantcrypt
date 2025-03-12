@@ -118,6 +118,8 @@ class SupportedAlgos:
             if not pqa_type or spec.type == pqa_type]
 
 
+KDFContext = b"quantcrypt"
+KryptonFileSuffix = ".kptn"
 SupportedVariants = [PQAVariant.REF]
 AMDArches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
 ARMArches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]

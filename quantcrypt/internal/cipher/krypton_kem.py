@@ -15,7 +15,7 @@ from quantcrypt.internal.kdf.common import KDFParams, MemCost
 from quantcrypt.internal.kdf.argon2_kdf import Argon2
 from quantcrypt.internal.pqa.base_kem import BaseKEM
 from quantcrypt.internal.chunksize import ChunkSize
-from quantcrypt.internal import utils
+from quantcrypt.internal import utils, constants as const
 
 
 __all__ = ["KryptonKEM"]
@@ -44,7 +44,7 @@ class KryptonKEM:
 			self,
 			kem_class: Type[BaseKEM],
 			kdf_params: KDFParams = None,
-			context: bytes = b"quantcrypt",
+			context: bytes = const.KDFContext,
 			callback: Optional[Callable] = None,
 			chunk_size: ChunkSize.Atd = None
 	) -> None:
@@ -111,7 +111,7 @@ class KryptonKEM:
 			raise FileNotFoundError(_in_file)
 
 		if output_file is None:
-			_out_file = _in_file.with_suffix(".kptn")
+			_out_file = _in_file.with_suffix(const.KryptonFileSuffix)
 		else:
 			_out_file = utils.resolve_relpath(output_file)
 

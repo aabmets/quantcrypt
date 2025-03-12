@@ -9,8 +9,9 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from typing import Annotated
 from typer import Option
+from typing import Annotated
+from quantcrypt.internal import constants as const
 
 
 __all__ = [
@@ -80,7 +81,8 @@ EncInFile = Annotated[str, Option(
 EncOutFile = Annotated[str, Option(
 	'--out-file', '-o', show_default=False, help=' '.join([
 		"Path to the output file where the encrypted data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the data file name with the .kptn suffix."
+		"Defaults to the Current Working Directory, using the data file name "
+		f"with the {const.KryptonFileSuffix} suffix."
 	])
 )]
 
@@ -94,7 +96,7 @@ DecInFile = Annotated[str, Option(
 DecOutFile = Annotated[str, Option(
 	'--out-file', '-o', show_default=False, help=' '.join([
 		"Path to the output file where the decrypted data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the original filename of the ",
+		"Defaults to the Current Working Directory, using the original filename of the",
 		"plaintext file that was stored into the ciphertext file."
 	])
 )]
