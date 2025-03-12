@@ -112,10 +112,12 @@ class SupportedAlgos:
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
 
     @classmethod
-    def iterate(cls) -> Iterator[AlgoSpec]:
-        for value in vars(cls).values():
-            if isinstance(value, AlgoSpec):
-                yield value
+    def keys(cls) -> list[str]:
+        return [k for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
+
+    @classmethod
+    def values(cls) -> list[AlgoSpec]:
+        return [v for v in vars(cls).values() if isinstance(v, AlgoSpec)]
 
 
 KDFContext = b"quantcrypt"

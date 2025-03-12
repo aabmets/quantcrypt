@@ -82,7 +82,7 @@ def test_algo_spec():
         spec = algo_spec("asdfg-1234")
         assert isinstance(spec, const.AlgoSpec)
         assert spec.type == pqa_type
-        assert spec.armor_name() == "ASDFG1234"
+        assert spec.armor_name == "ASDFG1234"
 
         assert spec.cdef_name(const.PQAVariant.REF) == "PQCLEAN_ASDFG1234_CLEAN"
         assert spec.cdef_name(const.PQAVariant.OPT) == "PQCLEAN_ASDFG1234_AVX2"
@@ -105,7 +105,9 @@ def test_supported_algos():
             continue
         assert isinstance(v, const.AlgoSpec)
 
-    for item in const.SupportedAlgos.iterate():
+    for item in const.SupportedAlgos.keys():
+        assert isinstance(item, str)
+    for item in const.SupportedAlgos.values():
         assert isinstance(item, const.AlgoSpec)
 
 
