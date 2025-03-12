@@ -139,8 +139,8 @@ class PQAMetaData(BaseModel):
 @cache
 def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
     pqclean = utils.search_upwards('pqclean')
-    algo_dir = pqclean / spec.type.value / spec.name
-    with (algo_dir / "META.yml").open('r') as file:
+    meta_file = pqclean / spec.src_subdir / "META.yml"
+    with meta_file.open('r') as file:
         data: dict = yaml.full_load(file)
     return PQAMetaData(**data)
 
@@ -184,7 +184,7 @@ def check_platform_support(
             required_flags = spf.required_flags
 
     pqclean = utils.search_upwards('pqclean')
-    source_dir = pqclean / spec.type.value / spec.name / variant.value
-    if source_dir.exists():
-        return source_dir, required_flags
+    variant_path = pqclean / spec.src_subdir / variant.value
+    if variant_path.exists():
+        return variant_path, required_flags
     return None, None
