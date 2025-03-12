@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 from enum import Enum
+from pathlib import Path
 from functools import cache
 from dataclasses import dataclass
 
@@ -39,7 +40,7 @@ class ExtendedEnum(Enum):
 
     @classmethod
     @cache
-    def values(cls) -> list:
+    def values(cls) -> list[str]:
         return [member.value for member in cls.members()]
 
 
@@ -63,6 +64,7 @@ class PQAType(ExtendedEnum):
     """
     KEM = "crypto_kem"
     DSS = "crypto_sign"
+    _COM = "common"
 
 
 class PQAKeyType(ExtendedEnum):
@@ -78,54 +80,102 @@ class PQAKeyType(ExtendedEnum):
 @dataclass(frozen=True)
 class AlgoSpec:
     type: PQAType
-    name: str
+    src_subdir: Path
+    pqclean_name: str
+    class_name: str
 
     @classmethod
-    def KEM(cls, name: str) -> AlgoSpec:  # NOSONAR
-        return cls(type=PQAType.KEM, name=name)
+    def KEM(cls, class_name: str, pqclean_name: str) -> AlgoSpec:  # NOSONAR
+        src_subdir = Path(PQAType.KEM.value, pqclean_name)
+        return cls(
+            type=PQAType.KEM,
+            src_subdir=src_subdir,
+            pqclean_name=pqclean_name,
+            class_name=class_name
+        )
 
     @classmethod
-    def DSS(cls, name: str) -> AlgoSpec:  # NOSONAR
-        return cls(type=PQAType.DSS, name=name)
+    def DSS(cls, class_name: str, pqclean_name: str) -> AlgoSpec:  # NOSONAR
+        src_subdir = Path(PQAType.DSS.value, pqclean_name)
+        return cls(
+            type=PQAType.DSS,
+            src_subdir=src_subdir,
+            pqclean_name=pqclean_name,
+            class_name=class_name
+        )
 
     @cache
     def cdef_name(self, variant: PQAVariant) -> str:
-        name = self.name.replace('-', '')
+        name = self.pqclean_name.replace('-', '')
         return f"PQCLEAN_{name}_{variant.value}".upper()
 
     @cache
     def module_name(self, variant: PQAVariant) -> str:
-        name = self.name.replace('-', '_')
+        name = self.pqclean_name.replace('-', '_')
         return f"{name}_{variant.value}".lower()
 
-
-class SupportedAlgos:
-    MLKEM_512 = AlgoSpec.KEM("ml-kem-512")
-    MLKEM_768 = AlgoSpec.KEM("ml-kem-768")
-    MLKEM_1024 = AlgoSpec.KEM("ml-kem-1024")
-    MLDSA_44 = AlgoSpec.DSS("ml-dsa-44")
-    MLDSA_65 = AlgoSpec.DSS("ml-dsa-65")
-    MLDSA_87 = AlgoSpec.DSS("ml-dsa-87")
-    FALCON_512 = AlgoSpec.DSS("falcon-512")
-    FALCON_1024 = AlgoSpec.DSS("falcon-1024")
-    FAST_SPHINCS = AlgoSpec.DSS("sphincs-shake-256f-simple")
-    SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
-
-    @classmethod
     @cache
-    def items(cls, pqa_type: PQAType | None = None) -> list[tuple[str, AlgoSpec]]:
+    def armor_name(self) -> str:
+        name = self.class_name.replace('_', '')
+        return name.upper()  # case safety
+
+
+class AlgoSpecsList(list):
+    def pqclean_names(self: list[AlgoSpec]) -> list[str]:
+        return [spec.pqclean_name for spec in self]
+
+    def armor_names(
+            self: list[AlgoSpec],
+            pqa_type: PQAType | None = None
+    ) -> list[AlgoSpec]:
         return [
-            (k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)
-            and (not pqa_type or pqa_type == v.type)
+            spec.armor_name() for spec in self if
+            not pqa_type or pqa_type == spec.type
         ]
 
-    @classmethod
-    @cache
-    def values(cls, pqa_type: PQAType | None = None) -> list[AlgoSpec]:
-        return [
-            v for v in vars(cls).values() if isinstance(v, AlgoSpec)
-            and (not pqa_type or pqa_type == v.type)
-        ]
+
+SupportedAlgos = AlgoSpecsList([
+    AlgoSpec.KEM(
+        class_name="MLKEM_512",
+        pqclean_name="ml-kem-512"
+    ),
+    AlgoSpec.KEM(
+        class_name="MLKEM_768",
+        pqclean_name="ml-kem-768"
+    ),
+    AlgoSpec.KEM(
+        class_name="MLKEM_1024",
+        pqclean_name="ml-kem-1024"
+    ),
+    AlgoSpec.DSS(
+        class_name="MLDSA_44",
+        pqclean_name="ml-dsa-44"
+    ),
+    AlgoSpec.DSS(
+        class_name="MLDSA_65",
+        pqclean_name="ml-dsa-65"
+    ),
+    AlgoSpec.DSS(
+        class_name="MLDSA_87",
+        pqclean_name="ml-dsa-87"
+    ),
+    AlgoSpec.DSS(
+        class_name="FALCON_512",
+        pqclean_name="falcon-512"
+    ),
+    AlgoSpec.DSS(
+        class_name="FALCON_1024",
+        pqclean_name="falcon-1024"
+    ),
+    AlgoSpec.DSS(
+        class_name="FAST_SPHINCS",
+        pqclean_name="sphincs-shake-256f-simple"
+    ),
+    AlgoSpec.DSS(
+        class_name="SMALL_SPHINCS",
+        pqclean_name="sphincs-shake-256s-simple"
+    ),
+])
 
 
 KDFContext = b"quantcrypt"

@@ -28,8 +28,7 @@ __all__ = [
     "resolve_directory",
     "process_paths",
     "validate_armored_key",
-    "get_pqa_class",
-    "available_algo_choices"
+    "get_pqa_class"
 ]
 
 
@@ -109,7 +108,7 @@ def validate_armored_key(
         console.raise_error("The armored key is corrupted.")
     elif fm.hdr_name != fm.ftr_name or fm.hdr_type != fm.ftr_type:
         console.raise_error("The envelope of the armored key is corrupted.")
-    elif fm.hdr_name not in [k.replace('_', '') for k, _ in const.SupportedAlgos.items(pqa_type)]:
+    elif fm.hdr_name not in const.SupportedAlgos.armor_names(pqa_type):
         console.raise_error(f"Unsupported algorithm {fm.hdr_name} in armored key header.")
     elif fm.hdr_type not in const.PQAKeyType.values():
         console.raise_error(f"Unsupported key type {fm.hdr_type} in armored key header.")
@@ -121,18 +120,11 @@ def validate_armored_key(
     return fm.hdr_name  # NOSONAR
 
 
-def get_pqa_class(algo_name: str) -> Type[BaseKEM | BaseDSS]:
-    for cls_name, spec in const.SupportedAlgos.items():
-        if algo_name.upper() == cls_name.replace('_', ''):
+def get_pqa_class(armor_name: str) -> Type[BaseKEM | BaseDSS]:
+    for spec in const.SupportedAlgos:
+        if spec.armor_name() == armor_name.upper():
             is_kem = spec.type == const.PQAType.KEM
             module = kem_algos if is_kem else dss_algos
-            return getattr(module, cls_name)
-    console.raise_error(f"Algorithm name '{algo_name}' does not map to any supported PQA class.")
+            return getattr(module, spec.class_name)
+    console.raise_error(f"Algorithm name '{armor_name}' does not map to any supported PQA class.")
     raise  # NOSONAR
-
-
-def available_algo_choices() -> str:
-    return ' | '.join([
-        k.replace('_', '').upper() for k, _ in
-        const.SupportedAlgos.items()
-    ])

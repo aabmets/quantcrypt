@@ -40,11 +40,10 @@ class BasePQAlgorithm(ABC):
 
 	@classmethod
 	def _get_spec(cls) -> const.AlgoSpec:
-		self_cls_name = cls.__name__
-		for cls_name, spec in const.SupportedAlgos.items():
-			if cls_name == self_cls_name:
+		for spec in const.SupportedAlgos:
+			if spec.class_name == cls.__name__:
 				return spec
-		raise errors.PQAUnsupportedClassError(self_cls_name)
+		raise errors.PQAUnsupportedClassError(cls.__name__)
 
 	@abstractmethod
 	def keygen(self) -> tuple[bytes, bytes]: ...
