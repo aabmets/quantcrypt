@@ -22,6 +22,7 @@ __all__ = [
 	"MissingBinariesError",
 
 	"PQAError",
+	"PQAUnsupportedClassError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
@@ -71,6 +72,11 @@ class MissingBinariesError(QuantCryptError):
 
 class PQAError(QuantCryptError):
 	"""Base class for all PQC errors."""
+
+
+class PQAUnsupportedClassError(PQAError):
+	def __init__(self, cls_name: str):
+		super().__init__(f"Unsupported PQA class '{cls_name}'.")
 
 
 class PQAKeyArmorError(PQAError):

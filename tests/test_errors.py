@@ -18,6 +18,7 @@ from quantcrypt.errors import (
 	MissingBinariesError,
 
 	PQAError,
+	PQAUnsupportedClassError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
@@ -51,6 +52,7 @@ def test_error_instantiation():
 	assert MissingBinariesError(const.PQAVariant.ARM)
 
 	assert PQAError()
+	assert PQAUnsupportedClassError("asdfg")
 	assert PQAKeyArmorError("armor")
 	assert PQAKeyArmorError("dearmor")
 	assert KEMKeygenFailedError()

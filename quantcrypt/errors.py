@@ -17,6 +17,7 @@ from quantcrypt.internal.errors import (
 	MissingBinariesError,
 
 	PQAError,
+	PQAUnsupportedClassError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
@@ -48,6 +49,7 @@ __all__ = [
 	"MissingBinariesError",
 
 	"PQAError",
+	"PQAUnsupportedClassError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
