@@ -117,7 +117,7 @@ def validate_armored_key(
             f"Expected a {key_type.value.lower()} key, but "
             f"received a {fm.hdr_type.lower()} key instead."
         )
-    return fm.hdr_name  # type: str
+    return fm.hdr_name  # NOSONAR
 
 
 def get_pqa_class(armor_name: str) -> Type[BaseKEM | BaseDSS]:
