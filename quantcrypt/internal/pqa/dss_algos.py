@@ -46,10 +46,6 @@ class MLDSA_44(BaseDSS):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLDSA_44
-
 
 class MLDSA_65(BaseDSS):  # NOSONAR
 	@utils.input_validator()
@@ -72,10 +68,6 @@ class MLDSA_65(BaseDSS):  # NOSONAR
 			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
-
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLDSA_65
 
 
 class MLDSA_87(BaseDSS):  # NOSONAR
@@ -100,10 +92,6 @@ class MLDSA_87(BaseDSS):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLDSA_87
-
 
 class FALCON_512(BaseDSS):  # NOSONAR
 	@utils.input_validator()
@@ -126,10 +114,6 @@ class FALCON_512(BaseDSS):  # NOSONAR
 			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
-
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.FALCON_512
 
 
 class FALCON_1024(BaseDSS):  # NOSONAR
@@ -154,10 +138,6 @@ class FALCON_1024(BaseDSS):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.FALCON_1024
-
 
 class FAST_SPHINCS(BaseDSS):  # NOSONAR
 	@utils.input_validator()
@@ -181,10 +161,6 @@ class FAST_SPHINCS(BaseDSS):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.FAST_SPHINCS
-
 
 class SMALL_SPHINCS(BaseDSS):  # NOSONAR
 	@utils.input_validator()
@@ -207,7 +183,3 @@ class SMALL_SPHINCS(BaseDSS):  # NOSONAR
 			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
-
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.SMALL_SPHINCS

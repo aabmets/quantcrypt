@@ -38,10 +38,6 @@ class MLKEM_512(BaseKEM):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLKEM_512
-
 
 class MLKEM_768(BaseKEM):  # NOSONAR
 	@utils.input_validator()
@@ -65,10 +61,6 @@ class MLKEM_768(BaseKEM):  # NOSONAR
 		"""
 		super().__init__(variant)
 
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLKEM_768
-
 
 class MLKEM_1024(BaseKEM):  # NOSONAR
 	@utils.input_validator()
@@ -91,7 +83,3 @@ class MLKEM_1024(BaseKEM):  # NOSONAR
 			recompiled, because all platforms should have CLEAN binaries available.
 		"""
 		super().__init__(variant)
-
-	@property
-	def spec(self) -> const.AlgoSpec:
-		return const.SupportedAlgos.MLKEM_1024
