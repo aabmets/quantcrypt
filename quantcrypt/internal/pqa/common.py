@@ -34,20 +34,24 @@ class BasePQAlgorithm(ABC):
 	_lib: ModuleType
 	variant: const.PQAVariant
 
+	@property
+	def spec(self) -> const.AlgoSpec:
+		return self._get_spec()
+
+	@classmethod
+	def _get_spec(cls) -> const.AlgoSpec:
+		self_cls_name = cls.__name__
+		for cls_name, spec in const.SupportedAlgos.items():
+			if cls_name == self_cls_name:
+				return spec
+		raise errors.PQAUnsupportedClassError(self_cls_name)
+
 	@abstractmethod
 	def keygen(self) -> tuple[bytes, bytes]: ...
 
 	@property
 	@abstractmethod
 	def param_sizes(self) -> BasePQAParamSizes: ...
-
-	@property
-	def spec(self) -> const.AlgoSpec:
-		self_cls_name = self.__class__.__name__
-		for cls_name, spec in const.SupportedAlgos.items():
-			if cls_name == self_cls_name:
-				return spec
-		raise errors.PQAUnsupportedClassError(self_cls_name)
 
 	@property
 	def _cdef_name(self) -> str:
