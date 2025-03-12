@@ -22,7 +22,11 @@ __all__ = [
     "PQAKeyType",
     "AlgoSpec",
     "SupportedAlgos",
+    "KDFContext",
+    "KryptonFileSuffix",
     "SupportedVariants",
+    "AMDArches",
+    "ARMArches",
     "PQCleanRepoArchiveURL"
 ]
 
