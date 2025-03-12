@@ -109,7 +109,7 @@ def validate_armored_key(
         console.raise_error("The armored key is corrupted.")
     elif fm.hdr_name != fm.ftr_name or fm.hdr_type != fm.ftr_type:
         console.raise_error("The envelope of the armored key is corrupted.")
-    elif fm.hdr_name not in [s.armor_name for s in const.SupportedAlgos.values(pqa_type)]:
+    elif fm.hdr_name not in [k.replace('_', '') for k, _ in const.SupportedAlgos.items(pqa_type)]:
         console.raise_error(f"Unsupported algorithm {fm.hdr_name} in armored key header.")
     elif fm.hdr_type not in const.PQAKeyType.values():
         console.raise_error(f"Unsupported key type {fm.hdr_type} in armored key header.")
