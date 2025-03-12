@@ -28,7 +28,8 @@ __all__ = [
     "resolve_directory",
     "process_paths",
     "validate_armored_key",
-    "get_pqa_class"
+    "get_pqa_class",
+    "available_algo_choices"
 ]
 
 
@@ -128,3 +129,10 @@ def get_pqa_class(algo_name: str) -> Type[BaseKEM | BaseDSS]:
             return getattr(module, cls_name)
     console.raise_error(f"Algorithm name '{algo_name}' does not map to any supported PQA class.")
     raise  # NOSONAR
+
+
+def available_algo_choices() -> str:
+    return ' | '.join([
+        k.replace('_', '').upper() for k, _ in
+        const.SupportedAlgos.items()
+    ])
