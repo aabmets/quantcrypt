@@ -120,14 +120,16 @@ VerifyDataFile = Annotated[str, Option(
 WriteSigFile = Annotated[str, Option(
 	'--sig-file', '-S', show_default=False, help=' '.join([
 		"Path to a file where the signature data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the data file name with the .sig suffix."
+		"Defaults to the Current Working Directory, using the data file name "
+		f"with the {const.SignatureFileSuffix} suffix."
 	])
 )]
 
 ReadSigFile = Annotated[str, Option(
 	'--sig-file', '-S', show_default=False, help=' '.join([
 		"Path to a file where the signature data will be read from, optional.",
-		"Defaults to the Current Working Directory, using the data file name with the .sig suffix."
+		"Defaults to the Current Working Directory, using the data file name "
+		f"with the {const.SignatureFileSuffix} suffix."
 	])
 )]
 
