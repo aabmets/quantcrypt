@@ -134,7 +134,7 @@ class AlgoSpecsList(list):
         ]
 
 
-SupportedAlgos = AlgoSpecsList([
+SupportedAlgos: AlgoSpecsList[AlgoSpec] = AlgoSpecsList([
     AlgoSpec.KEM(
         class_name="MLKEM_512",
         pqclean_name="ml-kem-512"

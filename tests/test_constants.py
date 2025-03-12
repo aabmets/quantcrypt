@@ -9,8 +9,8 @@
 #   SPDX-License-Identifier: MIT
 #
 
-import inspect
 import requests
+from pathlib import Path
 from quantcrypt.internal import constants as const
 
 
@@ -50,14 +50,17 @@ def test_pqa_variant():
 def test_pqa_type():
     assert const.PQAType.members() == [
         const.PQAType.KEM,
-        const.PQAType.DSS
+        const.PQAType.DSS,
+        const.PQAType._COM
     ]
     assert const.PQAType.values() == [
         const.PQAType.KEM.value,
-        const.PQAType.DSS.value
+        const.PQAType.DSS.value,
+        const.PQAType._COM.value
     ]
     assert const.PQAType.KEM.value == "crypto_kem"
     assert const.PQAType.DSS.value == "crypto_sign"
+    assert const.PQAType._COM.value == "common"
 
 
 def test_pqa_key_type():
@@ -79,43 +82,42 @@ def test_algo_spec():
         (const.AlgoSpec.DSS, const.PQAType.DSS),
     ]
     for algo_spec, pqa_type in spec_types:
-        spec = algo_spec("asdfg-1234")
+        class_name, pqclean_name = "ASDFG_1234", "as-dfg-1234"
+        spec: const.AlgoSpec = algo_spec(
+            class_name=class_name,
+            pqclean_name=pqclean_name
+        )
         assert isinstance(spec, const.AlgoSpec)
+        assert spec.src_subdir == Path(pqa_type.value, pqclean_name)
+        assert spec.pqclean_name == pqclean_name
+        assert spec.class_name == class_name
         assert spec.type == pqa_type
+        assert spec.armor_name() == "ASDFG1234"
 
         assert spec.cdef_name(const.PQAVariant.REF) == "PQCLEAN_ASDFG1234_CLEAN"
         assert spec.cdef_name(const.PQAVariant.OPT) == "PQCLEAN_ASDFG1234_AVX2"
         assert spec.cdef_name(const.PQAVariant.ARM) == "PQCLEAN_ASDFG1234_AARCH64"
 
-        assert spec.module_name(const.PQAVariant.REF) == "asdfg_1234_clean"
-        assert spec.module_name(const.PQAVariant.OPT) == "asdfg_1234_avx2"
-        assert spec.module_name(const.PQAVariant.ARM) == "asdfg_1234_aarch64"
+        assert spec.module_name(const.PQAVariant.REF) == "as_dfg_1234_clean"
+        assert spec.module_name(const.PQAVariant.OPT) == "as_dfg_1234_avx2"
+        assert spec.module_name(const.PQAVariant.ARM) == "as_dfg_1234_aarch64"
 
 
 def test_supported_algos():
-    for k, v in vars(const.SupportedAlgos).items():
-        if any([
-            k.startswith("__"),
-            isinstance(v, classmethod),
-            isinstance(v, staticmethod),
-            isinstance(v, property),
-            inspect.ismethod(v)
-        ]):
-            continue
-        assert isinstance(v, const.AlgoSpec)
+    assert isinstance(const.SupportedAlgos, list)
 
-    for item in const.SupportedAlgos.items():
-        assert isinstance(item, tuple)
-        assert len(item) == 2
-        assert isinstance(item[0], str)
-        assert isinstance(item[1], const.AlgoSpec)
-    for item in const.SupportedAlgos.values():
+    for item in const.SupportedAlgos:
         assert isinstance(item, const.AlgoSpec)
-    for pqa_type in const.PQAType.members():
-        for _, value in const.SupportedAlgos.items(pqa_type):
-            assert value.type == pqa_type
-        for item in const.SupportedAlgos.values(pqa_type):
-            assert item.type == pqa_type
+
+    for item in const.SupportedAlgos.pqclean_names():
+        assert isinstance(item, str)
+
+    for item in const.SupportedAlgos.armor_names():
+        assert isinstance(item, str)
+
+    for pqa_type in const.PQAType.members():  # type: const.PQAType
+        for item in const.SupportedAlgos.armor_names(pqa_type):
+            assert isinstance(item, str)
 
 
 def test_pqclean_repo_archive_url():
