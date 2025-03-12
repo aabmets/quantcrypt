@@ -11,52 +11,25 @@
 
 import string
 from typer import Typer
-from typing import Type
-from quantcrypt.internal import constants as const
 from quantcrypt.internal.cli import tools, console, annotations as ats
-from quantcrypt.internal.pqa import kem_algos
-from quantcrypt.internal.pqa import dss_algos
-from quantcrypt.internal.pqa.base_kem import BaseKEM
-from quantcrypt.internal.pqa.base_dss import BaseDSS
 
 
 app = Typer(
-    name="keygen", no_args_is_help=True,
+    name="keygen", invoke_without_command=True, no_args_is_help=True,
     help="Generates an ASCII armored keypair using a KEM or a DSS algorithm."
 )
 
 
-def add_command(pqa_class: Type[BaseKEM | BaseDSS]) -> None:
-    spec: const.AlgoSpec = getattr(pqa_class, "_get_spec")()
-    @app.command(
-        name=pqa_class.__name__.replace('_', '').lower(),
-        help=f"[{spec.type.name}] Generates {spec.name} keys and writes them to disk."
-    )
-    def command_keygen(
-            identifier: ats.Identifier = None,
-            directory: ats.Directory = None,
-            dry_run: ats.DryRun = False,
-            overwrite: ats.Overwrite = False,
-            non_interactive: ats.NonInteractive = False
-    ) -> None:
-        args = [*locals().values(), pqa_class]
-        _interactive_flow(*args)
-
-
-for module in [kem_algos, dss_algos]:
-    for obj in vars(module).values():
-        if issubclass(obj, (BaseKEM, BaseDSS)):
-            add_command(obj)
-
-
-def _interactive_flow(
-        identifier: str | None,
-        directory: str | None,
-        dry_run: bool,
-        overwrite: bool,
-        non_interactive: bool,
-        pqa_class: Type[BaseKEM | BaseDSS]
+@app.callback()
+def command_keygen(
+        algorithm: ats.PQAlgorithm,
+        identifier: ats.Identifier = None,
+        directory: ats.Directory = None,
+        dry_run: ats.DryRun = False,
+        overwrite: ats.Overwrite = False,
+        non_interactive: ats.NonInteractive = False
 ) -> None:
+    algorithm = algorithm.lower()
     console.notify_dry_run(dry_run)
 
     prefix = ''
@@ -64,9 +37,9 @@ def _interactive_flow(
         _validate_identifier(identifier)
         prefix = f"{identifier}-"
 
-    algo_name = pqa_class.__name__.lower()
-    apk_name = f"{prefix}{algo_name}-pubkey.qc"
-    ask_name = f"{prefix}{algo_name}-seckey.qc"
+    pqa_cls = tools.get_pqa_class(algorithm)
+    apk_name = f"{prefix}{algorithm}-pubkey.qc"
+    ask_name = f"{prefix}{algorithm}-seckey.qc"
 
     target_dir = tools.resolve_directory(directory)
     apk_file = target_dir / apk_name
@@ -86,7 +59,7 @@ def _interactive_flow(
             exit_on_false=True
         )
 
-    pqa = pqa_class()
+    pqa = pqa_cls()
     public_key, secret_key = pqa.keygen()
     apk = pqa.armor(public_key)
     ask = pqa.armor(secret_key)
