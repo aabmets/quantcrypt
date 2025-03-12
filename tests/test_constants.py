@@ -108,11 +108,6 @@ def test_supported_algos():
     for item in const.SupportedAlgos.iterate():
         assert isinstance(item, const.AlgoSpec)
 
-    for pqa_type in [None, *const.PQAType.members()]:
-        armor_names = const.SupportedAlgos.armor_names(pqa_type)
-        assert isinstance(armor_names, list)
-        assert all([isinstance(n, str) for n in armor_names])
-
 
 def test_pqclean_repo_archive_url():
     url = const.PQCleanRepoArchiveURL

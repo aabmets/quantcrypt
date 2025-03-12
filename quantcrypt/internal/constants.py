@@ -86,6 +86,7 @@ class AlgoSpec:
     def DSS(cls, name: str) -> AlgoSpec:  # NOSONAR
         return cls(type=PQAType.DSS, name=name)
 
+    @property
     def armor_name(self) -> str:
         return self.name.replace('-', '').upper()
 
@@ -115,11 +116,6 @@ class SupportedAlgos:
         for value in vars(cls).values():
             if isinstance(value, AlgoSpec):
                 yield value
-
-    @classmethod
-    def armor_names(cls, pqa_type: PQAType | None = None) -> list[str]:
-        return [spec.armor_name() for spec in cls.iterate()
-            if not pqa_type or spec.type == pqa_type]
 
 
 KDFContext = b"quantcrypt"
