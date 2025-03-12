@@ -113,8 +113,9 @@ class SupportedAlgos:
                 yield value
 
     @classmethod
-    def armor_names(cls) -> list[str]:
-        return [spec.armor_name() for spec in cls.iterate()]
+    def armor_names(cls, pqa_type: PQAType | None = None) -> list[str]:
+        return [spec.armor_name() for spec in cls.iterate()
+            if not pqa_type or spec.type == pqa_type]
 
 
 SupportedVariants = [PQAVariant.REF]
