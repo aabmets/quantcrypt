@@ -167,7 +167,7 @@ class BaseDSS(com.BasePQAlgorithm, ABC):
 		digest = utils.sha3_digest_file(_in_file, callback)
 		return SignedFile(
 			signature=self.sign(secret_key, digest),
-			algo_name=self._upper_name(),
+			algo_name=self._algo_name(),
 			file_digest=digest,
 		)
 

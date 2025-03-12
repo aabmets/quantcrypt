@@ -86,11 +86,8 @@ class BasePQAlgorithm(ABC):
 					pass
 			raise errors.MissingBinariesError(self.variant)
 
-	def _upper_name(self) -> str:
-		return ''.join(re.findall(
-			string=self.__class__.__name__,
-			pattern='.[^A-Z]*'
-		)).upper()
+	def _algo_name(self) -> str:
+		return self.__class__.__name__.replace('_', '').upper()
 
 	def _keygen(
 			self,
@@ -133,7 +130,7 @@ class BasePQAlgorithm(ABC):
 			key_str[i:i + max_line_length]
 			for i in range(0, len(key_str), max_line_length)
 		]
-		algo_name = self._upper_name()
+		algo_name = self._algo_name()
 		header = f"-----BEGIN {algo_name} {key_type} KEY-----\n"
 		footer = f"\n-----END {algo_name} {key_type} KEY-----"
 		return header + '\n'.join(lines) + footer
@@ -148,7 +145,7 @@ class BasePQAlgorithm(ABC):
 		:raises - errors.PQAKeyArmorError: If dearmoring fails for any reason.
 		"""
 		dearmor_error = errors.PQAKeyArmorError("dearmor")
-		algo_name = self._upper_name()
+		algo_name = self._algo_name()
 		key_data: str = ''
 
 		for key_type in ["PUBLIC", "SECRET"]:

@@ -93,7 +93,7 @@ def _common_flow(
     with paths.key_file.open('r') as file:
         armored_key = file.read()
 
-    armor_name = tools.validate_armored_key(armored_key, key_type, const.PQAType.DSS)
+    algo_name = tools.validate_armored_key(armored_key, key_type, const.PQAType.DSS)
 
     files = [paths.in_file, paths.key_file]
     a, b = [f"[italic sky_blue2]{f.name}[/]" for f in files]
@@ -113,5 +113,5 @@ def _common_flow(
     if not non_interactive:
         console.ask_continue(exit_on_false=True)
 
-    dss_cls = tools.get_pqa_class(armor_name)
+    dss_cls = tools.get_pqa_class(algo_name)
     return paths, dss_cls(), armored_key
