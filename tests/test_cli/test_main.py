@@ -8,6 +8,7 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+
 import pytest
 import tomllib
 from dotmap import DotMap
@@ -18,9 +19,9 @@ from quantcrypt.internal.cli.main import app
 
 @pytest.fixture(name="project", scope="module")
 def fixture_project() -> DotMap:
-	if path := utils.search_upwards(__file__, "pyproject.toml"):
-		project = tomllib.loads(path.read_text())
-		return DotMap(project["tool"]["poetry"])
+	path = utils.search_upwards("pyproject.toml")
+	contents = tomllib.loads(path.read_text())
+	return DotMap(contents["project"])
 
 
 def test_main_version(project: DotMap):
@@ -33,7 +34,7 @@ def test_main_version(project: DotMap):
 
 def test_main_info(project: DotMap):
 	runner = CliRunner()
-	result = runner.invoke(app, ["--info"])
+	result = runner.invoke(app, ["info"])
 
 	assert result.exit_code == 0
 	assert project.name in result.stdout
@@ -42,13 +43,6 @@ def test_main_info(project: DotMap):
 	assert project.license in result.stdout
 	assert project.urls.Repository in result.stdout
 
-	fn, ln, _ = project.authors[0].split(" ")
-	assert f"{fn} {ln}" in result.stdout
-
-
-def test_main_invalid_options():
-	runner = CliRunner()
-	result = runner.invoke(app, ["--version", "--info"])
-
-	assert result.exit_code == 1
-	assert "Cannot use --version and --info" in result.stdout
+	author = project.authors[0]
+	assert author.name in result.stdout
+	assert author.email in result.stdout
