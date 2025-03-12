@@ -112,6 +112,9 @@ def test_supported_algos():
         assert isinstance(item[1], const.AlgoSpec)
     for item in const.SupportedAlgos.values():
         assert isinstance(item, const.AlgoSpec)
+    for pqa_type in const.PQAType.members():
+        for item in const.SupportedAlgos.values(pqa_type):
+            assert item.type == pqa_type
 
 
 def test_pqclean_repo_archive_url():

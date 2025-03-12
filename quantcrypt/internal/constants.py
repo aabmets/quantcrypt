@@ -116,8 +116,11 @@ class SupportedAlgos:
         return [(k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
 
     @classmethod
-    def values(cls) -> list[AlgoSpec]:
-        return [v for v in vars(cls).values() if isinstance(v, AlgoSpec)]
+    def values(cls, pqa_type: PQAType | None = None) -> list[AlgoSpec]:
+        return [
+            v for v in vars(cls).values() if isinstance(v, AlgoSpec)
+            and (not pqa_type or pqa_type == v.type)
+        ]
 
 
 KDFContext = b"quantcrypt"
