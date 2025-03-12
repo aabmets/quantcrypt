@@ -120,11 +120,11 @@ def validate_armored_key(
     return fm.hdr_name  # NOSONAR
 
 
-def get_pqa_class(armor_name: str) -> Type[BaseKEM | BaseDSS]:
+def get_pqa_class(algo_name: str) -> Type[BaseKEM | BaseDSS]:
     for cls_name, spec in const.SupportedAlgos.items():
-        if spec.armor_name == armor_name:
+        if algo_name == cls_name.replace('_', '').lower():
             is_kem = spec.type == const.PQAType.KEM
             module = kem_algos if is_kem else dss_algos
             return getattr(module, cls_name)
-    console.raise_error(f"Armor name {armor_name} does not map to any supported PQA class.")
+    console.raise_error(f"Algorithm name '{algo_name}' does not map to any supported PQA class.")
     raise  # NOSONAR
