@@ -8,12 +8,32 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+
 import site
-from pathlib import Path
+from typer import Typer
 from dotmap import DotMap
+from pathlib import Path
+from quantcrypt.internal.cli import console
 
 
-__all__ = ["PackageInfo"]
+app = Typer(
+	name="info", invoke_without_command=True,
+    help="Prints project info to the console and exits."
+)
+
+
+@app.callback()
+def command_info() -> None:
+    title_color = "[{}]".format("#ff5fff")
+    key_color = "[{}]".format("#87d7d7")
+    value_color = "[{}]".format("#ffd787")
+
+    console.styled_print(f"{title_color}Package Info:")
+    for k, v in PackageInfo().toDict().items():
+        k = f"{key_color}{k}"
+        v = f"{value_color}{v}"
+        console.styled_print(f"{2 * ' '}{k}: {v}")
+    console.styled_print('')
 
 
 class PackageInfo(DotMap):
