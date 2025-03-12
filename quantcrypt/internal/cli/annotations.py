@@ -9,12 +9,14 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from typer import Option
+from typer import Option, Argument
 from typing import Annotated
 from quantcrypt.internal import constants as const
+from quantcrypt.internal.cli import tools
 
 
 __all__ = [
+    "PQAlgorithm",
     "Version",
     "DryRun",
     "Overwrite",
@@ -33,6 +35,13 @@ __all__ = [
     "Directory"
 ]
 
+
+PQAlgorithm = Annotated[str, Argument(
+    show_default=False, case_sensitive=False, help=' '.join([
+        "Name of the algorithm with which to generate the public-private keypair",
+        f"(case insensitive). Available choices: {tools.available_algo_choices()}"
+    ])
+)]
 
 Version = Annotated[bool, Option(
     '--version', '-v', show_default=False,
