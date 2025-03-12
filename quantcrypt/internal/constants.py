@@ -113,8 +113,11 @@ class SupportedAlgos:
 
     @classmethod
     @cache
-    def items(cls) -> list[tuple[str, AlgoSpec]]:
-        return [(k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
+    def items(cls, pqa_type: PQAType | None = None) -> list[tuple[str, AlgoSpec]]:
+        return [
+            (k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)
+            and (not pqa_type or pqa_type == v.type)
+        ]
 
     @classmethod
     @cache
