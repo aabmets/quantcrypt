@@ -42,7 +42,7 @@ def check_sources_exist() -> bool:
     pqclean = utils.search_upwards('pqclean')
     check_dirs: list[bool] = []
     variants = const.PQAVariant.values()
-    for spec in const.SupportedAlgos.iterate():
+    for spec in const.SupportedAlgos.values():
         for variant in variants:
             path = pqclean / spec.type.value / spec.name / variant
             check_dirs.append(path.exists())
@@ -50,7 +50,7 @@ def check_sources_exist() -> bool:
 
 
 def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]]:
-    supported_algos = [spec.name for spec in const.SupportedAlgos.iterate()]
+    supported_algos = [spec.name for spec in const.SupportedAlgos.values()]
     accepted_dirs = ["common", "crypto_kem", "crypto_sign"]
     filtered_members = []
 
