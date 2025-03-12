@@ -123,7 +123,7 @@ def validate_armored_key(
 
 def get_pqa_class(algo_name: str) -> Type[BaseKEM | BaseDSS]:
     for cls_name, spec in const.SupportedAlgos.items():
-        if algo_name == cls_name.replace('_', '').lower():
+        if algo_name.upper() == cls_name.replace('_', ''):
             is_kem = spec.type == const.PQAType.KEM
             module = kem_algos if is_kem else dss_algos
             return getattr(module, cls_name)
