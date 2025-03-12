@@ -13,8 +13,7 @@ from abc import ABC
 from cffi import FFI
 from types import ModuleType
 from functools import lru_cache
-from quantcrypt.internal import errors
-from quantcrypt.internal import utils
+from quantcrypt.internal import utils, errors
 from quantcrypt.internal.pqa import common as com
 
 

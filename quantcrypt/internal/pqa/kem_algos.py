@@ -9,8 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from quantcrypt.internal import constants as const
-from quantcrypt.internal import utils
+from quantcrypt.internal import utils, constants as const
 from quantcrypt.internal.pqa.base_kem import BaseKEM
 
 
