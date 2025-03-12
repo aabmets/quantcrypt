@@ -88,11 +88,6 @@ class AlgoSpec:
     def DSS(cls, name: str) -> AlgoSpec:  # NOSONAR
         return cls(type=PQAType.DSS, name=name)
 
-    @property
-    @cache
-    def armor_name(self) -> str:
-        return self.name.replace('-', '').upper()
-
     @cache
     def cdef_name(self, variant: PQAVariant) -> str:
         name = self.name.replace('-', '')
