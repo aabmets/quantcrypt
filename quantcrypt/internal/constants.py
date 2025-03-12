@@ -82,6 +82,9 @@ class AlgoSpec:
     def DSS(cls, name: str) -> AlgoSpec:  # NOSONAR
         return cls(type=PQAType.DSS, name=name)
 
+    def armor_name(self) -> str:
+        return self.name.replace('-', '').upper()
+
     def cdef_name(self, variant: PQAVariant) -> str:
         name = self.name.replace('-', '')
         return f"PQCLEAN_{name}_{variant.value}".upper()
@@ -108,6 +111,10 @@ class SupportedAlgos:
         for value in vars(cls).values():
             if isinstance(value, AlgoSpec):
                 yield value
+
+    @classmethod
+    def armor_names(cls) -> list[str]:
+        return [spec.armor_name() for spec in cls.iterate()]
 
 
 SupportedVariants = [PQAVariant.REF]

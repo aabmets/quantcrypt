@@ -79,23 +79,18 @@ def test_algo_spec():
         (const.AlgoSpec.DSS, const.PQAType.DSS),
     ]
     for algo_spec, pqa_type in spec_types:
-        spec = algo_spec("asdfg")
+        spec = algo_spec("asdfg-1234")
         assert isinstance(spec, const.AlgoSpec)
         assert spec.type == pqa_type
+        assert spec.armor_name() == "ASDFG1234"
 
-        expected = f"PQCLEAN_ASDFG_CLEAN"
-        assert spec.cdef_name(const.PQAVariant.REF) == expected
-        expected = f"PQCLEAN_ASDFG_AVX2"
-        assert spec.cdef_name(const.PQAVariant.OPT) == expected
-        expected = f"PQCLEAN_ASDFG_AARCH64"
-        assert spec.cdef_name(const.PQAVariant.ARM) == expected
+        assert spec.cdef_name(const.PQAVariant.REF) == "PQCLEAN_ASDFG1234_CLEAN"
+        assert spec.cdef_name(const.PQAVariant.OPT) == "PQCLEAN_ASDFG1234_AVX2"
+        assert spec.cdef_name(const.PQAVariant.ARM) == "PQCLEAN_ASDFG1234_AARCH64"
 
-        expected = f"asdfg_clean"
-        assert spec.module_name(const.PQAVariant.REF) == expected
-        expected = f"asdfg_avx2"
-        assert spec.module_name(const.PQAVariant.OPT) == expected
-        expected = f"asdfg_aarch64"
-        assert spec.module_name(const.PQAVariant.ARM) == expected
+        assert spec.module_name(const.PQAVariant.REF) == "asdfg_1234_clean"
+        assert spec.module_name(const.PQAVariant.OPT) == "asdfg_1234_avx2"
+        assert spec.module_name(const.PQAVariant.ARM) == "asdfg_1234_aarch64"
 
 
 def test_supported_algos():
@@ -112,6 +107,10 @@ def test_supported_algos():
 
     for item in const.SupportedAlgos.iterate():
         assert isinstance(item, const.AlgoSpec)
+
+    armor_names = const.SupportedAlgos.armor_names()
+    assert isinstance(armor_names, list)
+    assert all([isinstance(n, str) for n in armor_names])
 
 
 def test_pqclean_repo_archive_url():
