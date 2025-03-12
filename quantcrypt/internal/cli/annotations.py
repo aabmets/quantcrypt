@@ -15,22 +15,22 @@ from quantcrypt.internal import constants as const
 
 
 __all__ = [
-	"Version",
-	"DryRun",
-	"Overwrite",
-	"NonInteractive",
-	"PubKeyFile",
-	"SecKeyFile",
-	"EncInFile",
-	"EncOutFile",
-	"DecInFile",
-	"DecOutFile",
-	"SignDataFile",
-	"VerifyDataFile",
-	"WriteSigFile",
-	"ReadSigFile",
-	"Identifier",
-	"Directory"
+    "Version",
+    "DryRun",
+    "Overwrite",
+    "NonInteractive",
+    "PubKeyFile",
+    "SecKeyFile",
+    "EncInFile",
+    "EncOutFile",
+    "DecInFile",
+    "DecOutFile",
+    "SignDataFile",
+    "VerifyDataFile",
+    "WriteSigFile",
+    "ReadSigFile",
+    "Identifier",
+    "Directory"
 ]
 
 
@@ -41,12 +41,12 @@ Version = Annotated[bool, Option(
 
 DryRun = Annotated[bool, Option(
     "--dry-run", "-D", show_default=False,
-	help="Skips actual file operations. Useful for testing purposes."
+    help="Skips actual file operations. Useful for testing purposes."
 )]
 
 Overwrite = Annotated[bool, Option(
     "--overwrite", "-W", show_default=False,
-	help="Disables interactive confirmation prompt for overwriting files."
+    help="Disables interactive confirmation prompt for overwriting files."
 )]
 
 NonInteractive = Annotated[bool, Option(
@@ -72,76 +72,76 @@ SecKeyFile = Annotated[str, Option(
 )]
 
 EncInFile = Annotated[str, Option(
-	'--in-file', '-i', show_default=False, help=' '.join([
-		"Path to the plaintext data file, which will be encrypted with the Krypton cipher.",
-		"If the path is relative, it is evaluated from the Current Working Directory."
-	])
+    '--in-file', '-i', show_default=False, help=' '.join([
+        "Path to the plaintext data file, which will be encrypted with the Krypton cipher.",
+        "If the path is relative, it is evaluated from the Current Working Directory."
+    ])
 )]
 
 EncOutFile = Annotated[str, Option(
-	'--out-file', '-o', show_default=False, help=' '.join([
-		"Path to the output file where the encrypted data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the data file name "
-		f"with the {const.KryptonFileSuffix} suffix."
-	])
+    '--out-file', '-o', show_default=False, help=' '.join([
+        "Path to the output file where the encrypted data will be written to, optional.",
+        "Defaults to the Current Working Directory, using the data file name "
+        f"with the {const.KryptonFileSuffix} suffix."
+    ])
 )]
 
 DecInFile = Annotated[str, Option(
-	'--in-file', '-i', show_default=False, help=' '.join([
-		"Path to the ciphertext data file, which will be decrypted with the Krypton cipher.",
-		"If the path is relative, it is evaluated from the Current Working Directory."
-	])
+    '--in-file', '-i', show_default=False, help=' '.join([
+        "Path to the ciphertext data file, which will be decrypted with the Krypton cipher.",
+        "If the path is relative, it is evaluated from the Current Working Directory."
+    ])
 )]
 
 DecOutFile = Annotated[str, Option(
-	'--out-file', '-o', show_default=False, help=' '.join([
-		"Path to the output file where the decrypted data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the original filename of the",
-		"plaintext file that was stored into the ciphertext file."
-	])
+    '--out-file', '-o', show_default=False, help=' '.join([
+        "Path to the output file where the decrypted data will be written to, optional.",
+        "Defaults to the Current Working Directory, using the original filename of the",
+        "plaintext file that was stored into the ciphertext file."
+    ])
 )]
 
 SignDataFile = Annotated[str, Option(
-	'--in-file', '-i', show_default=False, help=' '.join([
-		"Path to the data file, which will be signed by a DSS algorithm.",
-		"The appropriate DSS algorithm is deduced from the contents of the armored key file.",
-		"If the path is relative, it is evaluated from the Current Working Directory."
-	])
+    '--in-file', '-i', show_default=False, help=' '.join([
+        "Path to the data file, which will be signed by a DSS algorithm.",
+        "The appropriate DSS algorithm is deduced from the contents of the armored key file.",
+        "If the path is relative, it is evaluated from the Current Working Directory."
+    ])
 )]
 
 VerifyDataFile = Annotated[str, Option(
-	'--in-file', '-i', show_default=False, help=' '.join([
-		"Path to the data file, which will be verified by a DSS algorithm.",
-		"The appropriate DSS algorithm is deduced from the contents of the armored key file.",
-		"If the path is relative, it is evaluated from the Current Working Directory."
-	])
+    '--in-file', '-i', show_default=False, help=' '.join([
+        "Path to the data file, which will be verified by a DSS algorithm.",
+        "The appropriate DSS algorithm is deduced from the contents of the armored key file.",
+        "If the path is relative, it is evaluated from the Current Working Directory."
+    ])
 )]
 
 WriteSigFile = Annotated[str, Option(
-	'--sig-file', '-S', show_default=False, help=' '.join([
-		"Path to a file where the signature data will be written to, optional.",
-		"Defaults to the Current Working Directory, using the data file name "
-		f"with the {const.SignatureFileSuffix} suffix."
-	])
+    '--sig-file', '-S', show_default=False, help=' '.join([
+        "Path to a file where the signature data will be written to, optional.",
+        "Defaults to the Current Working Directory, using the data file name "
+        f"with the {const.SignatureFileSuffix} suffix."
+    ])
 )]
 
 ReadSigFile = Annotated[str, Option(
-	'--sig-file', '-S', show_default=False, help=' '.join([
-		"Path to a file where the signature data will be read from, optional.",
-		"Defaults to the Current Working Directory, using the data file name "
-		f"with the {const.SignatureFileSuffix} suffix."
-	])
+    '--sig-file', '-S', show_default=False, help=' '.join([
+        "Path to a file where the signature data will be read from, optional.",
+        "Defaults to the Current Working Directory, using the data file name "
+        f"with the {const.SignatureFileSuffix} suffix."
+    ])
 )]
 
 Identifier = Annotated[str, Option(
-	"--id", "-i", show_default=False,
-	help="Unique identifier to prepend to the names of the keyfiles, optional."
+    "--id", "-i", show_default=False,
+    help="Unique identifier to prepend to the names of the keyfiles, optional."
 )]
 
 Directory = Annotated[str, Option(
-	"--dir", "-d", show_default=False, help=' '.join([
-		"Directory where to save the generated keypair, optional.",
-		"If the directory doesn't exist, it will be created with parents.",
-		"If not provided, the keys are saved into the Current Working Directory."
-	])
+    "--dir", "-d", show_default=False, help=' '.join([
+        "Directory where to save the generated keypair, optional.",
+        "If the directory doesn't exist, it will be created with parents.",
+        "If not provided, the keys are saved into the Current Working Directory."
+    ])
 )]
