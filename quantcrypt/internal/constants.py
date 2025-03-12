@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 from enum import Enum
-from typing import Iterator
+from functools import cache
 from dataclasses import dataclass
 
 
@@ -33,10 +33,12 @@ __all__ = [
 
 class ExtendedEnum(Enum):
     @classmethod
+    @cache
     def members(cls) -> list:
         return list(cls.__members__.values())
 
     @classmethod
+    @cache
     def values(cls) -> list:
         return [member.value for member in cls.members()]
 
@@ -87,13 +89,16 @@ class AlgoSpec:
         return cls(type=PQAType.DSS, name=name)
 
     @property
+    @cache
     def armor_name(self) -> str:
         return self.name.replace('-', '').upper()
 
+    @cache
     def cdef_name(self, variant: PQAVariant) -> str:
         name = self.name.replace('-', '')
         return f"PQCLEAN_{name}_{variant.value}".upper()
 
+    @cache
     def module_name(self, variant: PQAVariant) -> str:
         name = self.name.replace('-', '_')
         return f"{name}_{variant.value}".lower()
@@ -112,10 +117,12 @@ class SupportedAlgos:
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
 
     @classmethod
+    @cache
     def items(cls) -> list[tuple[str, AlgoSpec]]:
         return [(k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
 
     @classmethod
+    @cache
     def values(cls, pqa_type: PQAType | None = None) -> list[AlgoSpec]:
         return [
             v for v in vars(cls).values() if isinstance(v, AlgoSpec)
