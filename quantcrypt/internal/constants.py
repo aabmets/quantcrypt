@@ -127,7 +127,7 @@ class AlgoSpecsList(list):
     def armor_names(
             self: list[AlgoSpec],
             pqa_type: PQAType | None = None
-    ) -> list[AlgoSpec]:
+    ) -> list[str]:
         return [
             spec.armor_name() for spec in self if
             not pqa_type or pqa_type == spec.type
