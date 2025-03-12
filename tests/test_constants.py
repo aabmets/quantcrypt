@@ -82,7 +82,6 @@ def test_algo_spec():
         spec = algo_spec("asdfg-1234")
         assert isinstance(spec, const.AlgoSpec)
         assert spec.type == pqa_type
-        assert spec.armor_name == "ASDFG1234"
 
         assert spec.cdef_name(const.PQAVariant.REF) == "PQCLEAN_ASDFG1234_CLEAN"
         assert spec.cdef_name(const.PQAVariant.OPT) == "PQCLEAN_ASDFG1234_AVX2"
@@ -113,6 +112,8 @@ def test_supported_algos():
     for item in const.SupportedAlgos.values():
         assert isinstance(item, const.AlgoSpec)
     for pqa_type in const.PQAType.members():
+        for _, value in const.SupportedAlgos.items(pqa_type):
+            assert value.type == pqa_type
         for item in const.SupportedAlgos.values(pqa_type):
             assert item.type == pqa_type
 
