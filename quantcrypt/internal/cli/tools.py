@@ -98,8 +98,8 @@ def validate_armored_key(
         key_type: const.PQAKeyType,
         pqa_type: const.PQAType
 ) -> str:
-    header_pattern = r"^-----BEGIN (?P<hdr_name>[A-Z_]+) (?P<hdr_type>[A-Z_]+) KEY-----\n"
-    footer_pattern = r"\n-----END (?P<ftr_name>[A-Z_]+) (?P<ftr_type>[A-Z_]+) KEY-----$"
+    header_pattern = r"^-----BEGIN (?P<hdr_name>\w+) (?P<hdr_type>[A-Z_]+) KEY-----\n"
+    footer_pattern = r"\n-----END (?P<ftr_name>\w+) (?P<ftr_type>[A-Z_]+) KEY-----$"
     full_pattern = header_pattern + r"(?P<content>.+)" + footer_pattern
 
     full_match = re.match(full_pattern, armored_key, re.DOTALL)
