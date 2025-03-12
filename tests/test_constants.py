@@ -14,6 +14,23 @@ import requests
 from quantcrypt.internal import constants as const
 
 
+def test_extended_enum():
+    class TestEnum(const.ExtendedEnum):
+        FIRST = "asdfg"
+        SECOND = "qwerty"
+
+    assert TestEnum.members() == [
+        TestEnum.FIRST,
+        TestEnum.SECOND,
+    ]
+    assert TestEnum.values() == [
+        TestEnum.FIRST.value,
+        TestEnum.SECOND.value,
+    ]
+    assert TestEnum.FIRST.value == "asdfg"
+    assert TestEnum.SECOND.value == "qwerty"
+
+
 def test_pqa_variant():
     assert const.PQAVariant.members() == [
         const.PQAVariant.REF,
@@ -31,8 +48,29 @@ def test_pqa_variant():
 
 
 def test_pqa_type():
+    assert const.PQAType.members() == [
+        const.PQAType.KEM,
+        const.PQAType.DSS
+    ]
+    assert const.PQAType.values() == [
+        const.PQAType.KEM.value,
+        const.PQAType.DSS.value
+    ]
     assert const.PQAType.KEM.value == "crypto_kem"
     assert const.PQAType.DSS.value == "crypto_sign"
+
+
+def test_pqa_key_type():
+    assert const.PQAKeyType.members() == [
+        const.PQAKeyType.PUBLIC,
+        const.PQAKeyType.SECRET
+    ]
+    assert const.PQAKeyType.values() == [
+        const.PQAKeyType.PUBLIC.value,
+        const.PQAKeyType.SECRET.value
+    ]
+    assert const.PQAKeyType.PUBLIC.value == "PUBLIC"
+    assert const.PQAKeyType.SECRET.value == "SECRET"
 
 
 def test_algo_spec():

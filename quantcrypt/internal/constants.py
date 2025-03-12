@@ -16,8 +16,10 @@ from dataclasses import dataclass
 
 
 __all__ = [
+    "ExtendedEnum",
     "PQAVariant",
     "PQAType",
+    "PQAKeyType",
     "AlgoSpec",
     "SupportedAlgos",
     "SupportedVariants",
@@ -25,7 +27,17 @@ __all__ = [
 ]
 
 
-class PQAVariant(Enum):
+class ExtendedEnum(Enum):
+    @classmethod
+    def members(cls) -> list:
+        return list(cls.__members__.values())
+
+    @classmethod
+    def values(cls) -> list:
+        return [member.value for member in cls.members()]
+
+
+class PQAVariant(ExtendedEnum):
     """
     Available binaries of algorithms:
     * REF - Clean reference binaries for the x86_64 architecture.
@@ -36,23 +48,25 @@ class PQAVariant(Enum):
     OPT = "avx2"
     ARM = "aarch64"
 
-    @classmethod
-    def members(cls) -> list[PQAVariant]:
-        return list(vars(cls)["_member_map_"].values())
 
-    @classmethod
-    def values(cls) -> list[str]:
-        return [m.value for m in cls.members()]
-
-
-class PQAType(Enum):
+class PQAType(ExtendedEnum):
     """
-    Available types of algorithms:
+    Available types of PQ algorithms:
     * KEM - Key Encapsulation Mechanism
     * DSS - Digital Signature Scheme
     """
     KEM = "crypto_kem"
     DSS = "crypto_sign"
+
+
+class PQAKeyType(ExtendedEnum):
+    """
+    Available types of PQA keys:
+    * PUBLIC - Public key
+    * SECRET - Secret key
+    """
+    PUBLIC = "PUBLIC"
+    SECRET = "SECRET"
 
 
 @dataclass(frozen=True)
