@@ -105,8 +105,11 @@ def test_supported_algos():
             continue
         assert isinstance(v, const.AlgoSpec)
 
-    for item in const.SupportedAlgos.keys():
-        assert isinstance(item, str)
+    for item in const.SupportedAlgos.items():
+        assert isinstance(item, tuple)
+        assert len(item) == 2
+        assert isinstance(item[0], str)
+        assert isinstance(item[1], const.AlgoSpec)
     for item in const.SupportedAlgos.values():
         assert isinstance(item, const.AlgoSpec)
 

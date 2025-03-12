@@ -112,8 +112,8 @@ class SupportedAlgos:
     SMALL_SPHINCS = AlgoSpec.DSS("sphincs-shake-256s-simple")
 
     @classmethod
-    def keys(cls) -> list[str]:
-        return [k for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
+    def items(cls) -> list[tuple[str, AlgoSpec]]:
+        return [(k, v) for k, v in vars(cls).items() if isinstance(v, AlgoSpec)]
 
     @classmethod
     def values(cls) -> list[AlgoSpec]:
