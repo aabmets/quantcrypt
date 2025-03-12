@@ -149,7 +149,7 @@ class Compiler:
     def get_compile_targets() -> tuple[list[Target], list[Target]]:
         accepted: list[Target] = []
         rejected: list[Target] = []
-        algos = const.SupportedAlgos.iterate()
+        algos = const.SupportedAlgos.values()
         variants = const.PQAVariant.members()
         for spec, variant in itertools.product(algos, variants):
             source_dir, required_flags = pqclean.check_platform_support(spec, variant)
