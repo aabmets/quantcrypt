@@ -8,45 +8,44 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
-from typing import Annotated
-from typer import Typer, Option
-from .info import PackageInfo
-from . import utils, console
+
+import inspect
+import importlib
+from typer import Typer
+from pathlib import Path
+from typing import Generator
+from types import ModuleType
+from quantcrypt.internal import utils
+from quantcrypt.internal.cli import annotations as atd
+from quantcrypt.internal.cli.commands.info import PackageInfo
 
 
-app = utils.add_commands(Typer(
-	name="qclib",
-	invoke_without_command=True,
-	no_args_is_help=True
-))
-
-
-VersionAtd = Annotated[bool, Option(
-	'--version', '-v', show_default=False,
-	help="Prints package version to the console and exits."
-)]
-InfoAtd = Annotated[bool, Option(
-	'--info', '-i', show_default=False,
-	help="Prints project info to the console and exits."
-)]
+app = Typer(
+    name="qclib",
+    no_args_is_help=True,
+    invoke_without_command=True
+)
 
 
 @app.callback()
-def main(version: VersionAtd = False, info: InfoAtd = False) -> None:
-	if version and info:
-		a, b = [f"[bold turquoise2]--{kw}[/]" for kw in ["version", "info"]]
-		console.raise_error(f"Cannot use {a} and {b} options simultaneously.")
-	elif version or info:
-		if version:
-			print(PackageInfo().Version)
-		else:
-			title_color = "[{}]".format("#ff5fff")
-			key_color = "[{}]".format("#87d7d7")
-			value_color = "[{}]".format("#ffd787")
+def main(version: atd.Version = False) -> None:
+    if version:
+        print(PackageInfo().Version)
 
-			console.styled_print(f"{title_color}Package Info:")
-			for k, v in PackageInfo().toDict().items():
-				k = f"{key_color}{k}"
-				v = f"{value_color}{v}"
-				console.styled_print(f"{2 * ' '}{k}: {v}")
-			console.styled_print('')
+
+def _find_command_modules() -> Generator[ModuleType, None, None]:
+    package_path = utils.search_upwards("quantcrypt/__init__.py").parent
+    import_dir = Path(__file__).with_name("commands")
+    for filepath in import_dir.rglob("*.py"):
+        relative_path = filepath.relative_to(package_path)
+        module_path = '.'.join(relative_path.with_suffix('').parts)
+        yield importlib.import_module(
+            package=package_path.name,
+            name=f'.{module_path}'
+        )
+
+
+for module in _find_command_modules():
+    for _, obj in inspect.getmembers(module):
+        if isinstance(obj, Typer):
+            app.add_typer(typer_instance=obj, name=obj.info.name)
