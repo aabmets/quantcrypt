@@ -66,7 +66,7 @@ def _common_flow(
     armor_name = tools.validate_armored_key(armored_key, key_type, const.PQAType.KEM)
 
     files = [paths.in_file, paths.key_file]
-    a, b = [f"[italic sky_blue2]{f.name}[/]" for f in files]
+    a, b = [f"[italic sky_blue2]{f.name.lower()}[/]" for f in files]
 
     if key_type == const.PQAKeyType.PUBLIC:
         console.styled_print(
