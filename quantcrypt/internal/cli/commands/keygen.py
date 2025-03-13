@@ -14,13 +14,13 @@ from typer import Typer
 from quantcrypt.internal.cli import tools, console, annotations as ats
 
 
-app = Typer(
+keygen_app = Typer(
     name="keygen", invoke_without_command=True, no_args_is_help=True,
     help="Generates an ASCII armored keypair using a KEM or a DSS algorithm."
 )
 
 
-@app.callback()
+@keygen_app.callback()
 def command_keygen(
         algorithm: ats.PQAlgorithm,
         identifier: ats.Identifier = None,

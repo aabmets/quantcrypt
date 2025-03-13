@@ -16,13 +16,13 @@ from pathlib import Path
 from quantcrypt.internal.cli import console
 
 
-app = Typer(
+info_app = Typer(
 	name="info", invoke_without_command=True,
     help="Prints project info to the console and exits."
 )
 
 
-@app.callback()
+@info_app.callback()
 def command_info() -> None:
     title_color = "[{}]".format("#ff5fff")
     key_color = "[{}]".format("#87d7d7")
