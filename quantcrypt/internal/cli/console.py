@@ -90,6 +90,6 @@ def ask_overwrite_files(non_interactive: bool, overwrite: bool, exit_on_false: b
 
 def notify_dry_run(dry_run: bool, end='\n') -> None:
     if dry_run:
-        emojis = ":exclamation:" * 3
-        msg = f"{emojis} DRY RUN MODE {emojis}"
+        emojis = ":warning: " * 3
+        msg = f":warning: DRY RUN MODE :warning:"
         _custom_print(msg, color="bold dark_orange", end=end)
