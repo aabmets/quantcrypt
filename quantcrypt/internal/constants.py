@@ -52,8 +52,8 @@ class PQAVariant(ExtendedEnum):
     * ARM - Binaries for the aarch64 architecture.
     """
     REF = "clean"
-    OPT = "avx2"
-    ARM = "aarch64"
+    OPT_AMD = "avx2"
+    OPT_ARM = "aarch64"
 
 
 class PQAType(ExtendedEnum):
@@ -179,6 +179,7 @@ SupportedAlgos: AlgoSpecsList[AlgoSpec] = AlgoSpecsList([
 
 
 KDFContext = b"quantcrypt"
+SubprocTag = "<--quantcrypt-->"
 KryptonFileSuffix = ".kptn"
 SignatureFileSuffix = ".sig"
 SupportedVariants = [PQAVariant.REF]

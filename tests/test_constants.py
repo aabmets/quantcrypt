@@ -34,17 +34,17 @@ def test_extended_enum():
 def test_pqa_variant():
     assert const.PQAVariant.members() == [
         const.PQAVariant.REF,
-        const.PQAVariant.OPT,
-        const.PQAVariant.ARM
+        const.PQAVariant.OPT_AMD,
+        const.PQAVariant.OPT_ARM
     ]
     assert const.PQAVariant.values() == [
         const.PQAVariant.REF.value,
-        const.PQAVariant.OPT.value,
-        const.PQAVariant.ARM.value
+        const.PQAVariant.OPT_AMD.value,
+        const.PQAVariant.OPT_ARM.value
     ]
     assert const.PQAVariant.REF.value == "clean"
-    assert const.PQAVariant.OPT.value == "avx2"
-    assert const.PQAVariant.ARM.value == "aarch64"
+    assert const.PQAVariant.OPT_AMD.value == "avx2"
+    assert const.PQAVariant.OPT_ARM.value == "aarch64"
 
 
 def test_pqa_type():
@@ -95,12 +95,12 @@ def test_algo_spec():
         assert spec.armor_name() == "ASDFG1234"
 
         assert spec.cdef_name(const.PQAVariant.REF) == "PQCLEAN_ASDFG1234_CLEAN"
-        assert spec.cdef_name(const.PQAVariant.OPT) == "PQCLEAN_ASDFG1234_AVX2"
-        assert spec.cdef_name(const.PQAVariant.ARM) == "PQCLEAN_ASDFG1234_AARCH64"
+        assert spec.cdef_name(const.PQAVariant.OPT_AMD) == "PQCLEAN_ASDFG1234_AVX2"
+        assert spec.cdef_name(const.PQAVariant.OPT_ARM) == "PQCLEAN_ASDFG1234_AARCH64"
 
         assert spec.module_name(const.PQAVariant.REF) == "as_dfg_1234_clean"
-        assert spec.module_name(const.PQAVariant.OPT) == "as_dfg_1234_avx2"
-        assert spec.module_name(const.PQAVariant.ARM) == "as_dfg_1234_aarch64"
+        assert spec.module_name(const.PQAVariant.OPT_AMD) == "as_dfg_1234_avx2"
+        assert spec.module_name(const.PQAVariant.OPT_ARM) == "as_dfg_1234_aarch64"
 
 
 def test_supported_algos():

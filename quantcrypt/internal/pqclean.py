@@ -109,9 +109,9 @@ def get_common_filepaths(variant: const.PQAVariant) -> tuple[str, list[str]]:
                 files_list = keccak4x
             files_list.append(file)
 
-    if variant == const.PQAVariant.OPT:
+    if variant == const.PQAVariant.OPT_AMD:
         common.extend(keccak4x)
-    elif variant == const.PQAVariant.ARM:
+    elif variant == const.PQAVariant.OPT_ARM:
         common.extend(keccak2x)
 
     return path.as_posix(), common
@@ -154,7 +154,7 @@ def check_opsys_support(spf: PQASupportedPlatform) -> str | None:
 
 def check_arch_support(impl: PQAImplementation) -> PQASupportedPlatform | None:
     supported_arches = const.AMDArches
-    if impl.name == const.PQAVariant.ARM.value:
+    if impl.name == const.PQAVariant.OPT_ARM.value:
         supported_arches = const.ARMArches
     for spf in impl.supported_platforms:
         if platform.machine().lower() in supported_arches:

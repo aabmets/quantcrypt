@@ -48,8 +48,8 @@ def test_error_instantiation():
 	assert InvalidArgsError()
 	assert UnsupportedPlatformError()
 	assert MissingBinariesError(const.PQAVariant.REF)
-	assert MissingBinariesError(const.PQAVariant.OPT)
-	assert MissingBinariesError(const.PQAVariant.ARM)
+	assert MissingBinariesError(const.PQAVariant.OPT_AMD)
+	assert MissingBinariesError(const.PQAVariant.OPT_ARM)
 
 	assert PQAError()
 	assert PQAUnsupportedClassError("asdfg")

@@ -60,9 +60,9 @@ class BasePQAlgorithm(ABC):
 	def _auto_select_variant(self) -> const.PQAVariant:  # pragma: no cover
 		opsys = platform.machine().lower()
 		if opsys in const.ARMArches:
-			return const.PQAVariant.ARM
+			return const.PQAVariant.OPT_ARM
 		elif opsys in const.AMDArches:
-			return const.PQAVariant.OPT
+			return const.PQAVariant.OPT_AMD
 		return const.PQAVariant.REF
 
 	@lru_cache
