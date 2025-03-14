@@ -18,8 +18,8 @@ from quantcrypt.internal import constants as const
 from quantcrypt.internal.pqa.common import BasePQAlgorithm
 
 
-@pytest.fixture(scope="package")
-def invalid_keys() -> Callable:
+@pytest.fixture(name="invalid_keys", scope="package")
+def fixture_invalid_keys() -> Callable:
 	@lru_cache
 	def closure(key: bytes):
 		return [
@@ -30,8 +30,8 @@ def invalid_keys() -> Callable:
 	return closure
 
 
-@pytest.fixture(scope="package")
-def invalid_messages() -> Callable:
+@pytest.fixture(name="invalid_messages", scope="package")
+def fixture_invalid_messages() -> Callable:
 	@lru_cache
 	def closure(message: bytes):
 		return [
@@ -41,8 +41,8 @@ def invalid_messages() -> Callable:
 	return closure
 
 
-@pytest.fixture(scope="package")
-def invalid_signatures() -> Callable:
+@pytest.fixture(name="invalid_signatures", scope="package")
+def fixture_invalid_signatures() -> Callable:
 	@lru_cache
 	def closure(signature: bytes, max_size: int):
 		extra = b'0' * (max_size - len(signature) + 1)
@@ -53,8 +53,8 @@ def invalid_signatures() -> Callable:
 	return closure
 
 
-@pytest.fixture(scope="package")
-def invalid_ciphertexts() -> Callable:
+@pytest.fixture(name="invalid_ciphertexts", scope="package")
+def fixture_invalid_ciphertexts() -> Callable:
 	@lru_cache
 	def closure(ciphertext: bytes):
 		return [
@@ -65,8 +65,8 @@ def invalid_ciphertexts() -> Callable:
 	return closure
 
 
-@pytest.fixture(scope="package")
-def pqc_variant_tests():
+@pytest.fixture(name="pqc_variant_tests", scope="package")
+def fixture_pqc_variant_tests():
 	def closure(algo_cls: Type[BasePQAlgorithm]):
 		obj = algo_cls()
 		assert obj.variant == const.PQAVariant.REF
@@ -75,8 +75,8 @@ def pqc_variant_tests():
 	return closure
 
 
-@pytest.fixture(scope="package")
-def armoring_success_tests():
+@pytest.fixture(name="armor_success_tests", scope="package")
+def fixture_armor_success_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()
@@ -98,8 +98,8 @@ def armoring_success_tests():
 	return closure
 
 
-@pytest.fixture(scope="package")
-def armor_failure_tests():
+@pytest.fixture(name="armor_failure_tests", scope="package")
+def fixture_armor_failure_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()
@@ -119,8 +119,8 @@ def armor_failure_tests():
 	return closure
 
 
-@pytest.fixture(scope="package")
-def dearmor_failure_tests():
+@pytest.fixture(name="dearmor_failure_tests", scope="package")
+def fixture_dearmor_failure_tests():
 	def closure(pqa_cls: Type[BasePQAlgorithm]):
 		pqa = pqa_cls()
 		public_key, secret_key = pqa.keygen()

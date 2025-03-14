@@ -109,39 +109,60 @@ def fixture_invalid_inputs_tests(
 
 
 class Test_KEM_Algorithms:
-	algos = [MLKEM_512, MLKEM_768, MLKEM_1024]
+	kem_dataset = [
+		(cls, getattr(cls, "_get_spec")())
+		for cls in [
+			MLKEM_512,
+			MLKEM_768,
+			MLKEM_1024
+		]
+	]
 
 	@classmethod
-	def test_1(cls, pqc_variant_tests: Callable):
-		for algo in cls.algos:
-			pqc_variant_tests(algo)
+	def test_variants(cls, pqc_variant_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class variants")
+			pqc_variant_tests(kem_cls)
 
 	@classmethod
-	def test_2(cls, attribute_tests: Callable):
-		for algo in cls.algos:
-			attribute_tests(algo)
+	def test_attributes(cls, attribute_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class attributes")
+			attribute_tests(kem_cls)
 
 	@classmethod
-	def test_3(cls, cryptography_tests: Callable):
-		for algo in cls.algos:
-			cryptography_tests(algo)
+	def test_cryptography(cls, cryptography_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class cryptography")
+			cryptography_tests(kem_cls)
 
 	@classmethod
-	def test_4(cls, invalid_inputs_tests: Callable):
-		for algo in cls.algos:
-			invalid_inputs_tests(algo)
+	def test_invalid_inputs(cls, invalid_inputs_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class invalid inputs")
+			invalid_inputs_tests(kem_cls)
 
 	@classmethod
-	def test_5(cls, armoring_success_tests: Callable):
-		for algo in cls.algos:
-			armoring_success_tests(algo)
+	def test_armor_success(cls, armor_success_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class armor success")
+			armor_success_tests(kem_cls)
 
 	@classmethod
-	def test_6(cls, armor_failure_tests: Callable):
-		for algo in cls.algos:
-			armor_failure_tests(algo)
+	def test_armor_failure(cls, armor_failure_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class armor failure")
+			armor_failure_tests(kem_cls)
 
 	@classmethod
-	def test_7(cls, dearmor_failure_tests: Callable):
-		for algo in cls.algos:
-			dearmor_failure_tests(algo)
+	def test_dearmor_failure(cls, dearmor_failure_tests: Callable):
+		print()
+		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class dearmor failure")
+			dearmor_failure_tests(kem_cls)

@@ -173,57 +173,78 @@ def fixture_sign_verify_file_callback_tests(tmp_path: Path):
 
 
 class Test_DSS_Algorithms:
-	algos = [
-		MLDSA_44,
-		MLDSA_65,
-		MLDSA_87,
-		FALCON_512,
-		FALCON_1024,
-		SMALL_SPHINCS,
-		FAST_SPHINCS
+	dss_dataset = [
+		(cls, getattr(cls, "_get_spec")())
+		for cls in [
+			MLDSA_44,
+			MLDSA_65,
+			MLDSA_87,
+			FALCON_512,
+			FALCON_1024,
+			SMALL_SPHINCS,
+			FAST_SPHINCS
+		]
 	]
 
 	@classmethod
-	def test_1(cls, pqc_variant_tests: Callable):
-		for algo in cls.algos:
-			pqc_variant_tests(algo)
+	def test_variants(cls, pqc_variant_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class variants")
+			pqc_variant_tests(dss_cls)
 
 	@classmethod
-	def test_2(cls, attribute_tests: Callable):
-		for algo in cls.algos:
-			attribute_tests(algo)
+	def test_attributes(cls, attribute_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class attributes")
+			attribute_tests(dss_cls)
 
 	@classmethod
-	def test_3(cls, cryptography_tests: Callable):
-		for algo in cls.algos:
-			cryptography_tests(algo)
+	def test_cryptography(cls, cryptography_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class cryptography")
+			cryptography_tests(dss_cls)
 
 	@classmethod
-	def test_4(cls, invalid_inputs_tests: Callable):
-		for algo in cls.algos:
-			invalid_inputs_tests(algo)
+	def test_invalid_inputs(cls, invalid_inputs_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class invalid inputs")
+			invalid_inputs_tests(dss_cls)
 
 	@classmethod
-	def test_5(cls, armoring_success_tests: Callable):
-		for algo in cls.algos:
-			armoring_success_tests(algo)
+	def test_armor_success(cls, armor_success_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class armor success")
+			armor_success_tests(dss_cls)
 
 	@classmethod
-	def test_6(cls, armor_failure_tests: Callable):
-		for algo in cls.algos:
-			armor_failure_tests(algo)
+	def test_armor_failure(cls, armor_failure_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class armor failure")
+			armor_failure_tests(dss_cls)
 
 	@classmethod
-	def test_7(cls, dearmor_failure_tests: Callable):
-		for algo in cls.algos:
-			dearmor_failure_tests(algo)
+	def test_dearmor_failure(cls, dearmor_failure_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class dearmor failure")
+			dearmor_failure_tests(dss_cls)
 
 	@classmethod
-	def test_8(cls, sign_verify_file_tests: Callable):
-		for algo in cls.algos:
-			sign_verify_file_tests(algo)
+	def test_signature_verification(cls, sign_verify_file_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class signature verification")
+			sign_verify_file_tests(dss_cls)
 
 	@classmethod
-	def test_9(cls, sign_verify_file_callback_tests: Callable):
-		for algo in cls.algos:
-			sign_verify_file_callback_tests(algo)
+	def test_signature_verification_callback(cls, sign_verify_file_callback_tests: Callable):
+		print()
+		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
+			print(f"Testing {spec.armor_name()} class signature verification callback")
+			sign_verify_file_callback_tests(dss_cls)
