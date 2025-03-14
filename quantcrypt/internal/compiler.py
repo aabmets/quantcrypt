@@ -146,14 +146,14 @@ class Target:
 
 class Compiler:
     @staticmethod
-    def get_compile_targets() -> tuple[list[Target], list[Target]]:
+    def get_compile_targets(supported_variants: list[const.PQAVariant]) -> tuple[list[Target], list[Target]]:
         accepted: list[Target] = []
         rejected: list[Target] = []
         specs = const.SupportedAlgos
         variants = const.PQAVariant.members()
         for spec, variant in itertools.product(specs, variants):
             source_dir, required_flags = pqclean.check_platform_support(spec, variant)
-            acceptable = source_dir and variant in const.SupportedVariants
+            acceptable = source_dir and variant in supported_variants
             (accepted if acceptable else rejected).append(Target(
                 spec=spec,
                 variant=variant,
@@ -200,10 +200,10 @@ class Compiler:
         ffi.compile(verbose=False)
 
     @classmethod
-    def run(cls) -> None:
+    def run(cls, supported_variants: list[const.PQAVariant] = const.SupportedVariants) -> None:
         if not pqclean.check_sources_exist():
             pqclean.download_extract_pqclean()
-        accepted, rejected = cls.get_compile_targets()
+        accepted, rejected = cls.get_compile_targets(supported_variants)
         if not accepted:
             return
         with cls.build_path():
