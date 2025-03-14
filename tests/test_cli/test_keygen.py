@@ -9,152 +9,60 @@
 #   SPDX-License-Identifier: MIT
 #
 
-import os
-import pytest
-from typing import Callable
-from dotmap import DotMap
 from pathlib import Path
-from typer.testing import CliRunner
-from quantcrypt.internal import constants as const
-from quantcrypt.internal.cli.commands.keygen import app
-
-
-@pytest.fixture(name="success", scope="function")
-def fixture_success(tmp_path: Path, cli_message: DotMap) -> Callable:
-	def closure(algo_name: str) -> None:
-		os.chdir(tmp_path)
-		runner = CliRunner()
-
-		result = runner.invoke(app, [algo_name], input="n\n")
-		assert result.exit_code == 0
-		assert cli_message.cancelled in result.stdout
-
-		result = runner.invoke(app, [algo_name], input="y\n")
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-		pk_file = tmp_path / f"{algo_name}-pubkey.qc"
-		sk_file = tmp_path / f"{algo_name}-seckey.qc"
-
-		assert pk_file.is_file()
-		assert sk_file.is_file()
-
-	return closure
-
-
-@pytest.fixture(name="dry_run", scope="function")
-def fixture_dry_run(tmp_path: Path) -> Callable:
-	def closure(algo_name: str) -> None:
-		os.chdir(tmp_path)
-		runner = CliRunner()
-
-		result = runner.invoke(app, ["-D", algo_name], input="y\n")
-		assert result.exit_code == 0
-		assert "DRY RUN MODE" in result.stdout
-
-	return closure
-
-
-@pytest.fixture(name="overwrite", scope="function")
-def fixture_overwrite(tmp_path: Path, cli_message: DotMap) -> Callable:
-	def closure(algo_name: str) -> None:
-		os.chdir(tmp_path)
-		runner = CliRunner()
-
-		result = runner.invoke(app, [algo_name], input="y\n")
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-		result = runner.invoke(app, [algo_name], input="y\nn\n")
-		assert result.exit_code == 0
-		assert cli_message.cancelled in result.stdout
-
-		result = runner.invoke(app, [algo_name], input="y\ny\n")
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-		result = runner.invoke(app, ["-N", algo_name])
-		assert result.exit_code == 1
-		assert cli_message.ow_error in result.stdout
-
-		result = runner.invoke(app, ["-N", "-W", algo_name])
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-	return closure
-
-
-@pytest.fixture(name="identifier", scope="function")
-def fixture_identifier(tmp_path: Path, cli_message: DotMap) -> Callable:
-	def closure(algo_name: str) -> None:
-		os.chdir(tmp_path)
-		runner = CliRunner()
-
-		result = runner.invoke(app, ["-i", "pytest", algo_name], input="y\n")
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-		pk_file = tmp_path / f"pytest-{algo_name}-pubkey.qc"
-		sk_file = tmp_path / f"pytest-{algo_name}-seckey.qc"
-
-		assert pk_file.is_file()
-		assert sk_file.is_file()
-
-		result = runner.invoke(app, ["-i", "!", algo_name])
-		assert result.exit_code == 1
-		assert "Only characters [a-z, A-Z, 0-9]" in result.stdout
-
-		result = runner.invoke(app, ["-i", "x" * 16, algo_name])
-		assert result.exit_code == 1
-		assert "longer than 15 characters!" in result.stdout
-
-	return closure
-
-
-@pytest.fixture(name="directory", scope="function")
-def fixture_directory(tmp_path: Path, cli_message: DotMap) -> Callable:
-	def closure(algo_name: str) -> None:
-		os.chdir(tmp_path)
-		runner = CliRunner()
-
-		result = runner.invoke(app, ["-d", "pytest", algo_name], input="y\n")
-		assert result.exit_code == 0
-		assert cli_message.success in result.stdout
-
-		pk_file = tmp_path / f"pytest/{algo_name}-pubkey.qc"
-		sk_file = tmp_path / f"pytest/{algo_name}-seckey.qc"
-
-		assert pk_file.is_file()
-		assert sk_file.is_file()
-
-	return closure
-
+from collections.abc import Callable
+from quantcrypt.internal import utils, constants as const
+from .conftest import CryptoFilePaths, CLIMessages
 
 
 class Test_Keygen:
 	algos = const.SupportedAlgos.armor_names()
 
 	@classmethod
-	def test_success(cls, success: Callable):
-		for algo in cls.algos:
-			success(algo)
+	def test_keygen(cls, cfp_setup, cli_runner) -> None:
+		print()
+		for algorithm in cls.algos:
+			print(f"Testing {algorithm} key generation in CLI")
+			with cfp_setup(algorithm) as cfp:
+				cls.flow(algorithm, cfp, cli_runner)
 
-	@classmethod
-	def test_dry_run(cls, dry_run: Callable):
-		for algo in cls.algos:
-			dry_run(algo)
+	@staticmethod
+	def flow(algorithm: str, cfp: CryptoFilePaths, cli_runner: Callable) -> None:
+		public_key = Path(cfp.public_key_fp)
+		secret_key = Path(cfp.secret_key_fp)
 
-	@classmethod
-	def test_overwrite(cls, overwrite: Callable):
-		for algo in cls.algos:
-			overwrite(algo)
+		assert not public_key.exists()
+		assert not secret_key.exists()
 
-	@classmethod
-	def test_identifier(cls, identifier: Callable):
-		for algo in cls.algos:
-			identifier(algo)
+		cli_runner("keygen", [algorithm], "n\n", CLIMessages.CANCELLED)
+		cli_runner("keygen", ["-D", algorithm], "y\n", CLIMessages.DRYRUN)
 
-	@classmethod
-	def test_directory(cls, directory: Callable):
-		for algo in cls.algos:
-			directory(algo)
+		assert not public_key.exists()
+		assert not secret_key.exists()
+
+		cli_runner("keygen", [algorithm], "y\n", CLIMessages.SUCCESS)
+
+		assert public_key.exists()
+		assert secret_key.exists()
+
+		pkf_digest_1 = utils.sha3_digest_file(public_key)
+		skf_digest_1 = utils.sha3_digest_file(secret_key)
+
+		cli_runner("keygen", [algorithm], "y\nn\n", CLIMessages.CANCELLED)
+		cli_runner("keygen", [algorithm], "y\ny\n", CLIMessages.SUCCESS)
+
+		cli_runner("keygen", ["-N", algorithm], "", CLIMessages.ERROR)
+		cli_runner("keygen", ["-N", "-W", algorithm], "", CLIMessages.SUCCESS)
+
+		cli_runner("keygen", ["-i", "!", algorithm], "", CLIMessages.ERROR)
+		cli_runner("keygen", ["-i", "x" * 16, algorithm], "", CLIMessages.ERROR)
+		cli_runner("keygen", ["-i", "asdfg", algorithm], "y\n", CLIMessages.SUCCESS)
+
+		public_key = public_key.with_name(f"asdfg-{public_key.name}")
+		secret_key = secret_key.with_name(f"asdfg-{secret_key.name}")
+
+		pkf_digest_2 = utils.sha3_digest_file(public_key)
+		skf_digest_2 = utils.sha3_digest_file(secret_key)
+
+		assert pkf_digest_1 != pkf_digest_2
+		assert skf_digest_1 != skf_digest_2

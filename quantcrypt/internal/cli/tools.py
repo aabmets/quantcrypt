@@ -127,4 +127,4 @@ def get_pqa_class(armor_name: str) -> Type[BaseKEM | BaseDSS]:
             module = kem_algos if is_kem else dss_algos
             return getattr(module, spec.class_name)
     console.raise_error(f"Algorithm name '{armor_name}' does not map to any supported PQA class.")
-    raise  # NOSONAR
+    raise  # NOSONAR pragma: no cover

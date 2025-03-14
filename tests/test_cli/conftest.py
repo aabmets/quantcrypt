@@ -47,12 +47,7 @@ ValidCommands = t.Literal["main", "info", "encrypt", "decrypt", "sign", "verify"
 @pytest.fixture(name="cfp_setup", scope="function")
 def fixture_cfp_setup(tmp_path: Path) -> Callable[..., t.ContextManager[CryptoFilePaths]]:
     @contextmanager
-    def closure(
-            algorithm: str,
-            *,
-            touch: bool = False,
-            rmtree: bool = False
-    ) -> t.Generator[CryptoFilePaths, t.Any, None]:
+    def closure(algorithm: str) -> t.Generator[CryptoFilePaths, t.Any, None]:
         sub_path = tmp_path / secrets.token_hex(16)
         sub_path.mkdir(parents=True, exist_ok=True)
         cfp_dict = dict(
@@ -63,9 +58,6 @@ def fixture_cfp_setup(tmp_path: Path) -> Callable[..., t.ContextManager[CryptoFi
             signature_fp=sub_path / "signature.sig",
             ptf_data=os.urandom(1024)
         )
-        if touch:
-            for path in cfp_dict.values():
-                path.touch(exist_ok=False)
         cfp = CryptoFilePaths(**{
             k: v.as_posix() if isinstance(v, Path) else v
             for k, v in cfp_dict.items()
@@ -76,8 +68,6 @@ def fixture_cfp_setup(tmp_path: Path) -> Callable[..., t.ContextManager[CryptoFi
         os.chdir(sub_path)
         yield cfp
         os.chdir(cwd)
-        if rmtree:
-            shutil.rmtree(sub_path, ignore_errors=True)
     return closure
 
 
