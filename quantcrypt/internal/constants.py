@@ -124,14 +124,15 @@ class AlgoSpecsList(list):
     def pqclean_names(self: list[AlgoSpec]) -> list[str]:
         return [spec.pqclean_name for spec in self]
 
-    def armor_names(
-            self: list[AlgoSpec],
-            pqa_type: PQAType | None = None
-    ) -> list[str]:
+    def armor_names(self: list[AlgoSpec], pqa_type: PQAType | None = None) -> list[str]:
         return [
             spec.armor_name() for spec in self if
             not pqa_type or pqa_type == spec.type
         ]
+
+    def filter(self, armor_name: str) -> AlgoSpec | None:
+        specs = [s for s in self if s.armor_name() == armor_name.upper()]
+        return specs[0] if specs else None
 
 
 SupportedAlgos: AlgoSpecsList[AlgoSpec] = AlgoSpecsList([
