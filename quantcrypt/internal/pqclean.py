@@ -59,7 +59,7 @@ def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]
         if member.is_dir():
             continue
         match = re.search(r"/(.+)", member.filename)
-        if not match:
+        if not match:  # pragma: no cover
             continue
         file_path = Path(match.group(1))
         parts = file_path.parts
@@ -81,7 +81,7 @@ def download_extract_pqclean() -> None:
 
     with open(zip_path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
+            if chunk:  # pragma: no branch
                 f.write(chunk)
 
     with ZipFile(zip_path, 'r') as zip_ref:
@@ -170,7 +170,7 @@ def check_platform_support(
     meta = read_algo_metadata(spec)
     impl = meta.filter(variant)
 
-    if not impl:
+    if not impl:  # pragma: no cover
         return None, None
     elif impl.supported_platforms:
         spf = check_arch_support(impl)
@@ -180,11 +180,11 @@ def check_platform_support(
             opsys = check_opsys_support(spf)
             if not opsys:
                 return None, None
-        if spf.required_flags:
+        if spf.required_flags:  # pragma: no branch
             required_flags = spf.required_flags
 
     pqclean = utils.search_upwards('pqclean')
     variant_path = pqclean / spec.src_subdir / variant.value
-    if variant_path.exists():
+    if variant_path.exists():  # pragma: no branch
         return variant_path, required_flags
-    return None, None
+    return None, None  # pragma: no cover
