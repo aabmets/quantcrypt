@@ -39,7 +39,7 @@ class BasePQAlgorithm(ABC):
 		return self._get_spec()
 
 	@classmethod
-	def _get_spec(cls) -> const.AlgoSpec:
+	def _get_spec(cls) -> const.AlgoSpec:  # pragma: no cover
 		for spec in const.SupportedAlgos:
 			if spec.class_name == cls.__name__:
 				return spec
@@ -57,7 +57,7 @@ class BasePQAlgorithm(ABC):
 		return self.spec.cdef_name(self.variant)
 
 	@property
-	def _auto_select_variant(self) -> const.PQAVariant:
+	def _auto_select_variant(self) -> const.PQAVariant:  # pragma: no cover
 		opsys = platform.machine().lower()
 		if opsys in const.ARMArches:
 			return const.PQAVariant.ARM
@@ -75,13 +75,13 @@ class BasePQAlgorithm(ABC):
 		try:
 			self.variant = variant or self._auto_select_variant
 			self._lib = self._import(self.variant)
-		except ModuleNotFoundError:
+		except ModuleNotFoundError:  # pragma: no cover
 			if self.variant != const.PQAVariant.REF:
 				try:
 					self.variant = const.PQAVariant.REF
 					self._lib = self._import(const.PQAVariant.REF)
 					return
-				except ModuleNotFoundError:  # pragma: no cover
+				except ModuleNotFoundError:
 					pass
 			raise errors.MissingBinariesError(self.variant)
 

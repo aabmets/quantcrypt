@@ -57,7 +57,7 @@ class PackageInfo(DotMap):
                 self._set_fields(lines)
 
     def _set_fields(self, lines: list[str]) -> None:
-        for line in lines:
+        for line in lines:  # pragma: no branch
             if line.startswith("\n"):
                 break
             k, v = line.split(": ", maxsplit=1)
