@@ -15,7 +15,7 @@ import platform
 from typer import Typer
 from quantcrypt.internal import constants as const
 from quantcrypt.internal.compiler import Compiler
-from quantcrypt.internal.cli import tools, console, annotations as ats
+from quantcrypt.internal.cli import console, annotations as ats
 
 
 compile_app = Typer(
@@ -42,6 +42,10 @@ def command_compile(
 ) -> None:
     console.notify_dry_run(dry_run)
 
+    algos = const.SupportedAlgos
+    if algorithms:
+        algos = const.SupportedAlgos.filter(algorithms)
+
     variants = [const.PQAVariant.REF]
     if with_opt:
         arch = platform.machine().lower()
@@ -51,11 +55,6 @@ def command_compile(
             variants.append(const.PQAVariant.OPT_ARM)
         else:  # pragma: no branch
             console.raise_error("This machine does not support optimized variants.")
-
-    algos = [] if algorithms else const.SupportedAlgos
-    for armor_name in algorithms or []:
-        if spec := const.SupportedAlgos.filter(armor_name):
-            algos.append(spec)
 
     variants_fmt = 'only the [italic tan]clean[/]'
     if len(variants) > 1:

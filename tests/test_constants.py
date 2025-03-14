@@ -115,12 +115,15 @@ def test_supported_algos():
     for item in const.SupportedAlgos.armor_names():
         assert isinstance(item, str)
 
-    spec = const.SupportedAlgos.filter("FALCON512")
-    assert isinstance(spec, const.AlgoSpec)
-    assert spec.armor_name() == "FALCON512"
+    specs = const.SupportedAlgos.filter(["asdfg1234"])
+    assert specs == []
 
-    spec = const.SupportedAlgos.filter("asdfg1234")
-    assert spec is None
+    armor_names = ["MLKEM1024", "MLDSA87"]
+    specs = const.SupportedAlgos.filter(armor_names)
+    assert isinstance(specs, list) and len(specs) == 2
+    for spec in specs:
+        assert spec.armor_name() in armor_names
+        assert isinstance(spec, const.AlgoSpec)
 
     for pqa_type in const.PQAType.members():  # type: const.PQAType
         for item in const.SupportedAlgos.armor_names(pqa_type):

@@ -14,12 +14,12 @@ import os
 import sys
 import shutil
 import platform
-import itertools
 import subprocess
 from cffi import FFI
 from typing import Generator
 from pathlib import Path
 from textwrap import dedent
+from itertools import product
 from dataclasses import dataclass
 from contextlib import contextmanager
 from quantcrypt.internal import constants as const
@@ -154,7 +154,7 @@ class Compiler:
         rejected: list[Target] = []
         specs = const.SupportedAlgos
         variants = const.PQAVariant.members()
-        for spec, variant in itertools.product(specs, variants):
+        for spec, variant in product(specs, variants):
             source_dir, required_flags = pqclean.check_platform_support(spec, variant)
             acceptable = (
                 source_dir is not None

@@ -14,12 +14,12 @@ import re
 import yaml
 import requests
 import platform
-import itertools
 from typing import Literal
 from zipfile import ZipFile, ZipInfo
 from pathlib import Path
 from pydantic import BaseModel
 from functools import cache
+from itertools import product
 from quantcrypt.internal import constants as const
 from quantcrypt.internal import utils
 
@@ -44,7 +44,7 @@ def check_sources_exist() -> bool:
     check_dirs: list[bool] = []
     specs = const.SupportedAlgos
     variants: list[str] = const.PQAVariant.values()
-    for spec, variant in itertools.product(specs, variants):
+    for spec, variant in product(specs, variants):
         path = pqclean / spec.src_subdir / variant
         check_dirs.append(path.exists())
     return all(check_dirs)

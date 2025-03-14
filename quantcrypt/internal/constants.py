@@ -10,6 +10,7 @@
 #
 
 from __future__ import annotations
+from itertools import product
 from enum import Enum
 from pathlib import Path
 from functools import cache
@@ -130,9 +131,11 @@ class AlgoSpecsList(list):
             not pqa_type or pqa_type == spec.type
         ]
 
-    def filter(self, armor_name: str) -> AlgoSpec | None:
-        specs = [s for s in self if s.armor_name() == armor_name.upper()]
-        return specs[0] if specs else None
+    def filter(self, armor_names: list[str]) -> list[AlgoSpec]:
+        return [
+            spec for spec, name in product(self, armor_names)
+            if spec.armor_name() == name.upper()
+        ]
 
 
 SupportedAlgos: AlgoSpecsList[AlgoSpec] = AlgoSpecsList([
