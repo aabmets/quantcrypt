@@ -11,9 +11,11 @@
 
 from __future__ import annotations
 import os
+import sys
 import shutil
 import platform
 import itertools
+import subprocess
 from cffi import FFI
 from typing import Generator
 from pathlib import Path
@@ -146,14 +148,14 @@ class Target:
 
 class Compiler:
     @staticmethod
-    def get_compile_targets(supported_variants: list[const.PQAVariant]) -> tuple[list[Target], list[Target]]:
+    def get_compile_targets(target_variants: list[const.PQAVariant]) -> tuple[list[Target], list[Target]]:
         accepted: list[Target] = []
         rejected: list[Target] = []
         specs = const.SupportedAlgos
         variants = const.PQAVariant.members()
         for spec, variant in itertools.product(specs, variants):
             source_dir, required_flags = pqclean.check_platform_support(spec, variant)
-            acceptable = source_dir and variant in supported_variants
+            acceptable = source_dir and variant in target_variants
             (accepted if acceptable else rejected).append(Target(
                 spec=spec,
                 variant=variant,
@@ -184,7 +186,7 @@ class Compiler:
         shutil.rmtree(new_cwd, ignore_errors=True)
 
     @staticmethod
-    def compile(target: Target) -> None:
+    def compile(target: Target, debug: bool) -> None:
         com_dir, com_files = pqclean.get_common_filepaths(target.variant)
         ffi = FFI()
         ffi.cdef(target.ffi_cdefs)
@@ -197,15 +199,56 @@ class Compiler:
             extra_link_args=target.linker_args,
             libraries=target.libraries,
         )
-        ffi.compile(verbose=False)
+        ffi.compile(verbose=debug, debug=debug)
+
+    @staticmethod
+    def log_progress(target: Target) -> None:
+        algo = target.spec.armor_name()
+        variant = target.variant.value
+        prefix, suffix = '', "..."
+        if __name__ == "__main__":
+            prefix = const.SubprocTag
+            algo = f"[bold sky_blue2]{algo}[/]"
+            variant = f"[italic tan]{variant}[/]"
+            suffix = f"[grey46]{suffix}[/]"
+        msg = f"{prefix}Compiling {variant} variant of {algo}{suffix}"
+        print(msg, flush=True)
 
     @classmethod
-    def run(cls, supported_variants: list[const.PQAVariant] = const.SupportedVariants) -> None:
+    def run(cls,
+            target_variants: list[const.PQAVariant] = None,
+            *,
+            in_subprocess: bool = False,
+            verbose: bool = False,
+            debug: bool = False,
+    ) -> subprocess.Popen | list[Target] | None:
+        if target_variants is None:
+            target_variants = const.PQAVariant.members()
+
+        if in_subprocess:
+            jar_str = utils.b64pickle(target_variants)
+            return subprocess.Popen(
+                [sys.executable, __file__, jar_str],
+                stderr=subprocess.STDOUT,
+                stdout=subprocess.PIPE,
+                text=True
+            )
         if not pqclean.check_sources_exist():
             pqclean.download_extract_pqclean()
-        accepted, rejected = cls.get_compile_targets(supported_variants)
+
+        accepted, rejected = cls.get_compile_targets(target_variants)
         if not accepted:
-            return
+            return rejected
+
         with cls.build_path():
             for target in accepted:
-                cls.compile(target)
+                if verbose or debug:
+                    cls.log_progress(target)
+                cls.compile(target, debug)
+
+        return None
+
+
+if __name__ == "__main__":
+    _target_variants = utils.b64pickle(sys.argv[1])
+    Compiler.run(_target_variants, verbose=True)
