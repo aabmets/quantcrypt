@@ -85,27 +85,25 @@ def _common_flow(
         console.ask_continue(exit_on_false=True)
 
     if paths.out_file.exists():
-        console.ask_overwrite_files(
-            non_interactive, overwrite,
-            exit_on_false=True
-        )
+        console.ask_overwrite_files(non_interactive, overwrite,True)
 
     if dry_run:
         console.styled_print("QuantCrypt would have created the following file:")
         console.pretty_print([paths.out_file.as_posix()])
+        return
+
+    kem_cls = tools.get_pqa_class(armor_name)
+    krypton = KryptonKEM(kem_cls)
+    if key_type == const.PQAKeyType.PUBLIC:
+        krypton.encrypt(
+            public_key=armored_key,
+            data_file=paths.in_file,
+            output_file=paths.out_file
+        )
     else:
-        kem_cls = tools.get_pqa_class(armor_name)
-        krypton = KryptonKEM(kem_cls)
-        if key_type == const.PQAKeyType.PUBLIC:
-            krypton.encrypt(
-                public_key=armored_key,
-                data_file=paths.in_file,
-                output_file=paths.out_file
-            )
-        else:
-            krypton.decrypt_to_file(
-                secret_key=armored_key,
-                encrypted_file=paths.in_file,
-                output_file=paths.out_file
-            )
-        console.print_success()
+        krypton.decrypt_to_file(
+            secret_key=armored_key,
+            encrypted_file=paths.in_file,
+            output_file=paths.out_file
+        )
+    console.print_success()

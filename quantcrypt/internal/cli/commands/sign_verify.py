@@ -34,14 +34,18 @@ def command_sign(
         overwrite: ats.Overwrite = False,
         non_interactive: ats.NonInteractive = False
 ) -> None:
-    paths, dss, armored_key = _common_flow(
+    paths, dss_inst, armored_key = _common_flow(
         sk_file, in_file, sig_file, dry_run, non_interactive,
         False, const.PQAKeyType.SECRET
     )
     if paths.sig_file.exists():
         console.ask_overwrite_files(non_interactive, overwrite, True)
+    if dry_run:
+        console.styled_print("QuantCrypt would have created the following signature file:")
+        console.pretty_print([paths.out_file.as_posix()])
+        return
     try:
-        signed_file = dss.sign_file(armored_key, paths.in_file)
+        signed_file = dss_inst.sign_file(armored_key, paths.in_file)
         with paths.sig_file.open('wb') as file:
             file.write(signed_file.signature)
         console.print_success()
@@ -62,6 +66,10 @@ def command_verify(
         pk_file, in_file, sig_file, dry_run, non_interactive,
         True, const.PQAKeyType.PUBLIC
     )
+    if dry_run:
+        console.styled_print("QuantCrypt would have verified the following signature file:")
+        console.pretty_print([paths.sig_file.as_posix()])
+        return
     try:
         with paths.sig_file.open('rb') as file:
             signature = file.read()
