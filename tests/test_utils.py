@@ -9,23 +9,35 @@
 #   SPDX-License-Identifier: MIT
 #
 
+import string
 import pytest
 import secrets
 from pathlib import Path
 from pydantic import fields
 from typing import cast, Callable
 from annotated_types import MinLen, MaxLen
-from quantcrypt.internal import errors
-from quantcrypt.internal import utils
+from quantcrypt.internal import constants as const
+from quantcrypt.internal import errors, utils
 
 
-def test_b64_helper_func():
+def test_b64():
 	assert utils.b64(b'abcdefg') == "YWJjZGVmZw=="
 	assert utils.b64("YWJjZGVmZw==") == b'abcdefg'
 	with pytest.raises(errors.InvalidArgsError):
 		utils.b64(cast(13, bytes))
 	with pytest.raises(errors.InvalidArgsError):
 		utils.b64("YWJjZGVmZw=")
+
+
+def test_b64pickle():
+	b64charset = string.ascii_letters + string.digits + "+/="
+	complex_object = const.PQAVariant.members()
+	jar_str = utils.b64pickle(complex_object)
+	de_lid = utils.b64pickle(jar_str)
+
+	assert isinstance(jar_str, str)
+	assert all(c in b64charset for c in jar_str)
+	assert de_lid == complex_object
 
 
 def test_input_validator():

@@ -9,6 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 
+import pickle
 import base64
 import binascii
 import typing as t
@@ -22,6 +23,7 @@ from quantcrypt.internal import errors
 
 __all__ = [
 	"b64",
+	"b64pickle",
 	"input_validator",
 	"search_upwards",
 	"annotated_bytes",
@@ -40,6 +42,13 @@ def b64(data: str | bytes) -> str | bytes:
 		raise errors.InvalidArgsError
 	except (UnicodeError, binascii.Error):
 		raise errors.InvalidArgsError
+
+
+T = t.TypeVar("T")
+def b64pickle(obj: T | str) -> T | str:
+	if isinstance(obj, str):
+		return pickle.loads(b64(obj))
+	return b64(pickle.dumps(obj))
 
 
 def input_validator() -> t.Callable:
