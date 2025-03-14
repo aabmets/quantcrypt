@@ -15,7 +15,8 @@ from quantcrypt.internal import constants as const
 
 
 __all__ = [
-    "PQAlgorithm",
+    "CompileAlgos",
+    "KeygenAlgo",
     "Version",
     "DryRun",
     "Overwrite",
@@ -32,14 +33,33 @@ __all__ = [
     "ReadSigFile",
     "Identifier",
     "Directory",
-    "WithOpt",
+    "WithOpt"
 ]
 
 
-PQAlgorithm = Annotated[str, Argument(
+_algo_choices = ' | '.join(const.SupportedAlgos.armor_names())
+
+
+KeygenAlgo = Annotated[str, Argument(
     show_default=False, case_sensitive=False, help=' '.join([
         "Name of the algorithm with which to generate the keypair (case insensitive).",
-        f"Available choices: {' | '.join(const.SupportedAlgos.armor_names())}"
+        f"Available choices: {_algo_choices}"
+    ])
+)]
+
+CompileAlgos = Annotated[list[str], Argument(
+    show_default=False, case_sensitive=False, help=' '.join([
+        "Names of the algorithms which to compile, optional (case insensitive)." ,
+        "If not provided, all algorithms will be compiled.",
+        "Can accept multiple values separated by spaces.",
+        f"Available choices: {_algo_choices}"
+    ])
+)]
+
+WithOpt = Annotated[bool, Option(
+    "--with-opt", "-o", show_default=False, help=' '.join([
+        "Includes architecture-specific optimized variants to compilation targets.",
+        "On x86_64 systems, this will add avx2 variants and on ARM systems, this will add aarch64 variants."
     ])
 )]
 
@@ -152,12 +172,5 @@ Directory = Annotated[str, Option(
         "Directory where to save the generated keypair, optional.",
         "If the directory doesn't exist, it will be created with parents.",
         "If not provided, the keys are saved into the Current Working Directory."
-    ])
-)]
-
-WithOpt = Annotated[bool, Option(
-    "--with-opt", "-o", show_default=False, help=' '.join([
-        "Includes architecture-specific optimized variants to compilation targets.",
-        "On x86_64 systems, this will add avx2 variants and on ARM systems, this will add aarch64 variants."
     ])
 )]

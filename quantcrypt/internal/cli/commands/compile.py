@@ -35,6 +35,7 @@ def run_compiler(variants: list[const.PQAVariant]) -> None:
 
 @compile_app.callback()
 def command_compile(
+        algorithms: ats.CompileAlgos = None,
         with_opt: ats.WithOpt = None,
         dry_run: ats.DryRun = False,
         non_interactive: ats.NonInteractive = False
@@ -51,19 +52,24 @@ def command_compile(
         else:  # pragma: no branch
             console.raise_error("This machine does not support optimized variants.")
 
+    algos = [] if algorithms else const.SupportedAlgos
+    for armor_name in algorithms or []:
+        if spec := const.SupportedAlgos.filter(armor_name):
+            algos.append(spec)
+
     variants_fmt = 'only the [italic tan]clean[/]'
     if len(variants) > 1:
         variants_fmt = ' and '.join(f"[italic tan]{v.value}[/]" for v in variants)
 
     console.styled_print(
         f"QuantCrypt is about to compile {variants_fmt} "
-        f"variants of the [bold sky_blue2]PQC algorithms[/]."
+        f"variants of [bold sky_blue2]PQC algorithms[/]."
     )
     if not non_interactive:
         console.ask_continue(exit_on_false=True)
 
     console.styled_print("\nInitializing compilation[grey46]...[/]\n")
-    process = Compiler.run(variants, in_subprocess=True)
+    process = Compiler.run(variants, algos, in_subprocess=True)
 
     for line in process.stdout:  # type: str
         if line.startswith(const.SubprocTag):

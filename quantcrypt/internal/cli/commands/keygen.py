@@ -22,7 +22,7 @@ keygen_app = Typer(
 
 @keygen_app.callback()
 def command_keygen(
-        algorithm: ats.PQAlgorithm,
+        algorithm: ats.KeygenAlgo,
         identifier: ats.Identifier = None,
         directory: ats.Directory = None,
         dry_run: ats.DryRun = False,
