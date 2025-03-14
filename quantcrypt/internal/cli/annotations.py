@@ -31,7 +31,8 @@ __all__ = [
     "WriteSigFile",
     "ReadSigFile",
     "Identifier",
-    "Directory"
+    "Directory",
+    "WithOpt",
 ]
 
 
@@ -151,5 +152,12 @@ Directory = Annotated[str, Option(
         "Directory where to save the generated keypair, optional.",
         "If the directory doesn't exist, it will be created with parents.",
         "If not provided, the keys are saved into the Current Working Directory."
+    ])
+)]
+
+WithOpt = Annotated[bool, Option(
+    "--with-opt", "-o", show_default=False, help=' '.join([
+        "Includes architecture-specific optimized variants to compilation targets.",
+        "On x86_64 systems, this will add avx2 variants and on ARM systems, this will add aarch64 variants."
     ])
 )]
