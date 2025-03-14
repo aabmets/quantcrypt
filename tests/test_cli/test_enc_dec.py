@@ -35,11 +35,10 @@ class Test_Encrypt_Decrypt:
     def test_encrypt_decrypt(cls, cfp_setup, cli_runner) -> None:
         print()
         for algorithm in cls.algos:
-            print(f"Testing {algorithm} encryption and decryption in CLI", end='')
+            print(f"Testing {algorithm} encryption and decryption in CLI")
             with cfp_setup(algorithm) as cfp:
                 cli_runner("keygen", ['-N', algorithm])
                 cls.flow(cfp, cli_runner)
-            print(' - ✔')
 
     @classmethod
     def flow(cls, cfp: CryptoFilePaths, cli_runner: Callable) -> None:
