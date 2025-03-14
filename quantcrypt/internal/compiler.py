@@ -23,9 +23,7 @@ from textwrap import dedent
 from dataclasses import dataclass
 from contextlib import contextmanager
 from quantcrypt.internal import constants as const
-from quantcrypt.internal import pqclean
-from quantcrypt.internal import errors
-from quantcrypt.internal import utils
+from quantcrypt.internal import pqclean, errors, utils
 
 
 @dataclass(frozen=True)
@@ -110,7 +108,7 @@ class Target:
         return f'#include "{header_file.as_posix()}"'
 
     @property
-    def compiler_args(self) -> list[str]:
+    def compiler_args(self) -> list[str]:  # pragma: no cover
         opsys = platform.system().lower()
         arch = platform.machine().lower()
         extra_flags: list[str] = []
@@ -134,13 +132,13 @@ class Target:
         raise errors.UnsupportedPlatformError
 
     @property
-    def linker_args(self) -> list[str]:
+    def linker_args(self) -> list[str]:  # pragma: no cover
         if platform.system().lower() == "windows":
             return ["/NODEFAULTLIB:MSVCRTD"]
         return []
 
     @property
-    def libraries(self) -> list[str]:
+    def libraries(self) -> list[str]:  # pragma: no cover
         if platform.system().lower() == "windows":
             return ["advapi32"]
         return []
@@ -148,14 +146,22 @@ class Target:
 
 class Compiler:
     @staticmethod
-    def get_compile_targets(target_variants: list[const.PQAVariant]) -> tuple[list[Target], list[Target]]:
+    def get_compile_targets(
+            target_variants: list[const.PQAVariant],
+            target_algos: list[const.AlgoSpec]
+    ) -> tuple[list[Target], list[Target]]:
         accepted: list[Target] = []
         rejected: list[Target] = []
         specs = const.SupportedAlgos
         variants = const.PQAVariant.members()
         for spec, variant in itertools.product(specs, variants):
             source_dir, required_flags = pqclean.check_platform_support(spec, variant)
-            acceptable = source_dir and variant in target_variants
+            acceptable = (
+                source_dir is not None
+                and required_flags is not None
+                and variant in target_variants
+                and spec in target_algos
+            )
             (accepted if acceptable else rejected).append(Target(
                 spec=spec,
                 variant=variant,
@@ -202,7 +208,7 @@ class Compiler:
         ffi.compile(verbose=debug, debug=debug)
 
     @staticmethod
-    def log_progress(target: Target) -> None:
+    def log_progress(target: Target) -> None:  # pragma: no cover
         algo = target.spec.armor_name()
         variant = target.variant.value
         prefix, suffix = '', "..."
@@ -217,18 +223,23 @@ class Compiler:
     @classmethod
     def run(cls,
             target_variants: list[const.PQAVariant] = None,
+            target_algos: list[const.AlgoSpec] = None,
             *,
             in_subprocess: bool = False,
             verbose: bool = False,
             debug: bool = False,
-    ) -> subprocess.Popen | list[Target] | None:
+    ) -> subprocess.Popen | list[Target]:
         if target_variants is None:
             target_variants = const.PQAVariant.members()
-
+        if target_algos is None:
+            target_algos = const.SupportedAlgos
         if in_subprocess:
-            jar_str = utils.b64pickle(target_variants)
             return subprocess.Popen(
-                [sys.executable, __file__, jar_str],
+                args=[
+                    sys.executable, __file__,
+                    utils.b64pickle(target_variants),
+                    utils.b64pickle(target_algos)
+                ],
                 stderr=subprocess.STDOUT,
                 stdout=subprocess.PIPE,
                 text=True
@@ -236,19 +247,22 @@ class Compiler:
         if not pqclean.check_sources_exist():
             pqclean.download_extract_pqclean()
 
-        accepted, rejected = cls.get_compile_targets(target_variants)
+        accepted, rejected = cls.get_compile_targets(
+            target_variants, target_algos
+        )
         if not accepted:
             return rejected
 
         with cls.build_path():
             for target in accepted:
-                if verbose or debug:
+                if verbose or debug:  # pragma: no cover
                     cls.log_progress(target)
                 cls.compile(target, debug)
 
-        return None
+        return rejected
 
 
 if __name__ == "__main__":
     _target_variants = utils.b64pickle(sys.argv[1])
-    Compiler.run(_target_variants, verbose=True)
+    _target_algos = utils.b64pickle(sys.argv[2])
+    Compiler.run(_target_variants, _target_algos, verbose=True)
