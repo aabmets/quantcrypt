@@ -177,10 +177,10 @@ class Compiler:
         old_cwd = os.getcwd()
         bin_path = utils.search_upwards("bin")
         for path in bin_path.iterdir():
-            if path.is_dir():
-                shutil.rmtree(path, ignore_errors=True)
-            elif path.is_file():
+            if path.is_file():
                 path.unlink()
+            else:
+                shutil.rmtree(path, ignore_errors=True)
         new_cwd = bin_path / "build"
         new_cwd.mkdir(parents=True, exist_ok=True)
         os.chdir(new_cwd)
@@ -229,11 +229,11 @@ class Compiler:
             verbose: bool = False,
             debug: bool = False,
     ) -> subprocess.Popen | list[Target]:
-        if target_variants is None:
+        if target_variants is None:  # pragma: no cover
             target_variants = const.PQAVariant.members()
-        if target_algos is None:
+        if target_algos is None:  # pragma: no cover
             target_algos = const.SupportedAlgos
-        if in_subprocess:
+        if in_subprocess:  # pragma: no cover
             return subprocess.Popen(
                 args=[
                     sys.executable, __file__,
