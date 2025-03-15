@@ -9,7 +9,6 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from textwrap import dedent
 from quantcrypt.internal import constants as const
 from quantcrypt.internal.cli.commands import compile
 from .conftest import CLIMessages
@@ -20,12 +19,12 @@ class MockedProcess:
         self._returncode = returncode
 
     @property
-    def stdout(self) -> str:
-        return dedent(f"""
-            Some garbage output from CFFI...
-            {const.SubprocTag}Compiling clean variant of MLKEM512...
-            More garbage output from CFFI...
-        """)
+    def stdout(self) -> list[str]:
+        return [
+            "Some garbage output from CFFI...",
+            f"{const.SubprocTag}Compiling clean variant of MLKEM512...",
+            "More garbage output from CFFI..."
+        ]
 
     @property
     def returncode(self) -> int:
@@ -48,8 +47,8 @@ class MockedCompiler:
 def test_compile(cli_runner, alt_tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(compile, "Compiler", MockedCompiler)
 
-    cli_runner("compile", ['mlkem512'], "n\n", CLIMessages.CANCELLED)
-    cli_runner("compile", ['mlkem512'], "y\n", CLIMessages.SUCCESS)
+    cli_runner("compile", [], "n\n", CLIMessages.CANCELLED)
+    cli_runner("compile", ['-o', 'mlkem512'], "y\n", CLIMessages.SUCCESS)
     cli_runner("compile", ['-D', 'mlkem512'], "y\n", CLIMessages.DRYRUN)
     cli_runner("compile", ['-N', 'mlkem512'], "", CLIMessages.ERROR)
     cli_runner("compile", ['-N', 'mlkem512'], "", CLIMessages.SUCCESS)
