@@ -71,21 +71,19 @@ class BasePQAlgorithm(ABC):
 		module_path = f"quantcrypt.internal.bin.{module_name}"
 		return importlib.import_module(module_path).lib
 
-	def __init__(self, variant: const.PQAVariant | None = None) -> None:
+	def __init__(self, variant: const.PQAVariant | None, allow_fallback: bool) -> None:
 		self.variant = variant or self._auto_select_variant
 		try:
 			self._lib = self._import(self.variant)
 		except (ImportError, ModuleNotFoundError):  # pragma: no cover
-			if self.variant != const.PQAVariant.REF:
+			if allow_fallback and self.variant != const.PQAVariant.REF:
 				self.variant = const.PQAVariant.REF
 				try:
 					self._lib = self._import(self.variant)
 					return
-				except ModuleNotFoundError:
-					raise errors.MissingBinariesError(self.spec, self.variant)
-				except ImportError:
+				except (ImportError, ModuleNotFoundError):
 					pass
-			raise errors.ImportFailedError(self.spec, self.variant)
+			raise errors.PQAImportError(self.spec, self.variant)
 
 	def _algo_name(self) -> str:
 		return self.__class__.__name__.replace('_', '').upper()

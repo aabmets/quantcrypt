@@ -14,10 +14,10 @@ from quantcrypt.internal.pqa.base_dss import BaseDSS
 
 
 __all__ = [
-	"MLDSA_44",
-	"MLDSA_65",
-	"MLDSA_87",
-	"FALCON_512",
+    "MLDSA_44",
+    "MLDSA_65",
+    "MLDSA_87",
+    "FALCON_512",
     "FALCON_1024",
     "FAST_SPHINCS",
     "SMALL_SPHINCS"
@@ -25,161 +25,133 @@ __all__ = [
 
 
 class MLDSA_44(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLDSA_44 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLDSA_44 digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class MLDSA_65(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLDSA_65 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLDSA_65 digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class MLDSA_87(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLDSA_87 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLDSA_87 digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class FALCON_512(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the FALCON_512 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the FALCON_512 digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class FALCON_1024(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the FALCON_1024 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the FALCON_1024 digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class FAST_SPHINCS(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the FAST_SPHINCS instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the FAST_SPHINCS digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class SMALL_SPHINCS(BaseDSS):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the SMALL_SPHINCS instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the SMALL_SPHINCS digital signature scheme algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)

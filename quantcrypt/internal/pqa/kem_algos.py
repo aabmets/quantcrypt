@@ -17,69 +17,57 @@ __all__ = ["MLKEM_512", "MLKEM_768", "MLKEM_1024"]
 
 
 class MLKEM_512(BaseKEM):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLKEM_512 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLKEM_512 key encapsulation mechanism algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class MLKEM_768(BaseKEM):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLKEM_768 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLKEM_512 key encapsulation mechanism algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
 
 
 class MLKEM_1024(BaseKEM):  # NOSONAR
-	@utils.input_validator()
-	def __init__(self, variant: const.PQAVariant = None) -> None:
-		"""
-		Initializes the MLKEM_1024 instance with C extension binaries.
-		User is able to override which underlying binary is used for the
-		instance by providing a Variant enum for the variant parameter.
+    @utils.input_validator()
+    def __init__(self, variant: const.PQAVariant = None, *, allow_fallback: bool = True) -> None:
+        """
+        Initializes the MLKEM_512 key encapsulation mechanism algorithm
+        instance with compiled C extension binaries.
 
-		:param variant: Which binary to use underneath.
-			When variant is None *(auto-select mode)*, quantcrypt will
-			first try to import AVX2 binaries. If there are no AVX2 binaries
-			for the host platform, it will fall back to using CLEAN binaries.
-		:raises - ImportError: When an unknown import error has occurred.
-		:raises - ModuleNotFoundError: When variant is Variant.AVX2 *(manual-select mode)*
-			and quantcrypt cannot find AVX2 binaries for the current platform.
-		:raises - SystemExit: When quantcrypt cannot find CLEAN binaries for the
-			current platform *(any-select mode)*. This is a fatal error which
-			requires either the library to be reinstalled or the binaries to be
-			recompiled, because all platforms should have CLEAN binaries available.
-		"""
-		super().__init__(variant)
+        :param variant: Which compiled binary to use underneath.
+            When variant is None *(auto-select mode)*, QuantCrypt will first try to use
+            platform-optimized binaries. If it fails to do so and fallback is allowed,
+            it will then try to fall back to using clean reference binaries.
+        :param allow_fallback: Allow falling back to using clean reference binaries when
+            QuantCrypt has failed to import platform-optimized binaries. Defaults to True.
+        :raises - ImportFailedError: When QuantCrypt has failed to fall back to using clean
+            reference binaries, either because they are missing or fallback was not permitted.
+        """
+        super().__init__(variant, allow_fallback)
