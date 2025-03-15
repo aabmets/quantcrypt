@@ -244,8 +244,9 @@ class Compiler:
                 stdout=subprocess.PIPE,
                 text=True
             )
-        if not pqclean.check_sources_exist():
-            pqclean.download_extract_pqclean()
+        pqclean_dir = pqclean.find_pqclean_dir(src_must_exist=False)
+        if not pqclean.check_sources_exist(pqclean_dir):
+            pqclean.download_extract_pqclean(pqclean_dir)
 
         accepted, rejected = cls.get_compile_targets(
             target_variants, target_algos

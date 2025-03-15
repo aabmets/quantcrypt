@@ -17,7 +17,7 @@ import binascii
 import setuptools
 import typing as t
 from pathlib import Path
-from functools import lru_cache
+from functools import cache
 from Cryptodome.Hash import SHA3_512
 from pydantic import Field, ConfigDict, validate_call
 from quantcrypt.internal.chunksize import ChunkSize
@@ -62,7 +62,7 @@ def input_validator() -> t.Callable:
     ))
 
 
-@lru_cache
+@cache
 def search_upwards(for_path: str | Path, from_path: str | Path = __file__) -> Path:
     current_path = Path(from_path).parent.resolve()
     while current_path != current_path.parent:

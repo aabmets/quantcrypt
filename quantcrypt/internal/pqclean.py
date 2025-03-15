@@ -26,6 +26,7 @@ from quantcrypt.internal import utils
 
 __all__ = [
     "check_sources_exist",
+    "find_pqclean_dir",
     "filter_archive_contents",
     "download_extract_pqclean",
     "get_common_filepaths",
@@ -39,15 +40,29 @@ __all__ = [
 ]
 
 
-def check_sources_exist() -> bool:
-    pqclean = utils.search_upwards('pqclean')
-    check_dirs: list[bool] = []
+def check_sources_exist(pqclean_dir: Path) -> bool:
+    checked_files: list[bool] = []
     specs = const.SupportedAlgos
-    variants: list[str] = const.PQAVariant.values()
+    variants = const.PQAVariant.values()
     for spec, variant in product(specs, variants):
-        path = pqclean / spec.src_subdir / variant
-        check_dirs.append(path.exists())
-    return all(check_dirs)
+        path = pqclean_dir / spec.src_subdir / variant / "api.h"
+        checked_files.append(path.is_file())
+    return all(checked_files)
+
+
+@cache
+def find_pqclean_dir(*, src_must_exist: bool) -> Path:
+    res = utils.search_upwards("pqclean")
+    if not src_must_exist:
+        return res
+    elif not check_sources_exist(res):
+        res = utils.search_upwards("pqclean", res.parent)
+        if check_sources_exist(res):
+            return res
+    raise RuntimeError(
+        f"Unable to find pqclean directory which "
+        f"matches sources_exist = {src_must_exist}"
+    )
 
 
 def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]]:
@@ -72,12 +87,10 @@ def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]
     return filtered_members
 
 
-def download_extract_pqclean() -> None:
-    pqclean = utils.search_upwards('pqclean')
-    zip_path = pqclean / "temp.zip"
-
+def download_extract_pqclean(pqclean_dir: Path) -> None:
     response = requests.get(const.PQCleanRepoArchiveURL, stream=True)
     response.raise_for_status()
+    zip_path = pqclean_dir / "temp.zip"
 
     with open(zip_path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=8192):
@@ -86,7 +99,7 @@ def download_extract_pqclean() -> None:
 
     with ZipFile(zip_path, 'r') as zip_ref:
         for member, file_path in filter_archive_contents(zip_ref.infolist()):
-            full_path = pqclean / file_path
+            full_path = pqclean_dir / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
             with full_path.open("wb") as f:
                 f.write(zip_ref.read(member))
@@ -96,11 +109,11 @@ def download_extract_pqclean() -> None:
 
 @cache
 def get_common_filepaths(variant: const.PQAVariant) -> tuple[str, list[str]]:
-    path = utils.search_upwards("pqclean/common")
+    path = find_pqclean_dir(src_must_exist=True) / "common"
     common, keccak2x, keccak4x = list(), list(), list()
 
     for file in path.rglob("**/*"):
-        if file.is_file() and file.suffix == '.c':
+        if file.is_file() and file.suffix in ['.c', '.S', '.s']:
             file = file.as_posix()
             files_list = common
             if 'keccak2x' in file:
@@ -138,8 +151,8 @@ class PQAMetaData(BaseModel):
 
 @cache
 def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
-    pqclean = utils.search_upwards('pqclean')
-    meta_file = pqclean / spec.src_subdir / "META.yml"
+    pqclean_dir = find_pqclean_dir(src_must_exist=True)
+    meta_file = pqclean_dir / spec.src_subdir / "META.yml"
     with meta_file.open('r') as file:
         data: dict = yaml.full_load(file)
     return PQAMetaData(**data)
@@ -183,8 +196,6 @@ def check_platform_support(
         if spf.required_flags:  # pragma: no branch
             required_flags = spf.required_flags
 
-    pqclean = utils.search_upwards('pqclean')
-    variant_path = pqclean / spec.src_subdir / variant.value
-    if variant_path.exists():  # pragma: no branch
-        return variant_path, required_flags
-    return None, None  # pragma: no cover
+    pqclean_dir = find_pqclean_dir(src_must_exist=True)
+    path = pqclean_dir / spec.src_subdir / variant.value
+    return path, required_flags
