@@ -40,13 +40,13 @@ def command_compile(
         algos = const.SupportedAlgos.filter(algorithms)
 
     variants = [const.PQAVariant.REF]
-    if with_opt:
+    if with_opt:  # pragma: no cover
         arch = platform.machine().lower()
         if arch in const.AMDArches:
             variants.append(const.PQAVariant.OPT_AMD)
         elif arch in const.ARMArches:
             variants.append(const.PQAVariant.OPT_ARM)
-        else:  # pragma: no branch
+        else:
             console.raise_error("This machine does not support optimized variants.")
 
     variants_fmt = 'only the [italic tan]clean[/]'
@@ -59,6 +59,11 @@ def command_compile(
     )
     if not non_interactive:
         console.ask_continue(exit_on_false=True)
+
+    if dry_run:
+        console.styled_print("QuantCrypt would have compiled the following algorithms:")
+        console.pretty_print(', '.join(s.armor_name() for s in algos))
+        return
 
     console.styled_print("\nInitializing compilation[grey46]...[/]\n")
     process = Compiler.run(variants, algos, in_subprocess=True)
