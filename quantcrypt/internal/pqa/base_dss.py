@@ -14,7 +14,7 @@ from abc import ABC
 from cffi import FFI
 from types import ModuleType
 from pathlib import Path
-from functools import lru_cache
+from functools import cache
 from dataclasses import dataclass
 from typing import Optional, Callable
 from quantcrypt.internal import utils, errors
@@ -45,7 +45,7 @@ class DSSParamSizes(com.BasePQAParamSizes):
 
 class BaseDSS(com.BasePQAlgorithm, ABC):
     @property
-    @lru_cache
+    @cache
     def param_sizes(self) -> DSSParamSizes:
         return DSSParamSizes(self._lib, self._cdef_name)
 

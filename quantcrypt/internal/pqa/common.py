@@ -17,7 +17,7 @@ from cffi import FFI
 from abc import ABC, abstractmethod
 from types import ModuleType
 from typing import Literal, Type
-from functools import lru_cache
+from functools import cache
 from quantcrypt.internal import utils, errors, constants as const
 
 
@@ -65,7 +65,7 @@ class BasePQAlgorithm(ABC):
 			return const.PQAVariant.OPT_AMD
 		return const.PQAVariant.REF
 
-	@lru_cache
+	@cache
 	def _import(self, variant: const.PQAVariant) -> ModuleType:
 		module_name = self.spec.module_name(variant)
 		module_path = f"quantcrypt.internal.bin.{module_name}"

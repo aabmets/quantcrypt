@@ -12,7 +12,7 @@
 from abc import ABC
 from cffi import FFI
 from types import ModuleType
-from functools import lru_cache
+from functools import cache
 from quantcrypt.internal import utils, errors
 from quantcrypt.internal.pqa import common as com
 
@@ -29,7 +29,7 @@ class KEMParamSizes(com.BasePQAParamSizes):
 
 class BaseKEM(com.BasePQAlgorithm, ABC):
     @property
-    @lru_cache
+    @cache
     def param_sizes(self) -> KEMParamSizes:
         return KEMParamSizes(self._lib, self._cdef_name)
 
