@@ -26,7 +26,6 @@ __all__ = [
     "SupportedAlgos",
     "KDFContext",
     "KryptonFileSuffix",
-    "SupportedVariants",
     "AMDArches",
     "ARMArches",
     "PQCleanRepoArchiveURL"
@@ -186,7 +185,6 @@ KDFContext = b"quantcrypt"
 SubprocTag = "<--quantcrypt-->"
 KryptonFileSuffix = ".kptn"
 SignatureFileSuffix = ".sig"
-SupportedVariants = [PQAVariant.REF]
 AMDArches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
 ARMArches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
 PQCleanRepoArchiveURL = "https://github.com/PQClean/PQClean/archive/448c71a8f590343e681d0d0cec94f29947b0ff18.zip"
