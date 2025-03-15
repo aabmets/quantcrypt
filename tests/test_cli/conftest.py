@@ -88,6 +88,7 @@ def fixture_cli_runner() -> Callable[..., Result]:
             sign=cmd.sign_app,
             verify=cmd.verify_app,
             compile=cmd.compile_app,
+            remove=cmd.remove_app
         )[command]
         result = runner.invoke(_app, options, input=user_input)
         if debug:
