@@ -37,7 +37,7 @@ def find_command_modules() -> Generator[ModuleType, None, None]:
     package_path = utils.search_upwards("quantcrypt/__init__.py").parent
     import_dir = Path(__file__).with_name("commands")
     for filepath in import_dir.rglob("*.py"):
-        relative_path = filepath.relative_to(package_path)
+        relative_path = filepath.resolve().relative_to(package_path)
         module_path = '.'.join(relative_path.with_suffix('').parts)
         yield importlib.import_module(
             package=package_path.name,
