@@ -72,18 +72,20 @@ class BasePQAlgorithm(ABC):
 		return importlib.import_module(module_path).lib
 
 	def __init__(self, variant: const.PQAVariant | None = None) -> None:
+		self.variant = variant or self._auto_select_variant
 		try:
-			self.variant = variant or self._auto_select_variant
 			self._lib = self._import(self.variant)
-		except ModuleNotFoundError:  # pragma: no cover
+		except (ImportError, ModuleNotFoundError):  # pragma: no cover
 			if self.variant != const.PQAVariant.REF:
+				self.variant = const.PQAVariant.REF
 				try:
-					self.variant = const.PQAVariant.REF
-					self._lib = self._import(const.PQAVariant.REF)
+					self._lib = self._import(self.variant)
 					return
 				except ModuleNotFoundError:
+					raise errors.MissingBinariesError(self.spec, self.variant)
+				except ImportError:
 					pass
-			raise errors.MissingBinariesError(self.variant)
+			raise errors.ImportFailedError(self.spec, self.variant)
 
 	def _algo_name(self) -> str:
 		return self.__class__.__name__.replace('_', '').upper()

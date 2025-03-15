@@ -20,6 +20,7 @@ __all__ = [
 	"InvalidArgsError",
 	"UnsupportedPlatformError",
 	"MissingBinariesError",
+	"ImportFailedError",
 
 	"PQAError",
 	"PQAUnsupportedClassError",
@@ -62,16 +63,21 @@ class InvalidArgsError(QuantCryptError):
 
 class UnsupportedPlatformError(QuantCryptError):
 	def __init__(self):
-		super().__init__(f"Operating system '{platform.system()}' not supported!")
-
-
-class MissingBinariesError(QuantCryptError):
-	def __init__(self, variant: const.PQAVariant):
-		super().__init__(f"{variant.value.upper()} binaries not found!")
+		super().__init__(f"Operating system '{platform.system()}' not supported.")
 
 
 class PQAError(QuantCryptError):
 	"""Base class for all PQC errors."""
+
+
+class MissingBinariesError(PQAError):
+	def __init__(self, spec: const.AlgoSpec, variant: const.PQAVariant):
+		super().__init__(f"Missing {variant.value} binaries for the {spec.class_name} algorithm.")
+
+
+class ImportFailedError(PQAError):
+	def __init__(self, spec: const.AlgoSpec, variant: const.PQAVariant):
+		super().__init__(f"Failed to import {variant.value} binaries of the {spec.class_name} algorithm.")
 
 
 class PQAUnsupportedClassError(PQAError):
