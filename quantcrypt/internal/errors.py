@@ -19,11 +19,10 @@ __all__ = [
 	"InvalidUsageError",
 	"InvalidArgsError",
 	"UnsupportedPlatformError",
-	"MissingBinariesError",
-	"ImportFailedError",
 
 	"PQAError",
-	"PQAUnsupportedClassError",
+	"PQAImportError",
+	"PQAUnsupportedAlgoError",
 	"PQAKeyArmorError",
 	"KEMKeygenFailedError",
 	"KEMEncapsFailedError",
@@ -70,17 +69,12 @@ class PQAError(QuantCryptError):
 	"""Base class for all PQC errors."""
 
 
-class MissingBinariesError(PQAError):
-	def __init__(self, spec: const.AlgoSpec, variant: const.PQAVariant):
-		super().__init__(f"Missing {variant.value} binaries for the {spec.class_name} algorithm.")
-
-
-class ImportFailedError(PQAError):
+class PQAImportError(PQAError):
 	def __init__(self, spec: const.AlgoSpec, variant: const.PQAVariant):
 		super().__init__(f"Failed to import {variant.value} binaries of the {spec.class_name} algorithm.")
 
 
-class PQAUnsupportedClassError(PQAError):
+class PQAUnsupportedAlgoError(PQAError):
 	def __init__(self, cls_name: str):
 		super().__init__(f"Unsupported PQA class '{cls_name}'.")
 

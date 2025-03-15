@@ -13,38 +13,42 @@ from quantcrypt.internal.chunksize import ChunkSize
 from quantcrypt.internal.constants import PQAVariant
 from quantcrypt.internal.pqa.base_dss import DSSParamSizes, BaseDSS
 from quantcrypt.internal.pqa.dss_algos import (
-	MLDSA_44,
-	MLDSA_65,
-	MLDSA_87,
-	FALCON_512,
-	FALCON_1024,
-	FAST_SPHINCS,
-	SMALL_SPHINCS
+    MLDSA_44,
+    MLDSA_65,
+    MLDSA_87,
+    FALCON_512,
+    FALCON_1024,
+    FAST_SPHINCS,
+    SMALL_SPHINCS
 )
 from quantcrypt.internal.errors import (
-	PQAError,
-	PQAKeyArmorError,
-	DSSKeygenFailedError,
-	DSSSignFailedError,
-	DSSVerifyFailedError
+    PQAError,
+    PQAImportError,
+    PQAUnsupportedAlgoError,
+    PQAKeyArmorError,
+    DSSKeygenFailedError,
+    DSSSignFailedError,
+    DSSVerifyFailedError
 )
 
 
 __all__ = [
-	"ChunkSize",
-	"PQAVariant",
-	"DSSParamSizes",
-	"BaseDSS",
-	"MLDSA_44",
-	"MLDSA_65",
-	"MLDSA_87",
-	"FALCON_512",
-	"FALCON_1024",
-	"FAST_SPHINCS",
-	"SMALL_SPHINCS",
-	"PQAError",
-	"PQAKeyArmorError",
-	"DSSKeygenFailedError",
-	"DSSSignFailedError",
-	"DSSVerifyFailedError"
+    "ChunkSize",
+    "PQAVariant",
+    "DSSParamSizes",
+    "BaseDSS",
+    "MLDSA_44",
+    "MLDSA_65",
+    "MLDSA_87",
+    "FALCON_512",
+    "FALCON_1024",
+    "FAST_SPHINCS",
+    "SMALL_SPHINCS",
+    "PQAError",
+    "PQAImportError",
+    "PQAUnsupportedAlgoError",
+    "PQAKeyArmorError",
+    "DSSKeygenFailedError",
+    "DSSSignFailedError",
+    "DSSVerifyFailedError"
 ]

@@ -15,10 +15,10 @@ from quantcrypt.errors import (
 	InvalidUsageError,
 	InvalidArgsError,
 	UnsupportedPlatformError,
-	MissingBinariesError,
 
 	PQAError,
-	PQAUnsupportedClassError,
+	PQAImportError,
+	PQAUnsupportedAlgoError,
 	PQAKeyArmorError,
 	KEMKeygenFailedError,
 	KEMEncapsFailedError,
@@ -47,12 +47,10 @@ def test_error_instantiation():
 	assert InvalidUsageError()
 	assert InvalidArgsError()
 	assert UnsupportedPlatformError()
-	assert MissingBinariesError(const.PQAVariant.REF)
-	assert MissingBinariesError(const.PQAVariant.OPT_AMD)
-	assert MissingBinariesError(const.PQAVariant.OPT_ARM)
 
 	assert PQAError()
-	assert PQAUnsupportedClassError("asdfg")
+	assert PQAImportError(const.SupportedAlgos[0], const.PQAVariant.REF)
+	assert PQAUnsupportedAlgoError("asdfg")
 	assert PQAKeyArmorError("armor")
 	assert PQAKeyArmorError("dearmor")
 	assert KEMKeygenFailedError()

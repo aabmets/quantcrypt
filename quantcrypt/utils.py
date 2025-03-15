@@ -14,13 +14,16 @@ from quantcrypt.internal.kdf.common import MemCost, KDFParams
 from quantcrypt.internal.constants import PQAVariant
 from quantcrypt.internal.pqa.base_dss import SignedFile
 from quantcrypt.internal.chunksize import ChunkSize
+from quantcrypt.internal.compiler import Target, Compiler
 
 
 __all__ = [
-	"DecryptedFile",
-	"MemCost",
-	"KDFParams",
-	"PQAVariant",
-	"SignedFile",
-	"ChunkSize"
+    "DecryptedFile",
+    "MemCost",
+    "KDFParams",
+    "PQAVariant",
+    "SignedFile",
+    "ChunkSize",
+    "Target",
+    "Compiler"
 ]
