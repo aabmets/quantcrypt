@@ -9,26 +9,20 @@
 #   SPDX-License-Identifier: MIT
 #
 
-import secrets
-import tempfile
 from pathlib import Path
 from quantcrypt.internal import utils, constants as const
 from quantcrypt.internal.compiler import Compiler
 
 
-def test_compiler_run(monkeypatch):
-    base_path = Path(tempfile.gettempdir())
-    test_path = base_path / "pytest" / secrets.token_hex(10)
-    test_path.mkdir(parents=True, exist_ok=True)
-
+def test_compiler_run(monkeypatch, alt_tmp_path):
     def _mocked_search_upwards(_path: Path | str):
-        sub_path = test_path / _path
+        sub_path = alt_tmp_path / _path
         sub_path.mkdir(parents=True, exist_ok=True)
         return sub_path
 
     monkeypatch.setattr(utils, "search_upwards", _mocked_search_upwards)
 
-    bin_path = test_path / "bin"
+    bin_path = alt_tmp_path / "bin"
     old_file = bin_path / "old_file"
     old_folder = bin_path / "old_folder"
     old_folder.mkdir(parents=True)

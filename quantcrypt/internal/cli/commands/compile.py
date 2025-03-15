@@ -9,8 +9,6 @@
 #   SPDX-License-Identifier: MIT
 #
 
-import os
-import sys
 import platform
 from typer import Typer
 from quantcrypt.internal import constants as const
@@ -26,11 +24,6 @@ compile_app = Typer(
         "Use the --help option to see all available options."
     ])
 )
-
-
-def run_compiler(variants: list[const.PQAVariant]) -> None:
-    sys.stdout = open(os.devnull, 'w')
-    Compiler().run(variants)
 
 
 @compile_app.callback()
