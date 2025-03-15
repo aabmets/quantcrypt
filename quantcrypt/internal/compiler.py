@@ -30,8 +30,8 @@ from quantcrypt.internal import pqclean, errors, utils
 class Target:
     spec: const.AlgoSpec
     variant: const.PQAVariant
-    source_dir: Path | None
-    required_flags: list[str] | None
+    source_dir: Path
+    required_flags: list[str]
     accepted: bool
 
     @property
@@ -99,7 +99,7 @@ class Target:
     def variant_files(self) -> list[str]:
         return [
             file.as_posix() for file in self.source_dir.rglob("**/*")
-            if file.is_file() and file.name.endswith(".c")
+            if file.is_file() and file.suffix in ['.c', '.S', '.s']
         ]
 
     @property
@@ -165,8 +165,8 @@ class Compiler:
             (accepted if acceptable else rejected).append(Target(
                 spec=spec,
                 variant=variant,
-                source_dir=source_dir,
-                required_flags=required_flags,
+                source_dir=source_dir or Path(),
+                required_flags=required_flags or [],
                 accepted=acceptable
             ))
         return accepted, rejected
@@ -200,7 +200,7 @@ class Compiler:
             module_name=target.module_name,
             source=target.include_directive,
             sources=[*com_files, *target.variant_files],
-            include_dirs=[com_dir],
+            include_dirs=[com_dir, target.source_dir.as_posix()],
             extra_compile_args=target.compiler_args,
             extra_link_args=target.linker_args,
             libraries=target.libraries,
