@@ -14,7 +14,7 @@ from quantcrypt.internal import constants as const
 from .conftest import CryptoFilePaths, CLIMessages
 
 
-class Test_Sign_Verify:
+class TestSignVerify:
     algos = const.SupportedAlgos.armor_names(const.PQAType.DSS)
 
     @staticmethod

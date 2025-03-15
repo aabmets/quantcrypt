@@ -15,7 +15,7 @@ from quantcrypt.internal import utils, constants as const
 from .conftest import CryptoFilePaths, CLIMessages
 
 
-class Test_Keygen:
+class TestKeygen:
 	algos = const.SupportedAlgos.armor_names()
 
 	@classmethod

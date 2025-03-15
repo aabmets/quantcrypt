@@ -51,7 +51,7 @@ class ChunkSizeMB:
 
 
 class ChunkSize:
-	Atd = t.Annotated[
+	atd = t.Annotated[
 		t.Optional[ChunkSizeKB | ChunkSizeMB],
 		Field(default=None)
 	]

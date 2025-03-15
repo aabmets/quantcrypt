@@ -14,7 +14,7 @@ from quantcrypt.internal import constants as const
 from .conftest import CryptoFilePaths, CLIMessages
 
 
-class Test_Encrypt_Decrypt:
+class TestEncryptDecrypt:
     algos = const.SupportedAlgos.armor_names(const.PQAType.KEM)
 
     @staticmethod

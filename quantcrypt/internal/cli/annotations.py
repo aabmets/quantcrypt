@@ -38,6 +38,7 @@ __all__ = [
 
 
 _algo_choices = ' | '.join(const.SupportedAlgos.armor_names())
+_rel_path_msg = "If the path is relative, it is evaluated from the Current Working Directory."
 
 
 KeygenAlgo = Annotated[str, Argument(
@@ -89,21 +90,21 @@ NonInteractive = Annotated[bool, Option(
 PubKeyFile = Annotated[str, Option(
     '--pk-file', '-p', show_default=False, help=' '.join([
         "Either an absolute or a relative path to an armored PQA public key file.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 
 SecKeyFile = Annotated[str, Option(
     '--sk-file', '-s', show_default=False, help=' '.join([
         "Either an absolute or a relative path to an armored PQA secret key file.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 
 EncInFile = Annotated[str, Option(
     '--in-file', '-i', show_default=False, help=' '.join([
         "Path to the plaintext data file, which will be encrypted with the Krypton cipher.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 
@@ -118,7 +119,7 @@ EncOutFile = Annotated[str, Option(
 DecInFile = Annotated[str, Option(
     '--in-file', '-i', show_default=False, help=' '.join([
         "Path to the ciphertext data file, which will be decrypted with the Krypton cipher.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 
@@ -134,7 +135,7 @@ SignDataFile = Annotated[str, Option(
     '--in-file', '-i', show_default=False, help=' '.join([
         "Path to the data file, which will be signed by a DSS algorithm.",
         "The appropriate DSS algorithm is deduced from the contents of the armored key file.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 
@@ -142,7 +143,7 @@ VerifyDataFile = Annotated[str, Option(
     '--in-file', '-i', show_default=False, help=' '.join([
         "Path to the data file, which will be verified by a DSS algorithm.",
         "The appropriate DSS algorithm is deduced from the contents of the armored key file.",
-        "If the path is relative, it is evaluated from the Current Working Directory."
+        _rel_path_msg
     ])
 )]
 

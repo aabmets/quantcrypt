@@ -108,7 +108,7 @@ def fixture_invalid_inputs_tests(
 	return closure
 
 
-class Test_KEM_Algorithms:
+class TestKemAlgorithms:
 	kem_dataset = [
 		(cls, getattr(cls, "_get_spec")())
 		for cls in [

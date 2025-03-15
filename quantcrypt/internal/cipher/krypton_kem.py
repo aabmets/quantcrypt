@@ -46,7 +46,7 @@ class KryptonKEM:
 			kdf_params: KDFParams = None,
 			context: bytes = const.KDFContext,
 			callback: Optional[Callable] = None,
-			chunk_size: ChunkSize.Atd = None
+			chunk_size: ChunkSize.atd = None
 	) -> None:
 		"""
 		Creates a new KryptonKEM instance for encrypting and/or decrypting

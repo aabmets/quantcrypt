@@ -43,7 +43,7 @@ def _check_linux_support(spec: const.AlgoSpec, variant: const.PQAVariant) -> Non
     for arch, _variant in [("x86_64", opt_amd), ("arm_8", opt_arm)]:
         with pytest.MonkeyPatch.context() as mpc:
             mpc.setattr(platform, "system", lambda: "Linux")
-            mpc.setattr(platform, "machine", lambda: arch)
+            mpc.setattr(platform, "machine", lambda: arch)  # NOSONAR
             res1, res2 = pqclean.check_platform_support(spec, variant)
             if _variant == variant:
                 assert res1 is not None and res2 is not None

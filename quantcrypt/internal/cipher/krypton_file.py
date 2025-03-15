@@ -39,7 +39,7 @@ class KryptonFile:
 			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
 			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
 			callback: Optional[Callable] = None,
-			chunk_size: ChunkSize.Atd = None
+			chunk_size: ChunkSize.atd = None
 	) -> None:
 		"""
 		Creates a new KryptonFile instance for encrypting and/or decrypting multiple

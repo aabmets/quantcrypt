@@ -172,7 +172,7 @@ def fixture_sign_verify_file_callback_tests(tmp_path: Path):
 	return closure
 
 
-class Test_DSS_Algorithms:
+class TestDssAlgorithms:
 	dss_dataset = [
 		(cls, getattr(cls, "_get_spec")())
 		for cls in [

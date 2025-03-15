@@ -42,7 +42,7 @@ class Krypton:
 			self,
 			secret_key: Annotated[bytes, Field(min_length=64, max_length=64)],
 			context: Annotated[Optional[bytes], Field(default=b'')] = b'',
-			chunk_size: ChunkSize.Atd = None
+			chunk_size: ChunkSize.atd = None
 	) -> None:
 		"""
 		Creates a new Krypton instance for encrypting and/or decrypting
