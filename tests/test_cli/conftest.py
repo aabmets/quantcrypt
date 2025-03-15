@@ -10,9 +10,7 @@
 #
 
 import os
-import shutil
 import pytest
-import secrets
 import typing as t
 from pathlib import Path
 from dataclasses import dataclass
@@ -45,17 +43,15 @@ ValidCommands = t.Literal["main", "info", "encrypt", "decrypt", "sign", "verify"
 
 
 @pytest.fixture(name="cfp_setup", scope="function")
-def fixture_cfp_setup(tmp_path: Path) -> Callable[..., t.ContextManager[CryptoFilePaths]]:
+def fixture_cfp_setup(alt_tmp_path) -> Callable[..., t.ContextManager[CryptoFilePaths]]:
     @contextmanager
     def closure(algorithm: str) -> t.Generator[CryptoFilePaths, t.Any, None]:
-        sub_path = tmp_path / secrets.token_hex(16)
-        sub_path.mkdir(parents=True, exist_ok=True)
         cfp_dict = dict(
-            public_key_fp=sub_path / f"{algorithm}-pubkey.qc",
-            secret_key_fp=sub_path / f"{algorithm}-seckey.qc",
-            ciphertext_fp=sub_path / "ciphertext.kptn",
-            plaintext_fp=sub_path / "plaintext.bin",
-            signature_fp=sub_path / "signature.sig",
+            public_key_fp=alt_tmp_path / f"{algorithm}-pubkey.qc",
+            secret_key_fp=alt_tmp_path / f"{algorithm}-seckey.qc",
+            ciphertext_fp=alt_tmp_path / "ciphertext.kptn",
+            plaintext_fp=alt_tmp_path / "plaintext.bin",
+            signature_fp=alt_tmp_path / "signature.sig",
             ptf_data=os.urandom(1024)
         )
         cfp = CryptoFilePaths(**{
@@ -65,7 +61,7 @@ def fixture_cfp_setup(tmp_path: Path) -> Callable[..., t.ContextManager[CryptoFi
         with open(cfp.plaintext_fp, "wb") as file:
             file.write(cfp.ptf_data)
         cwd = os.getcwd()
-        os.chdir(sub_path)
+        os.chdir(alt_tmp_path)
         yield cfp
         os.chdir(cwd)
     return closure
