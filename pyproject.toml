@@ -1,6 +1,6 @@
 [project]
 name = "quantcrypt"
-version = "0.4.2"
+version = "1.0.0-pre"
 description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries"
 authors = [
    { name = "Mattias Aabmets", email = "mattias.aabmets@gmail.com" }
@@ -9,7 +9,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["post-quantum", "crypto", "cryptography", "security", "pqclean"]
 classifiers = [
-   "Development Status :: 4 - Beta",
+   "Development Status :: 5 - Production/Stable",
    "Intended Audience :: Developers",
    "License :: OSI Approved :: MIT License",
    "Natural Language :: English",
@@ -32,7 +32,6 @@ dependencies = [
    "orjson>=3.10.0",
    "pycryptodomex>=3.20.0",
    "pydantic>=2.10.0",
-   "requests>=2.27.0",
    "rich>=13.9.0",
    "typer>=0.15.0",
    "types-zxcvbn>=4.5.0",
@@ -48,16 +47,22 @@ dependencies = [
 qclib = "quantcrypt.internal.cli.main:app"
 
 [dependency-groups]
+compiler = [
+    "cffi>=1.16.0",
+    "pyyaml>=6.0.1",
+    "requests>=2.31.0",
+    "setuptools>=70.0.0",
+]
 dev = [
-   "cffi>=1.17.0",
+   "cffi>=1.16.0",
    "coverage>=7.6.0",
    "devtools-cli>=0.14.0",
-   "psutil>=7.0.0",
    "pytest>=8.3.0",
    "pytest-cov>=6.0.0",
    "pytest-xdist>=3.6.1",
-   "pyyaml>=6.0.0",
-   "setuptools>=76.0.0",
+   "pyyaml>=6.0.1",
+   "requests>=2.31.0",
+   "setuptools>=70.0.0",
 ]
 
 [tool.pytest.ini_options]
