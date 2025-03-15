@@ -253,6 +253,7 @@ class Compiler:
         if not accepted:
             return rejected
 
+        utils.patch_distutils()
         with cls.build_path():
             for target in accepted:
                 if verbose or debug:  # pragma: no cover
