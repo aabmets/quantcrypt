@@ -20,7 +20,7 @@ compile_app = Typer(
     name="compile", invoke_without_command=True, help=' '.join([
         "Compiles PQA binaries from PQClean C source code using CFFI.",
         "Requires an active internet connection and pre-installed platform-specific build tools.",
-        "Calling this command without options begins the compilation of only clean reference variants.",
+        "Calling this command without options begins the compilation process.",
         "Use the --help option to see all available options."
     ])
 )

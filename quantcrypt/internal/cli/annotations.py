@@ -51,7 +51,15 @@ KeygenAlgo = Annotated[str, Argument(
 CompileAlgos = Annotated[list[str], Argument(
     show_default=False, case_sensitive=False, help=' '.join([
         "Names of the algorithms which to compile, optional (case insensitive)." ,
-        "If not provided, all algorithms will be compiled.",
+        "If not provided, clean reference variants of ALL available algorithms",
+        "will be compiled. Can accept multiple values separated by spaces.",
+        f"Available choices: {_algo_choices}"
+    ])
+)]
+
+RemoveAlgos = Annotated[list[str], Argument(
+    show_default=False, case_sensitive=False, help=' '.join([
+        "Names of the PQC algorithms which to remove from the library (case insensitive).",
         "Can accept multiple values separated by spaces.",
         f"Available choices: {_algo_choices}"
     ])
