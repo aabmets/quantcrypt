@@ -63,6 +63,8 @@ def fixture_cfp_setup(alt_tmp_path) -> Callable[..., t.ContextManager[CryptoFile
         cwd = os.getcwd()
         os.chdir(alt_tmp_path)
         yield cfp
+        for item in alt_tmp_path.iterdir():
+            item.unlink()
         os.chdir(cwd)
     return closure
 
