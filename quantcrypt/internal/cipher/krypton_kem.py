@@ -8,6 +8,7 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+
 from pathlib import Path
 from typing import Type, Callable, Optional
 from quantcrypt.internal.cipher.krypton_file import KryptonFile

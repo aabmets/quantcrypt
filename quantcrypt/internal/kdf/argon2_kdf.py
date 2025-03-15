@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import secrets
 from abc import ABC, abstractmethod
 from zxcvbn import zxcvbn

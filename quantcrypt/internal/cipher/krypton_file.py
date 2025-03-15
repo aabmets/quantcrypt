@@ -8,6 +8,7 @@
 #
 #   SPDX-License-Identifier: MIT
 #
+
 from pathlib import Path
 from pydantic import Field
 from dataclasses import dataclass

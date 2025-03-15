@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 from dotmap import DotMap
 from pydantic import Field
 from typing import Type, Annotated, Literal

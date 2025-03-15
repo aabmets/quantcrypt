@@ -8,6 +8,7 @@
 #   
 #   SPDX-License-Identifier: MIT
 #
+
 import secrets
 from pydantic import Field
 from typing import Annotated, Optional, Literal, Any
