@@ -128,18 +128,20 @@ def patch_distutils():  # pragma: no cover
 		lines = f.readlines()
 
 	pattern = re.compile(r'^( {0,4}src_extensions\s*=\s*)(\[[^]]*])')
+	did_append = False
 
 	for i, line in enumerate(lines):
 		match = pattern.search(line)
 		if match:
-			prefix = match.group(1)
-			list_str = match.group(2)
-			ext_list = ast.literal_eval(list_str)  # NOSONAR
+			prefix, list_str = match.group(1), match.group(2)
+			ext_list: list[str] = ast.literal_eval(list_str)  # NOSONAR
 			for suffix in ['.S', '.s']:
 				if suffix not in ext_list:
 					ext_list.append(suffix)
+					did_append = True
 			lines[i] = prefix + repr(ext_list) + "\n"
 			break
 
-	with compiler_path.open("w", encoding="utf-8") as f:
-		f.writelines(lines)
+	if did_append:
+		with compiler_path.open("w", encoding="utf-8") as f:
+			f.writelines(lines)
