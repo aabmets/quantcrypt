@@ -65,6 +65,13 @@ RemoveAlgos = Annotated[list[str], Argument(
     ])
 )]
 
+KeepAlgos = Annotated[bool, Option(
+    "--keep", "-k", show_default=False, help=' '.join([
+        "Inverts the meaning of the algorithm names which to remove from the library,",
+        "keeping the named algorithms and removing everything else instead."
+    ])
+)]
+
 WithOpt = Annotated[bool, Option(
     "--with-opt", "-o", show_default=False, help=' '.join([
         "Includes architecture-specific optimized variants to compilation targets.",

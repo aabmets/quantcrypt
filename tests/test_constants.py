@@ -121,9 +121,15 @@ def test_supported_algos():
     armor_names = ["MLKEM1024", "MLDSA87"]
     specs = const.SupportedAlgos.filter(armor_names)
     assert isinstance(specs, list) and len(specs) == 2
+
     for spec in specs:
         assert spec.armor_name() in armor_names
         assert isinstance(spec, const.AlgoSpec)
+
+    armor_names = ["MLKEM1024", "MLDSA87"]
+    specs = const.SupportedAlgos.filter(armor_names, invert=True)
+    for spec in specs:
+        assert spec.armor_name() not in armor_names
 
     for pqa_type in const.PQAType.members():  # type: const.PQAType
         for item in const.SupportedAlgos.armor_names(pqa_type):

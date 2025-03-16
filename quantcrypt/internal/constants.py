@@ -130,10 +130,11 @@ class AlgoSpecsList(list):
             not pqa_type or pqa_type == spec.type
         ]
 
-    def filter(self, armor_names: list[str]) -> list[AlgoSpec]:
+    def filter(self, armor_names: list[str], invert: bool = False) -> list[AlgoSpec]:
         return [
             spec for spec, name in product(self, armor_names)
-            if spec.armor_name() == name.upper()
+            if (not invert and spec.armor_name() == name.upper())
+            or (invert and spec.armor_name() not in armor_names)
         ]
 
 

@@ -17,7 +17,7 @@ from quantcrypt.internal.cli import console, annotations as ats
 
 remove_app = Typer(
     name="remove", invoke_without_command=True, no_args_is_help=True, help=' '.join([
-        "Removes compiled PQA binaries from the QuantCrypt library by name.",
+        "Removes compiled PQA binaries from the library by name.",
         "Useful for reducing the size of software bundles when all PQC algorithms are not required.",
         "Usually called in a CI pipeline during the build process."
     ])
@@ -27,6 +27,7 @@ remove_app = Typer(
 @remove_app.callback()
 def command_remove(
         algorithms: ats.RemoveAlgos,
+        keep_algos: ats.KeepAlgos = False,
         dry_run: ats.DryRun = False,
         non_interactive: ats.NonInteractive = False
 ) -> None:
@@ -36,7 +37,7 @@ def command_remove(
     if not non_interactive:
         console.ask_continue(exit_on_false=True)
 
-    algos = const.SupportedAlgos.filter(algorithms)
+    algos = const.SupportedAlgos.filter(algorithms, invert=keep_algos)
     variants = const.PQAVariant.members()
 
     if dry_run:
