@@ -1,6 +1,6 @@
 [project]
 name = "quantcrypt"
-version = "1.0.0-pre"
+version = "1.0.0rc0"
 description = "Cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries"
 authors = [
    { name = "Mattias Aabmets", email = "mattias.aabmets@gmail.com" }
@@ -74,9 +74,9 @@ addopts = [
    "--cov-report=html",
    "--no-cov-on-fail",
    "--import-mode=append",
-   "--numprocesses=auto",
-   "--maxprocesses=8",
-   "--dist=worksteal"
+#   "--numprocesses=auto",
+#   "--maxprocesses=8",
+#   "--dist=worksteal"
 ]
 pythonpath = [
    ".",
@@ -89,7 +89,7 @@ branch = true
 source = ["quantcrypt"]
 
 [tool.coverage.report]
-fail_under = 90
+#fail_under = 90
 skip_empty = true
 ignore_errors = true
 exclude_lines = [

@@ -121,7 +121,7 @@ def test_get_pqa_class():
     for armor_name in const.SupportedAlgos.armor_names():
         cls = tools.get_pqa_class(armor_name)
         assert issubclass(cls, (BaseKEM, BaseDSS))
-        spec = getattr(cls, "_get_spec")()
+        spec = cls.get_spec()
         assert isinstance(spec, const.AlgoSpec)
         assert spec.armor_name() == armor_name
 

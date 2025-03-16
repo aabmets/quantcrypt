@@ -21,7 +21,7 @@ def _validate_common_filepaths(variant: const.PQAVariant) -> None:
     assert Path(data[0]).is_dir()
     for cp in [Path(p) for p in data[1]]:
         assert cp.is_file()
-        assert cp.suffix == '.c'
+        assert cp.suffix in ['.c', '.S', '.s']
 
 
 def _check_windows_support(spec: const.AlgoSpec, variant: const.PQAVariant) -> None:
@@ -51,17 +51,18 @@ def _check_linux_support(spec: const.AlgoSpec, variant: const.PQAVariant) -> Non
             assert res1 is None and res2 is None
 
 
-def test_pqclean_sources(tmp_path, monkeypatch):
+def test_pqclean_sources(alt_tmp_path, monkeypatch):
     def _mocked_search_upwards(path: Path | str):
-        new_path = tmp_path / path
+        new_path = alt_tmp_path / path
         new_path.mkdir(parents=True, exist_ok=True)
         return new_path
 
     monkeypatch.setattr(utils, "search_upwards", _mocked_search_upwards)
 
-    assert pqclean.check_sources_exist() is False
-    pqclean.download_extract_pqclean()
-    assert pqclean.check_sources_exist() is True
+    pqclean_dir = pqclean.find_pqclean_dir(src_must_exist=False)
+    assert pqclean.check_sources_exist(pqclean_dir) is False
+    pqclean.download_extract_pqclean(pqclean_dir)
+    assert pqclean.check_sources_exist(pqclean_dir) is True
 
     for variant in const.PQAVariant.members():
         _validate_common_filepaths(variant)
