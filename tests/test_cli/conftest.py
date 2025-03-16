@@ -49,7 +49,7 @@ ValidCommands = t.Literal["main", "info", "encrypt", "decrypt", "sign", "verify"
 def fixture_cfp_setup(alt_tmp_path) -> Callable[..., t.ContextManager[CryptoFilePaths]]:
     @contextmanager
     def closure(pqa_class: BaseDSS | BaseKEM) -> t.Generator[CryptoFilePaths, t.Any, None]:
-        algorithm = pqa_class.armor_name()
+        algorithm = pqa_class.armor_name().lower()
         cfp_dict = dict(
             algorithm=algorithm,
             public_key_fp=alt_tmp_path / f"{algorithm}-pubkey.qc",

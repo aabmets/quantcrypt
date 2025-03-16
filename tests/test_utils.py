@@ -46,18 +46,15 @@ def test_input_validator():
 
 
 def test_search_upwards():
-	path = utils.search_upwards("tests", __file__)
+	path = utils.search_upwards("tests")
+	assert path == Path(__file__).resolve().parent
 	assert isinstance(path, Path)
-	assert path == Path(__file__).parent
 
-
-def test_search_upwards_error():
-	pyproject_toml = utils.search_upwards("pyproject.toml")
 	bad_path = secrets.token_hex()
 	with pytest.raises(RuntimeError):
 		utils.search_upwards(bad_path, __file__)
 	with pytest.raises(RuntimeError):
-		utils.search_upwards(bad_path, pyproject_toml.parent)
+		utils.search_upwards(bad_path, path.parent)
 
 
 def test_annotated_bytes():
