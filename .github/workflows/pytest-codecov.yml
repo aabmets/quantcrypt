@@ -23,7 +23,7 @@ jobs:
 
       - name: Run commands
         run: |
-          source .venv/bin/activate
+          uv sync --all-extras --frozen
           qclib compile -N
           pytest
 
