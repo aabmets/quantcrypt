@@ -79,13 +79,13 @@ class BasePQAlgorithm(ABC):
 		self.variant = variant or self._auto_select_variant
 		try:
 			self._lib = self._import(self.variant)
-		except (ImportError, ModuleNotFoundError):  # pragma: no cover
+		except ImportError:  # pragma: no cover
 			if allow_fallback and self.variant != const.PQAVariant.REF:
 				self.variant = const.PQAVariant.REF
 				try:
 					self._lib = self._import(self.variant)
 					return
-				except (ImportError, ModuleNotFoundError):
+				except ImportError:
 					pass
 			raise errors.PQAImportError(self.spec, self.variant)
 
