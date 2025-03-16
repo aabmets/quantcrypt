@@ -10,159 +10,105 @@
 #
 
 import pytest
+from pathlib import Path
 from typing import Callable, Type
 from secrets import compare_digest
 from pydantic import ValidationError
-from quantcrypt.internal.pqa.base_kem import BaseKEM
 from quantcrypt.internal import constants as const
-from quantcrypt.kem import (
-	MLKEM_512, MLKEM_768, MLKEM_1024,
-	KEMParamSizes
-)
+from quantcrypt.internal.pqa import kem_algos as kem
+from quantcrypt.internal.pqa.base_kem import KEMParamSizes, BaseKEM
+from .conftest import BaseAlgorithmTester
 
 
-@pytest.fixture(name="attribute_tests", scope="module")
-def fixture_attribute_tests():
-	def closure(kem_cls: Type[BaseKEM]):
-		kem = kem_cls()
+class TestKemAlgorithms(BaseAlgorithmTester):
+	@classmethod
+	def test_mlkem_512(cls):
+		cls.run_tests(Path(), kem.MLKEM_512)
 
-		assert hasattr(kem, "spec")
-		assert isinstance(kem.spec, const.AlgoSpec)
+	@classmethod
+	def test_mlkem_768(cls):
+		cls.run_tests(Path(), kem.MLKEM_768)
 
-		assert hasattr(kem, "variant")
-		assert isinstance(kem.variant, const.PQAVariant)
+	@classmethod
+	def test_mlkem_1024(cls):
+		cls.run_tests(Path(), kem.MLKEM_1024)
 
-		assert hasattr(kem, "param_sizes")
-		assert isinstance(kem.param_sizes, KEMParamSizes)
+	@classmethod
+	def run_tests(cls, alt_tmp_path, kem_class: Type[BaseKEM]):
+		for kem_instance in cls.get_pqa_instances(kem_class):
+			cls.run_attribute_tests(kem_instance)
+			cls.run_cryptography_tests(kem_instance)
+			cls.run_invalid_inputs_tests(kem_instance)
+			cls.run_armor_success_tests(kem_instance)
+			cls.run_armor_failure_tests(kem_instance)
+			cls.run_dearmor_failure_tests(kem_instance)
 
-		assert hasattr(kem, "keygen")
-		assert isinstance(kem.keygen, Callable)
+	@classmethod
+	def run_attribute_tests(cls, kem_instance: BaseKEM):
+		cls.notify(kem_instance, "Testing attributes")
 
-		assert hasattr(kem, "encaps")
-		assert isinstance(kem.encaps, Callable)
+		assert hasattr(kem_instance, "spec")
+		assert isinstance(kem_instance.spec, const.AlgoSpec)
 
-		assert hasattr(kem, "decaps")
-		assert isinstance(kem.decaps, Callable)
+		assert hasattr(kem_instance, "variant")
+		assert isinstance(kem_instance.variant, const.PQAVariant)
 
-		assert hasattr(kem, "armor")
-		assert isinstance(kem.armor, Callable)
+		assert hasattr(kem_instance, "param_sizes")
+		assert isinstance(kem_instance.param_sizes, KEMParamSizes)
 
-		assert hasattr(kem, "dearmor")
-		assert isinstance(kem.dearmor, Callable)
+		assert hasattr(kem_instance, "keygen")
+		assert isinstance(kem_instance.keygen, Callable)
 
-	return closure
+		assert hasattr(kem_instance, "encaps")
+		assert isinstance(kem_instance.encaps, Callable)
 
+		assert hasattr(kem_instance, "decaps")
+		assert isinstance(kem_instance.decaps, Callable)
 
-@pytest.fixture(name="cryptography_tests", scope="module")
-def fixture_cryptography_tests():
-	def closure(kem_cls: Type[BaseKEM]):
-		kem = kem_cls()
+		assert hasattr(kem_instance, "armor")
+		assert isinstance(kem_instance.armor, Callable)
 
-		params = kem.param_sizes
-		public_key, secret_key = kem.keygen()
+		assert hasattr(kem_instance, "dearmor")
+		assert isinstance(kem_instance.dearmor, Callable)
+
+	@classmethod
+	def run_cryptography_tests(cls, kem_instance: BaseKEM):
+		cls.notify(kem_instance, "Testing cryptography")
+
+		params = kem_instance.param_sizes
+		public_key, secret_key = kem_instance.keygen()
 
 		assert isinstance(public_key, bytes)
 		assert len(public_key) == params.pk_size
 		assert isinstance(secret_key, bytes)
 		assert len(secret_key) == params.sk_size
 
-		cipher_text, shared_secret = kem.encaps(public_key)
-
+		cipher_text, shared_secret = kem_instance.encaps(public_key)
 		assert isinstance(cipher_text, bytes)
 		assert len(cipher_text) == params.ct_size
 		assert isinstance(shared_secret, bytes)
 		assert len(shared_secret) == params.ss_size
 
-		decaps_shared_secret = kem.decaps(secret_key, cipher_text)
-
+		decaps_shared_secret = kem_instance.decaps(secret_key, cipher_text)
 		assert isinstance(decaps_shared_secret, bytes)
 		assert len(decaps_shared_secret) == params.ss_size
 		assert compare_digest(shared_secret, decaps_shared_secret)
 
-	return closure
+	@classmethod
+	def run_invalid_inputs_tests(cls, kem_instance: BaseKEM):
+		cls.notify(kem_instance, "Testing invalid inputs")
 
+		public_key, secret_key = kem_instance.keygen()
+		cipher_text, _ = kem_instance.encaps(public_key)
 
-@pytest.fixture(name="invalid_inputs_tests", scope="module")
-def fixture_invalid_inputs_tests(
-		invalid_keys: Callable,
-		invalid_ciphertexts: Callable):
-
-	def closure(kem_cls: Type[BaseKEM]):
-		kem = kem_cls()
-		public_key, secret_key = kem.keygen()
-
-		for ipk in invalid_keys(public_key):
+		for ipk in cls.invalid_keys(public_key):
 			with pytest.raises(ValidationError):
-				kem.encaps(ipk)
+				kem_instance.encaps(ipk)
 
-		cipher_text, _ = kem.encaps(public_key)
-
-		for isk in invalid_keys(secret_key):
+		for isk in cls.invalid_keys(secret_key):
 			with pytest.raises(ValidationError):
-				kem.decaps(isk, cipher_text)
+				kem_instance.decaps(isk, cipher_text)
 
-		for ict in invalid_ciphertexts(cipher_text):
+		for ict in cls.invalid_ciphertexts(cipher_text):
 			with pytest.raises(ValidationError):
-				kem.decaps(secret_key, ict)
-
-	return closure
-
-
-class TestKemAlgorithms:
-	kem_dataset = [
-		(cls, getattr(cls, "_get_spec")())
-		for cls in [
-			MLKEM_512,
-			MLKEM_768,
-			MLKEM_1024
-		]
-	]
-
-	@classmethod
-	def test_variants(cls, pqc_variant_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class variants")
-			pqc_variant_tests(kem_cls)
-
-	@classmethod
-	def test_attributes(cls, attribute_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class attributes")
-			attribute_tests(kem_cls)
-
-	@classmethod
-	def test_cryptography(cls, cryptography_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class cryptography")
-			cryptography_tests(kem_cls)
-
-	@classmethod
-	def test_invalid_inputs(cls, invalid_inputs_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class invalid inputs")
-			invalid_inputs_tests(kem_cls)
-
-	@classmethod
-	def test_armor_success(cls, armor_success_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class armor success")
-			armor_success_tests(kem_cls)
-
-	@classmethod
-	def test_armor_failure(cls, armor_failure_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class armor failure")
-			armor_failure_tests(kem_cls)
-
-	@classmethod
-	def test_dearmor_failure(cls, dearmor_failure_tests: Callable):
-		print()
-		for kem_cls, spec in cls.kem_dataset:  # type: Type[BaseKEM], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class dearmor failure")
-			dearmor_failure_tests(kem_cls)
+				kem_instance.decaps(secret_key, ict)

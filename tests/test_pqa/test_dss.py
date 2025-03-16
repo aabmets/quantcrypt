@@ -13,238 +13,166 @@ import pytest
 from pathlib import Path
 from typing import Callable, Type
 from pydantic import ValidationError
-from quantcrypt.internal.pqa.base_dss import BaseDSS
-from quantcrypt.internal import constants as const
-from quantcrypt.internal import errors
-from quantcrypt.dss import (
-	MLDSA_44, MLDSA_65, MLDSA_87,
-	FALCON_512, FALCON_1024,
-	FAST_SPHINCS, SMALL_SPHINCS,
-	DSSParamSizes
-)
+from quantcrypt.internal import errors, constants as const
+from quantcrypt.internal.pqa import dss_algos as dss
+from quantcrypt.internal.pqa.base_dss import DSSParamSizes, BaseDSS
+from .conftest import BaseAlgorithmTester
 
 
-@pytest.fixture(name="attribute_tests", scope="module")
-def fixture_attribute_tests():
-	def closure(dss_cls: Type[BaseDSS]):
-		dss = dss_cls()
+class TestDssAlgorithms(BaseAlgorithmTester):
+	@classmethod
+	def test_mldsa_44(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.MLDSA_44)
 
-		assert hasattr(dss, "spec")
-		assert isinstance(dss.spec, const.AlgoSpec)
+	@classmethod
+	def test_mldsa_65(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.MLDSA_65)
 
-		assert hasattr(dss, "variant")
-		assert isinstance(dss.variant, const.PQAVariant)
+	@classmethod
+	def test_mlds_87(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.MLDSA_87)
 
-		assert hasattr(dss, "param_sizes")
-		assert isinstance(dss.param_sizes, DSSParamSizes)
+	@classmethod
+	def test_falcon_512(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.FALCON_512)
 
-		assert hasattr(dss, "keygen")
-		assert isinstance(dss.keygen, Callable)
+	@classmethod
+	def test_falcon_1024(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.FALCON_1024)
 
-		assert hasattr(dss, "sign")
-		assert isinstance(dss.sign, Callable)
+	@classmethod
+	def test_small_sphincs(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.SMALL_SPHINCS)
 
-		assert hasattr(dss, "verify")
-		assert isinstance(dss.verify, Callable)
+	@classmethod
+	def test_fast_sphincs(cls, alt_tmp_path):
+		cls.run_tests(alt_tmp_path, dss.FAST_SPHINCS)
 
-		assert hasattr(dss, "armor")
-		assert isinstance(dss.armor, Callable)
+	@classmethod
+	def run_tests(cls, alt_tmp_path: Path, dss_class: Type[BaseDSS]):
+		for dss_instance in cls.get_pqa_instances(dss_class):
+			cls.run_attribute_tests(dss_instance)
+			cls.run_cryptography_tests(dss_instance)
+			cls.run_invalid_inputs_tests(dss_instance)
+			cls.run_sign_verify_file_tests(dss_instance, alt_tmp_path)
+			cls.run_armor_success_tests(dss_instance)
+			cls.run_armor_failure_tests(dss_instance)
+			cls.run_dearmor_failure_tests(dss_instance)
 
-		assert hasattr(dss, "dearmor")
-		assert isinstance(dss.dearmor, Callable)
+	@classmethod
+	def run_attribute_tests(cls, dss_instance: BaseDSS):
+		cls.notify(dss_instance, "Testing attributes")
 
-	return closure
+		assert hasattr(dss_instance, "spec")
+		assert isinstance(dss_instance.spec, const.AlgoSpec)
 
+		assert hasattr(dss_instance, "variant")
+		assert isinstance(dss_instance.variant, const.PQAVariant)
 
-@pytest.fixture(name="cryptography_tests", scope="module")
-def fixture_cryptography_tests():
-	def closure(dss_cls: Type[BaseDSS]):
-		dss = dss_cls()
-		params = dss.param_sizes
+		assert hasattr(dss_instance, "param_sizes")
+		assert isinstance(dss_instance.param_sizes, DSSParamSizes)
+
+		assert hasattr(dss_instance, "keygen")
+		assert isinstance(dss_instance.keygen, Callable)
+
+		assert hasattr(dss_instance, "sign")
+		assert isinstance(dss_instance.sign, Callable)
+
+		assert hasattr(dss_instance, "verify")
+		assert isinstance(dss_instance.verify, Callable)
+
+		assert hasattr(dss_instance, "armor")
+		assert isinstance(dss_instance.armor, Callable)
+
+		assert hasattr(dss_instance, "dearmor")
+		assert isinstance(dss_instance.dearmor, Callable)
+
+	@classmethod
+	def run_cryptography_tests(cls, dss_instance: BaseDSS):
+		cls.notify(dss_instance, "Testing cryptography")
+
 		message = b"Hello World"
-
-		public_key, secret_key = dss.keygen()
+		params = dss_instance.param_sizes
+		public_key, secret_key = dss_instance.keygen()
 
 		assert isinstance(public_key, bytes)
 		assert len(public_key) == params.pk_size
 		assert isinstance(secret_key, bytes)
 		assert len(secret_key) == params.sk_size
 
-		signature = dss.sign(secret_key, message)
-
+		signature = dss_instance.sign(secret_key, message)
 		assert isinstance(signature, bytes)
 		assert len(signature) <= params.sig_size
-		assert dss.verify(public_key, message, signature, raises=False)
+		assert dss_instance.verify(public_key, message, signature, raises=False)
 
-	return closure
+	@classmethod
+	def run_invalid_inputs_tests(cls, dss_instance: BaseDSS):
+		cls.notify(dss_instance, "Testing invalid inputs")
 
-
-@pytest.fixture(name="invalid_inputs_tests", scope="module")
-def fixture_invalid_inputs_tests(
-		invalid_keys: Callable,
-		invalid_messages: Callable,
-		invalid_signatures: Callable):
-	def closure(dss_cls: Type[BaseDSS]):
-		dss = dss_cls()
-		params = dss.param_sizes
 		message = b"Hello World"
+		params = dss_instance.param_sizes
+		public_key, secret_key = dss_instance.keygen()
 
-		public_key, secret_key = dss.keygen()
-
-		for isk in invalid_keys(secret_key):
+		for isk in cls.invalid_keys(secret_key):
 			with pytest.raises(ValidationError):
-				dss.sign(isk, message)
+				dss_instance.sign(isk, message)
 
-		for inv_msg in invalid_messages(message):
+		for inv_msg in cls.invalid_messages(message):
 			with pytest.raises(ValidationError):
-				dss.sign(secret_key, inv_msg)
+				dss_instance.sign(secret_key, inv_msg)
 
-		signature = dss.sign(secret_key, message)
+		signature = dss_instance.sign(secret_key, message)
 
-		for ipk in invalid_keys(public_key):
+		for ipk in cls.invalid_keys(public_key):
 			with pytest.raises(ValidationError):
-				dss.verify(ipk, message, signature)
+				dss_instance.verify(ipk, message, signature)
 
-		for inv_msg in invalid_messages(message):
+		for inv_msg in cls.invalid_messages(message):
 			with pytest.raises(ValidationError):
-				dss.verify(public_key, inv_msg, signature)
+				dss_instance.verify(public_key, inv_msg, signature)
 
-		for inv_sig in invalid_signatures(signature, params.sig_size):
+		for inv_sig in cls.invalid_signatures(signature, params.sig_size):
 			with pytest.raises(ValidationError):
-				dss.verify(public_key, message, inv_sig)
+				dss_instance.verify(public_key, message, inv_sig)
 
 		with pytest.raises(errors.DSSVerifyFailedError):
-			dss.verify(public_key[::-1], message, signature)
+			dss_instance.verify(public_key[::-1], message, signature)
 
 		with pytest.raises(errors.DSSVerifyFailedError):
-			dss.verify(public_key, message[::-1], signature)
+			dss_instance.verify(public_key, message[::-1], signature)
 
 		with pytest.raises(errors.DSSVerifyFailedError):
-			dss.verify(public_key, message, signature[::-1])
+			dss_instance.verify(public_key, message, signature[::-1])
 
-	return closure
+	@classmethod
+	def run_sign_verify_file_tests(cls, dss_instance: BaseDSS, alt_tmp_path: Path):
+		cls.notify(dss_instance, "Testing file signature verification")
 
-
-@pytest.fixture(name="sign_verify_file_tests", scope="function")
-def fixture_sign_verify_file_tests(tmp_path: Path):
-	def closure(dss_cls: Type[BaseDSS]):
-		dss = dss_cls()
-		pk, sk = dss.keygen()
-
-		data_file = tmp_path / "test.txt"
+		data_file = alt_tmp_path / "test.txt"
 		data_file.write_text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
-
-		sf = dss.sign_file(sk, data_file)
-		dss.verify_file(pk, data_file, sf.signature)
-
-	return closure
-
-
-@pytest.fixture(name="sign_verify_file_callback_tests", scope="function")
-def fixture_sign_verify_file_callback_tests(tmp_path: Path):
-	def closure(dss_cls: Type[BaseDSS]):
-		dss = dss_cls()
-		pk, sk = dss.keygen()
-
-		data_file = tmp_path / "test.txt"
-		data_file.write_text("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
+		public_key, secret_key = dss_instance.keygen()
 
 		counter = []
-
 		def callback():
 			counter.append(1)
 
-		ask = dss.armor(sk)
-		apk = dss.armor(pk)
+		ask = dss_instance.armor(secret_key)
+		apk = dss_instance.armor(public_key)
 
-		sf = dss.sign_file(ask, data_file, callback)
+		dss_instance.sign_file(ask, data_file, callback)
 		assert sum(counter) == 1
 
-		dss.verify_file(apk, data_file, sf.signature, callback)
+		sf = dss_instance.sign_file(ask, data_file)
+		assert sum(counter) == 1
+
+		dss_instance.verify_file(apk, data_file, sf.signature, callback)
+		assert sum(counter) == 2
+
+		dss_instance.verify_file(apk, data_file, sf.signature)
 		assert sum(counter) == 2
 
 		with pytest.raises(FileNotFoundError):
-			dss.sign_file(ask, Path("asdfg"))
+			dss_instance.sign_file(ask, Path("asdfg"))
 
 		with pytest.raises(FileNotFoundError):
-			dss.verify_file(apk, Path("asdfg"), sf.signature)
-
-	return closure
-
-
-class TestDssAlgorithms:
-	dss_dataset = [
-		(cls, getattr(cls, "_get_spec")())
-		for cls in [
-			MLDSA_44,
-			MLDSA_65,
-			MLDSA_87,
-			FALCON_512,
-			FALCON_1024,
-			SMALL_SPHINCS,
-			FAST_SPHINCS
-		]
-	]
-
-	@classmethod
-	def test_variants(cls, pqc_variant_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class variants")
-			pqc_variant_tests(dss_cls)
-
-	@classmethod
-	def test_attributes(cls, attribute_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class attributes")
-			attribute_tests(dss_cls)
-
-	@classmethod
-	def test_cryptography(cls, cryptography_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class cryptography")
-			cryptography_tests(dss_cls)
-
-	@classmethod
-	def test_invalid_inputs(cls, invalid_inputs_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class invalid inputs")
-			invalid_inputs_tests(dss_cls)
-
-	@classmethod
-	def test_armor_success(cls, armor_success_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class armor success")
-			armor_success_tests(dss_cls)
-
-	@classmethod
-	def test_armor_failure(cls, armor_failure_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class armor failure")
-			armor_failure_tests(dss_cls)
-
-	@classmethod
-	def test_dearmor_failure(cls, dearmor_failure_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class dearmor failure")
-			dearmor_failure_tests(dss_cls)
-
-	@classmethod
-	def test_signature_verification(cls, sign_verify_file_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class signature verification")
-			sign_verify_file_tests(dss_cls)
-
-	@classmethod
-	def test_signature_verification_callback(cls, sign_verify_file_callback_tests: Callable):
-		print()
-		for dss_cls, spec in cls.dss_dataset:  # type: Type[BaseDSS], const.AlgoSpec
-			print(f"Testing {spec.armor_name()} class signature verification callback")
-			sign_verify_file_callback_tests(dss_cls)
+			dss_instance.verify_file(apk, Path("asdfg"), sf.signature)
