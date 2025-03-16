@@ -36,14 +36,18 @@ class BasePQAlgorithm(ABC):
 
 	@property
 	def spec(self) -> const.AlgoSpec:
-		return self._get_spec()
+		return self.get_spec()
 
 	@classmethod
-	def _get_spec(cls) -> const.AlgoSpec:  # pragma: no cover
+	def get_spec(cls) -> const.AlgoSpec:  # pragma: no cover
 		for spec in const.SupportedAlgos:
 			if spec.class_name == cls.__name__:
 				return spec
 		raise errors.PQAUnsupportedAlgoError(cls.__name__)
+
+	@classmethod
+	def armor_name(cls) -> str:
+		return cls.__name__.replace('_', '').upper()
 
 	@abstractmethod
 	def keygen(self) -> tuple[bytes, bytes]: ...
@@ -84,9 +88,6 @@ class BasePQAlgorithm(ABC):
 				except (ImportError, ModuleNotFoundError):
 					pass
 			raise errors.PQAImportError(self.spec, self.variant)
-
-	def _algo_name(self) -> str:
-		return self.__class__.__name__.replace('_', '').upper()
 
 	def _keygen(
 			self,
@@ -129,7 +130,7 @@ class BasePQAlgorithm(ABC):
 			key_str[i:i + max_line_length]
 			for i in range(0, len(key_str), max_line_length)
 		]
-		algo_name = self._algo_name()
+		algo_name = self.armor_name()
 		header = f"-----BEGIN {algo_name} {key_type} KEY-----\n"
 		footer = f"\n-----END {algo_name} {key_type} KEY-----"
 		return header + '\n'.join(lines) + footer
@@ -144,7 +145,7 @@ class BasePQAlgorithm(ABC):
 		:raises - errors.PQAKeyArmorError: If dearmoring fails for any reason.
 		"""
 		dearmor_error = errors.PQAKeyArmorError("dearmor")
-		algo_name = self._algo_name()
+		algo_name = self.armor_name()
 		key_data: str = ''
 
 		for key_type in ["PUBLIC", "SECRET"]:
