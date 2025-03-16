@@ -9,6 +9,7 @@
 #   SPDX-License-Identifier: MIT
 #
 
+import os
 import pytest
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -57,6 +58,8 @@ class BaseAlgorithmTester(ABC):
 		instances: list[BaseDSS | BaseKEM] = []
 		spec = pqa_class.get_spec()
 		for variant in const.PQAVariant.members():  # type: const.PQAVariant
+			if "CODECOV" in os.environ and variant != const.PQAVariant.REF:
+				continue
 			path, flags = pqclean.check_platform_support(spec, variant)
 			if path is not None and flags is not None:
 				inst = pqa_class(variant, allow_fallback=False)
