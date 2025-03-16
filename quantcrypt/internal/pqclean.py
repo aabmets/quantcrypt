@@ -50,7 +50,6 @@ def check_sources_exist(pqclean_dir: Path) -> bool:
     return all(checked_files)
 
 
-@cache
 def find_pqclean_dir(*, src_must_exist: bool) -> Path:
     res = utils.search_upwards("pqclean")
     if not src_must_exist or check_sources_exist(res):
@@ -103,7 +102,6 @@ def download_extract_pqclean(pqclean_dir: Path) -> None:
     zip_path.unlink()
 
 
-@cache
 def get_common_filepaths(variant: const.PQAVariant) -> tuple[str, list[str]]:
     path = find_pqclean_dir(src_must_exist=True) / "common"
     common, keccak2x, keccak4x = list(), list(), list()

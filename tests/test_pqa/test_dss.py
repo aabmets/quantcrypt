@@ -15,7 +15,7 @@ from typing import Callable, Type
 from pydantic import ValidationError
 from quantcrypt.internal import errors, constants as const
 from quantcrypt.internal.pqa import dss_algos as dss
-from quantcrypt.internal.pqa.base_dss import DSSParamSizes, BaseDSS
+from quantcrypt.dss import DSSParamSizes, BaseDSS
 from .conftest import BaseAlgorithmTester
 
 
@@ -162,13 +162,13 @@ class TestDssAlgorithms(BaseAlgorithmTester):
 		dss_instance.sign_file(ask, data_file, callback)
 		assert sum(counter) == 1
 
-		sf = dss_instance.sign_file(ask, data_file)
+		sf = dss_instance.sign_file(secret_key, data_file)
 		assert sum(counter) == 1
 
 		dss_instance.verify_file(apk, data_file, sf.signature, callback)
 		assert sum(counter) == 2
 
-		dss_instance.verify_file(apk, data_file, sf.signature)
+		dss_instance.verify_file(public_key, data_file, sf.signature)
 		assert sum(counter) == 2
 
 		with pytest.raises(FileNotFoundError):

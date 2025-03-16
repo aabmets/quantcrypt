@@ -11,8 +11,7 @@
 
 import platform
 from typer import Typer
-from quantcrypt.internal import constants as const
-from quantcrypt.internal.compiler import Compiler
+from quantcrypt.internal import compiler, constants as const
 from quantcrypt.internal.cli import console, annotations as ats
 
 
@@ -66,7 +65,7 @@ def command_compile(
         return
 
     console.styled_print("\nInitializing compilation[grey46]...[/]\n")
-    process = Compiler.run(variants, algos, in_subprocess=True)
+    process = compiler.Compiler.run(variants, algos, in_subprocess=True)
 
     for line in process.stdout:  # type: str
         if line.startswith(const.SubprocTag):

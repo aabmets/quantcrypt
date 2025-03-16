@@ -13,8 +13,8 @@ import pytest
 import platform
 import itertools
 from pathlib import Path
+from unittest.mock import patch
 from quantcrypt.internal import pqclean, constants as const
-from quantcrypt.internal.pqclean import utils
 
 
 def _validate_common_filepaths(variant: const.PQAVariant) -> None:
@@ -52,29 +52,52 @@ def _check_linux_support(spec: const.AlgoSpec, variant: const.PQAVariant) -> Non
             assert res1 is None and res2 is None
 
 
-def test_pqclean_sources(alt_tmp_path, monkeypatch):
-    def _mocked_search_upwards(path: Path | str):
-        new_path = alt_tmp_path / path
-        new_path.mkdir(parents=True, exist_ok=True)
-        return new_path
+def test_pqclean_sources(alt_tmp_path):
+    pqclean_dir = alt_tmp_path / "pqclean"
+    pqclean_dir.mkdir(parents=True, exist_ok=True)
 
-    monkeypatch.setattr(utils, "search_upwards", _mocked_search_upwards)
+    with patch('internal.pqclean.utils.search_upwards') as mock:
+        mock.side_effect = lambda *_, **__: pqclean_dir
 
-    pqclean_dir = pqclean.find_pqclean_dir(src_must_exist=False)
-    assert pqclean.check_sources_exist(pqclean_dir) is False
-    pqclean.download_extract_pqclean(pqclean_dir)
-    assert pqclean.check_sources_exist(pqclean_dir) is True
+        assert pqclean.check_sources_exist(pqclean_dir) is False
+        pqclean.download_extract_pqclean(pqclean_dir)
+        assert pqclean.check_sources_exist(pqclean_dir) is True
 
-    for variant in const.PQAVariant.members():
-        _validate_common_filepaths(variant)
+        for variant in const.PQAVariant.members():
+            _validate_common_filepaths(variant)
 
-    specs = const.SupportedAlgos
-    variants = const.PQAVariant.members()
+        specs = const.SupportedAlgos
+        variants = const.PQAVariant.members()
 
-    for spec, variant in itertools.product(specs, variants):  # type: const.AlgoSpec, const.PQAVariant
-        if variant == const.PQAVariant.REF:
-            res1, res2 = pqclean.check_platform_support(spec, variant)
-            assert res1 is not None and res2 is not None
-            continue
-        _check_windows_support(spec, variant)
-        _check_linux_support(spec, variant)
+        for spec, variant in itertools.product(specs, variants):  # type: const.AlgoSpec, const.PQAVariant
+            if variant == const.PQAVariant.REF:
+                res1, res2 = pqclean.check_platform_support(spec, variant)
+                assert res1 is not None and res2 is not None
+                continue
+            _check_windows_support(spec, variant)
+            _check_linux_support(spec, variant)
+
+
+def test_find_pqclean_dir(alt_tmp_path):
+    nested_pqclean_dir = alt_tmp_path / "quantcrypt/pqclean"
+    upper_pqclean_dir = alt_tmp_path / "pqclean"
+
+    def _mocked_search_upwards(_, from_path = None):
+        ret_path = nested_pqclean_dir
+        if from_path is not None:
+            ret_path = upper_pqclean_dir
+        ret_path.mkdir(parents=True, exist_ok=True)
+        return ret_path
+
+    with patch('internal.pqclean.utils.search_upwards') as mock:
+        mock.side_effect = _mocked_search_upwards
+
+        pqclean_dir = pqclean.find_pqclean_dir(src_must_exist=False)
+        assert pqclean_dir == nested_pqclean_dir
+
+        with pytest.raises(RuntimeError):
+            pqclean.find_pqclean_dir(src_must_exist=True)
+
+        pqclean.download_extract_pqclean(upper_pqclean_dir)
+        pqclean_dir = pqclean.find_pqclean_dir(src_must_exist=True)
+        assert pqclean_dir == upper_pqclean_dir

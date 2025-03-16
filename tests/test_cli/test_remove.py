@@ -9,17 +9,20 @@
 #   SPDX-License-Identifier: MIT
 #
 
-from quantcrypt.internal import utils, constants as const
+from unittest.mock import patch
+from quantcrypt.internal import constants as const
 from .conftest import CLIMessages
 
 
-def test_remove(cli_runner, alt_tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(utils, "search_upwards", lambda *_: alt_tmp_path)
-    for spec in const.SupportedAlgos:  # type: const.AlgoSpec
-        (alt_tmp_path / spec.module_name(const.PQAVariant.REF)).touch()
+def test_remove(cli_runner, alt_tmp_path) -> None:
+    with patch('internal.cli.commands.remove.utils.search_upwards') as mock:
+        mock.return_value = alt_tmp_path
 
-    cli_runner("remove", ["mlkem512"], "n\n", CLIMessages.CANCELLED)
-    cli_runner("remove", ["mlkem512"], "y\n", CLIMessages.SUCCESS)
-    cli_runner("remove", ["mlkem512"], "y\n", CLIMessages.SUCCESS)
-    cli_runner("remove", ["-D", "mlkem512"], "y\n", CLIMessages.DRYRUN)
-    cli_runner("remove", ["-N", "fastsphincs"], "", CLIMessages.SUCCESS)
+        for spec in const.SupportedAlgos:  # type: const.AlgoSpec
+            (alt_tmp_path / spec.module_name(const.PQAVariant.REF)).touch()
+
+        cli_runner("remove", ["mlkem512"], "n\n", CLIMessages.CANCELLED)
+        cli_runner("remove", ["mlkem512"], "y\n", CLIMessages.SUCCESS)
+        cli_runner("remove", ["asdfg"], "y\n", CLIMessages.SUCCESS)
+        cli_runner("remove", ["-D", "mlkem512"], "y\n", CLIMessages.DRYRUN)
+        cli_runner("remove", ["-N", "fastsphincs"], "", CLIMessages.SUCCESS)

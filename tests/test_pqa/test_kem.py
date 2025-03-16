@@ -16,7 +16,7 @@ from secrets import compare_digest
 from pydantic import ValidationError
 from quantcrypt.internal import constants as const
 from quantcrypt.internal.pqa import kem_algos as kem
-from quantcrypt.internal.pqa.base_kem import KEMParamSizes, BaseKEM
+from quantcrypt.kem import KEMParamSizes, BaseKEM
 from .conftest import BaseAlgorithmTester
 
 

@@ -9,8 +9,8 @@
 #   SPDX-License-Identifier: MIT
 #
 
+from unittest.mock import patch
 from quantcrypt.internal import constants as const
-from quantcrypt.internal.cli.commands import compile
 from .conftest import CLIMessages
 
 
@@ -44,11 +44,14 @@ class MockedCompiler:
         return MockedProcess(cls._returncode)
 
 
-def test_compile(cli_runner, alt_tmp_path, monkeypatch) -> None:
-    monkeypatch.setattr(compile, "Compiler", MockedCompiler)
+def test_compile(cli_runner, alt_tmp_path) -> None:
+    target = "internal.cli.commands.compile.compiler.Compiler"
+    patcher = patch(target, new=MockedCompiler)
 
+    patcher.start()
     cli_runner("compile", [], "n\n", CLIMessages.CANCELLED)
     cli_runner("compile", ['-o', 'mlkem512'], "y\n", CLIMessages.SUCCESS)
     cli_runner("compile", ['-D', 'mlkem512'], "y\n", CLIMessages.DRYRUN)
     cli_runner("compile", ['-N', 'mlkem512'], "", CLIMessages.ERROR)
     cli_runner("compile", ['-N', 'mlkem512'], "", CLIMessages.SUCCESS)
+    patcher.stop()
