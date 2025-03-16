@@ -20,14 +20,14 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=aabmets_quantcrypt&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=aabmets_quantcrypt)
 
 
-### Description
+## Description
 
 QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries. 
 While QuantCrypt contains multiple variants of PQC algorithms that are standardized by [NIST](https://csrc.nist.gov/projects/post-quantum-cryptography), 
 it is recommended to use only the strongest variants as recommended by the [CNSA advisory by NSA](https://en.wikipedia.org/wiki/Commercial_National_Security_Algorithm_Suite).
 
 
-### Motivation
+## Motivation
 
 Currently, there does not exist any pure-Python implementation of Post-Quantum Cryptographic algorithms, 
 which requires Python developers to first discover where to get reliable C source code of PQC algorithms, 
@@ -43,7 +43,7 @@ when working with Post-Quantum cryptography. This library places a lot of focus 
 to be powerful in features, yet easy and enjoyable to use, so it would _just work_ for your project.
 
 
-### Quickstart
+## Quickstart
 
 The full documentation of this library can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
 Because this library is rich in docstrings which provide detailed insight into the library's behavior, 
@@ -51,7 +51,7 @@ it is suggested to use an IDE which supports autocomplete and code insights when
 Most popular choices are either PyCharm or VS Code with Python-specific plugins.
 
 
-#### Install
+### Install
 
 Using [UV](https://docs.astral.sh/uv/) _(recommended)_:  
 ```shell
@@ -69,7 +69,7 @@ pip install quantcrypt
 ```
 
 
-#### Script Imports
+### Script Imports
 
 ```python
 from quantcrypt import (
@@ -82,7 +82,7 @@ from quantcrypt import (
 )
 ```
 
-#### CLI Commands
+### CLI Commands
 
 The general functionality of this library is also available from the command-line, which you can access 
 with the `qclib` command. Keep in mind that if you install QuantCrypt into a venv, you will need to activate 
@@ -103,14 +103,14 @@ qclib remove --help
 qclib compile --help
 ```
 
-### Security Statement
+## Security Statement
 
 The PQC algorithms used in this library inherit their security from the [PQClean](https://github.com/PQClean/PQClean) project. 
 You can read the security statement of the PQClean project from their [SECURITY.md](https://github.com/PQClean/PQClean/blob/master/SECURITY.md) file. 
 To report a security vulnerability for a PQC algorithm, please create an [issue](https://github.com/PQClean/PQClean/issues) in the PQClean repository.
 
 
-### Credits
+## Credits
 
 This library would be impossible without these essential dependencies:
 
