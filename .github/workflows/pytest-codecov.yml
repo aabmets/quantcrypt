@@ -1,0 +1,32 @@
+name: Run Pytest and Upload Code Coverage
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  main:
+    name: pytest-codecov
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Setup UV package manager
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.13"
+          version: "latest"
+
+      - name: Run commands
+        run: |
+          qclib compile -N
+          pytest
+
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
