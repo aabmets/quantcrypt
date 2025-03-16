@@ -97,7 +97,7 @@ Overwrite = Annotated[bool, Option(
 )]
 
 NonInteractive = Annotated[bool, Option(
-    "--non-interactive", "-N", show_default=False, help=' '.join([
+    "--no-ask", "-N", show_default=False, help=' '.join([
         "Disables interactive prompts. If the program is going to overwrite",
         "files and the --overwrite option is not separately provided, the",
         "program will exit with an exit code of 1."
