@@ -15,8 +15,11 @@ from quantcrypt.internal import constants as const
 
 
 __all__ = [
-    "CompileAlgos",
     "KeygenAlgo",
+    "CompileAlgos",
+    "RemoveAlgos",
+    "KeepAlgos",
+    "WithOpt",
     "Version",
     "DryRun",
     "Overwrite",
@@ -32,8 +35,7 @@ __all__ = [
     "WriteSigFile",
     "ReadSigFile",
     "Identifier",
-    "Directory",
-    "WithOpt"
+    "Directory"
 ]
 
 
