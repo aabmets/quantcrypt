@@ -29,7 +29,7 @@ class TestDssAlgorithms(BaseAlgorithmTester):
 		cls.run_tests(alt_tmp_path, dss.MLDSA_65)
 
 	@classmethod
-	def test_mlds_87(cls, alt_tmp_path):
+	def test_mldsa_87(cls, alt_tmp_path):
 		cls.run_tests(alt_tmp_path, dss.MLDSA_87)
 
 	@classmethod

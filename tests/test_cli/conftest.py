@@ -17,12 +17,15 @@ from dataclasses import dataclass
 from contextlib import contextmanager
 from collections.abc import Callable
 from typer.testing import CliRunner, Result
+from quantcrypt.internal.pqa.base_dss import BaseDSS
+from quantcrypt.internal.pqa.base_kem import BaseKEM
 from quantcrypt.internal.cli.main import app
 from quantcrypt.internal.cli import commands as cmd
 
 
 @dataclass(frozen=True)
 class CryptoFilePaths:
+    algorithm: str
     public_key_fp: str
     secret_key_fp: str
     ciphertext_fp: str
@@ -45,8 +48,10 @@ ValidCommands = t.Literal["main", "info", "encrypt", "decrypt", "sign", "verify"
 @pytest.fixture(name="cfp_setup", scope="function")
 def fixture_cfp_setup(alt_tmp_path) -> Callable[..., t.ContextManager[CryptoFilePaths]]:
     @contextmanager
-    def closure(algorithm: str) -> t.Generator[CryptoFilePaths, t.Any, None]:
+    def closure(pqa_class: BaseDSS | BaseKEM) -> t.Generator[CryptoFilePaths, t.Any, None]:
+        algorithm = pqa_class.armor_name()
         cfp_dict = dict(
+            algorithm=algorithm,
             public_key_fp=alt_tmp_path / f"{algorithm}-pubkey.qc",
             secret_key_fp=alt_tmp_path / f"{algorithm}-seckey.qc",
             ciphertext_fp=alt_tmp_path / "ciphertext.kptn",
