@@ -6,6 +6,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/quantcrypt)](https://pypi.org/project/quantcrypt/)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/aabmets/quantcrypt/pypi_publish_pipeline.yaml)](https://github.com/aabmets/quantcrypt/actions/workflows/pypi_publish_pipeline.yaml)
 [![codecov](https://codecov.io/gh/aabmets/quantcrypt/graph/badge.svg?token=jymcRynp2P)](https://codecov.io/gh/aabmets/quantcrypt)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/aabmets/quantcrypt/pytest-codecov.yml?label=tests)](https://github.com/aabmets/quantcrypt/actions/workflows/pytest-codecov.yml)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/quantcrypt)](https://pypistats.org/packages/quantcrypt)
 
 
@@ -21,8 +22,9 @@
 
 ### Description
 
-QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries.  
-QuantCrypt contains only the **strongest** variants of the PQC algorithms from the [NIST PQC standardization process](https://csrc.nist.gov/projects/post-quantum-cryptography) as recommended by the [CNSA advisory by NSA](https://en.wikipedia.org/wiki/Commercial_National_Security_Algorithm_Suite).
+QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries. 
+While QuantCrypt contains multiple variants of PQC algorithms that are standardized by [NIST](https://csrc.nist.gov/projects/post-quantum-cryptography), 
+it is recommended to use only the strongest variants as recommended by the [CNSA advisory by NSA](https://en.wikipedia.org/wiki/Commercial_National_Security_Algorithm_Suite).
 
 
 ### Motivation
@@ -45,14 +47,27 @@ to be powerful in features, yet easy and enjoyable to use, so it would _just wor
 
 The full documentation of this library can be found in the [Wiki](https://github.com/aabmets/quantcrypt/wiki).
 Because this library is rich in docstrings which provide detailed insight into the library's behavior, 
-it is suggested to use an IDE which supports autocomplete and intellisense when working with this library.
+it is suggested to use an IDE which supports autocomplete and code insights when working with this library. 
+Most popular choices are either PyCharm or VS Code with Python-specific plugins.
 
 
 #### Install
 
+Using [UV](https://docs.astral.sh/uv/) _(recommended)_:  
+```shell
+uv add quantcrypt
+```
+
+Using [Poetry](https://python-poetry.org/docs/): 
+```shell
+poetry add quantcrypt
+```
+
+Using [pip](https://pip.pypa.io/en/stable/getting-started/):
 ```shell
 pip install quantcrypt
 ```
+
 
 #### Script Imports
 
@@ -76,15 +91,16 @@ You can use the `--help` option to learn more about each command and subcommand.
 
 ```shell
 qclib --help
-qclib --info
 qclib --version
 
+qclib info --help
 qclib keygen --help
 qclib encrypt --help
 qclib decrypt --help
 qclib sign --help
 qclib verify --help
-qclib optimize --help
+qclib remove --help
+qclib compile --help
 ```
 
 ### Security Statement
