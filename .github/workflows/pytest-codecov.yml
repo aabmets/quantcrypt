@@ -24,7 +24,7 @@ jobs:
       - name: Run commands
         run: |
           uv sync --all-extras --frozen
-          qclib compile -N
+          qclib compile -o -N
           pytest
 
       - name: Upload code coverage
