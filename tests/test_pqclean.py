@@ -13,7 +13,8 @@ import pytest
 import platform
 import itertools
 from pathlib import Path
-from quantcrypt.internal import utils, pqclean, constants as const
+from quantcrypt.internal import pqclean, constants as const
+from quantcrypt.internal.pqclean import utils
 
 
 def _validate_common_filepaths(variant: const.PQAVariant) -> None:

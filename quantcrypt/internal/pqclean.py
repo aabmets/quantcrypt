@@ -46,7 +46,7 @@ def check_sources_exist(pqclean_dir: Path) -> bool:
     variants = const.PQAVariant.values()
     for spec, variant in product(specs, variants):
         path = pqclean_dir / spec.src_subdir / variant / "api.h"
-        checked_files.append(path.is_file())
+        checked_files.append(path.exists())
     return all(checked_files)
 
 
