@@ -53,16 +53,12 @@ def check_sources_exist(pqclean_dir: Path) -> bool:
 @cache
 def find_pqclean_dir(*, src_must_exist: bool) -> Path:
     res = utils.search_upwards("pqclean")
-    if not src_must_exist:
+    if not src_must_exist or check_sources_exist(res):
         return res
-    elif not check_sources_exist(res):
-        res = utils.search_upwards("pqclean", res.parent)
-        if check_sources_exist(res):
-            return res
-    raise RuntimeError(
-        f"Unable to find pqclean directory which "
-        f"matches sources_exist = {src_must_exist}"
-    )
+    res = utils.search_upwards("pqclean", res.parent)
+    if check_sources_exist(res):
+        return res
+    raise RuntimeError("Unable to find a valid pqclean directory")
 
 
 def filter_archive_contents(members: list[ZipInfo]) -> list[tuple[ZipInfo, Path]]:
