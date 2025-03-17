@@ -9,12 +9,9 @@
 #   SPDX-License-Identifier: MIT
 #
 
-import re
-import ast
 import pickle
 import base64
 import binascii
-import setuptools
 import typing as t
 from pathlib import Path
 from functools import cache
@@ -32,8 +29,7 @@ __all__ = [
     "annotated_bytes",
     "read_file_chunks",
     "sha3_digest_file",
-    "resolve_relpath",
-    "patch_distutils"
+    "resolve_relpath"
 ]
 
 
@@ -117,31 +113,3 @@ def resolve_relpath(path: str | Path | None = None) -> Path:
     if _path.is_absolute():
         return Path(_path)
     return (Path.cwd() / _path).resolve()
-
-
-def patch_distutils():  # pragma: no cover
-    setuptools_path = Path(setuptools.__file__).parent
-    distutils_path = "_distutils/compilers/C/unix.py"
-    compiler_path = setuptools_path / distutils_path
-
-    with compiler_path.open("r", encoding="utf-8") as f:
-        lines = f.readlines()
-
-    pattern = re.compile(r'^( {0,4}src_extensions\s*=\s*)(\[[^]]*])')
-    did_append = False
-
-    for i, line in enumerate(lines):
-        match = pattern.search(line)
-        if match:
-            prefix, list_str = match.group(1), match.group(2)
-            ext_list: list[str] = ast.literal_eval(list_str)  # NOSONAR
-            for suffix in ['.S', '.s']:
-                if suffix not in ext_list:
-                    ext_list.append(suffix)
-                    did_append = True
-            lines[i] = prefix + repr(ext_list) + "\n"
-            break
-
-    if did_append:
-        with compiler_path.open("w", encoding="utf-8") as f:
-            f.writelines(lines)

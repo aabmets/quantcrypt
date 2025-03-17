@@ -19,8 +19,13 @@ from collections.abc import Callable
 from typer.testing import CliRunner, Result
 from quantcrypt.internal.pqa.base_dss import BaseDSS
 from quantcrypt.internal.pqa.base_kem import BaseKEM
+from quantcrypt.internal.cli.commands import sign_verify
+from quantcrypt.internal.cli.commands import enc_dec
+from quantcrypt.internal.cli.commands import compile
+from quantcrypt.internal.cli.commands import keygen
+from quantcrypt.internal.cli.commands import remove
+from quantcrypt.internal.cli.commands import info
 from quantcrypt.internal.cli.main import app
-from quantcrypt.internal.cli import commands as cmd
 
 
 @dataclass(frozen=True)
@@ -86,14 +91,14 @@ def fixture_cli_runner() -> Callable[..., Result]:
         runner = CliRunner()
         _app = dict(
             main=app,
-            info=cmd.info_app,
-            keygen=cmd.keygen_app,
-            encrypt=cmd.enc_app,
-            decrypt=cmd.dec_app,
-            sign=cmd.sign_app,
-            verify=cmd.verify_app,
-            compile=cmd.compile_app,
-            remove=cmd.remove_app
+            info=info.info_app,
+            keygen=keygen.keygen_app,
+            encrypt=enc_dec.enc_app,
+            decrypt=enc_dec.dec_app,
+            sign=sign_verify.sign_app,
+            verify=sign_verify.verify_app,
+            compile=compile.compile_app,
+            remove=remove.remove_app
         )[command]
         result = runner.invoke(_app, options, input=user_input)
         if debug:

@@ -10,10 +10,13 @@
 #
 
 from __future__ import annotations
+import re
 import os
+import ast
 import sys
 import shutil
 import platform
+import setuptools
 import subprocess
 from cffi import FFI
 from typing import Generator
@@ -146,6 +149,34 @@ class Target:
 
 class Compiler:
     @staticmethod
+    def patch_distutils():  # pragma: no cover
+        setuptools_path = Path(setuptools.__file__).parent
+        distutils_path = "_distutils/compilers/C/unix.py"
+        compiler_path = setuptools_path / distutils_path
+
+        with compiler_path.open("r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        pattern = re.compile(r'^( {0,4}src_extensions\s*=\s*)(\[[^]]*])')
+        did_append = False
+
+        for i, line in enumerate(lines):
+            match = pattern.search(line)
+            if match:
+                prefix, list_str = match.group(1), match.group(2)
+                ext_list: list[str] = ast.literal_eval(list_str)  # NOSONAR
+                for suffix in ['.S', '.s']:
+                    if suffix not in ext_list:
+                        ext_list.append(suffix)
+                        did_append = True
+                lines[i] = prefix + repr(ext_list) + "\n"
+                break
+
+        if did_append:
+            with compiler_path.open("w", encoding="utf-8") as f:
+                f.writelines(lines)
+
+    @staticmethod
     def get_compile_targets(
             target_variants: list[const.PQAVariant],
             target_algos: list[const.AlgoSpec]
@@ -254,7 +285,7 @@ class Compiler:
         if not accepted:
             return rejected
 
-        utils.patch_distutils()
+        cls.patch_distutils()
         with cls.build_path():
             for target in accepted:
                 if verbose or debug:  # pragma: no cover

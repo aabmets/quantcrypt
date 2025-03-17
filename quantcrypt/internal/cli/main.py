@@ -12,9 +12,10 @@
 import inspect
 import importlib
 from typer import Typer
-from pathlib import Path
-from typing import Generator
 from types import ModuleType
+from typing import Generator
+from pathlib import Path
+from importlib.util import find_spec
 from quantcrypt.internal import utils
 from quantcrypt.internal.cli import annotations as atd
 from quantcrypt.internal.cli.commands.info import PackageInfo
@@ -37,6 +38,10 @@ def find_command_modules() -> Generator[ModuleType, None, None]:
     package_path = utils.search_upwards("quantcrypt/__init__.py").parent
     import_dir = Path(__file__).with_name("commands")
     for filepath in import_dir.rglob("*.py"):
+        if filepath.name == "compile.py":
+            required_packages = ["cffi", "setuptools", "yaml", "requests"]
+            if not all(find_spec(pkg) is not None for pkg in required_packages):
+                continue
         relative_path = filepath.resolve().relative_to(package_path)
         module_path = '.'.join(relative_path.with_suffix('').parts)
         yield importlib.import_module(
