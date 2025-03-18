@@ -124,10 +124,13 @@ class Target:
                 for flag in self.required_flags:
                     extra_flags.append(f"-m{flag.lower()}")
             elif arch in const.ARMArches:
-                extra_flag = "-march=armv8.5-a"
-                for flag in self.required_flags:
-                    extra_flag += f"+{flag.lower()}"
-                extra_flags.append(extra_flag)
+                if opsys == "darwin":
+                    extra_flags.append("-march=armv8.5-a")
+                else:
+                    extra_flag = "-march=armv8.5-a"
+                    for flag in self.required_flags:
+                        extra_flag += f"+{flag.lower()}"
+                    extra_flags.append(extra_flag)
             return [
                 "-s", "-fdata-sections", "-ffunction-sections",
                 "-O3", "-flto", "-std=c99", *extra_flags,
