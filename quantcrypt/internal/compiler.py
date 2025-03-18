@@ -114,28 +114,34 @@ class Target:
     def compiler_args(self) -> list[str]:  # pragma: no cover
         opsys = platform.system().lower()
         arch = platform.machine().lower()
+
+        if opsys not in ("windows", "linux", "darwin"):
+            raise errors.UnsupportedPlatformError
+
         extra_flags: list[str] = []
+        unix_flags = [
+            "-fdata-sections", "-ffunction-sections",
+            "-O3", "-flto", "-std=c99"
+        ]
         if opsys == "windows" and arch in const.AMDArches:
             for flag in self.required_flags:
                 extra_flags.append(f"/arch:{flag.upper()}")
             return ["/O2", "/MD", "/nologo", *extra_flags]
-        elif opsys in ["linux", "darwin"]:
+        elif opsys == "linux":
+            extra_flags.append("-s")
             if arch in const.AMDArches:
                 for flag in self.required_flags:
                     extra_flags.append(f"-m{flag.lower()}")
             elif arch in const.ARMArches:
-                if opsys == "darwin":
-                    extra_flags.append("-mfloat-abi=hard")
-                else:
-                    extra_flag = "-march=armv8.5-a"
-                    for flag in self.required_flags:
-                        extra_flag += f"+{flag.lower()}"
-                    extra_flags.append(extra_flag)
-            return [
-                "-s", "-fdata-sections", "-ffunction-sections",
-                "-O3", "-flto", "-std=c99", *extra_flags,
-            ]
-        raise errors.UnsupportedPlatformError
+                march_flag = "-march=armv8.5-a"
+                for flag in self.required_flags:
+                    march_flag += f"+{flag.lower()}"
+                extra_flags.append(march_flag)
+        elif opsys == "darwin":
+            pass
+
+        unix_flags.extend(extra_flags)
+        return unix_flags
 
     @property
     def linker_args(self) -> list[str]:  # pragma: no cover
