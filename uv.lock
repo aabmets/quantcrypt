@@ -834,6 +834,7 @@ dependencies = [
     { name = "pycryptodomex" },
     { name = "pydantic" },
     { name = "rich" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typer" },
     { name = "types-zxcvbn" },
     { name = "zxcvbn" },
@@ -870,6 +871,7 @@ develop = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "setuptools" },
+    { name = "tomli" },
 ]
 
 [package.metadata]
@@ -884,6 +886,7 @@ requires-dist = [
     { name = "requests", marker = "extra == 'compiler'", specifier = ">=2.31.0" },
     { name = "rich", specifier = ">=13.8.0" },
     { name = "setuptools", marker = "extra == 'compiler'", specifier = ">=70.0.0" },
+    { name = "tomli", marker = "python_full_version == '3.10.*'", specifier = ">=2.1.1" },
     { name = "typer", specifier = ">=0.15.0" },
     { name = "types-zxcvbn", specifier = ">=4.5.0" },
     { name = "zxcvbn", specifier = ">=4.5.0" },
@@ -913,6 +916,7 @@ develop = [
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "setuptools", specifier = ">=70.0.0" },
+    { name = "tomli", specifier = ">=2.1.1" },
 ]
 
 [[package]]

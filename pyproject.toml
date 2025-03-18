@@ -55,15 +55,6 @@ compiler = [
 ]
 
 [dependency-groups]
-build = [
-    "build>=1.1.1",
-    "cffi>=1.17.0",
-    "cibuildwheel[uv]>=2.20.0",
-    "hatchling>=1.24.0",
-    "pyyaml>=6.0.1",
-    "requests>=2.31.0",
-    "setuptools>=70.0.0",
-]
 develop = [
    "build>=1.1.1",
    "cffi>=1.17.0",
@@ -77,6 +68,7 @@ develop = [
    "pyyaml>=6.0.1",
    "requests>=2.31.0",
    "setuptools>=70.0.0",
+   "tomli>=2.1.1",
 ]
 
 [tool.pytest.ini_options]
@@ -148,7 +140,8 @@ path = "scripts/build.py"
 [tool.cibuildwheel]
 skip = ["*win32", "*i686", "pp*"]
 build-frontend = "build[uv]"
-before-build = "uv sync --active --group build && python scripts/build.py"
+before-build = "uv sync --active --frozen --group develop && python scripts/build.py"
+test-command = "pytest {project}/tests"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]

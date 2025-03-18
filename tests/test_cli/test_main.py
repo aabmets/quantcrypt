@@ -9,8 +9,8 @@
 #   SPDX-License-Identifier: MIT
 #
 
+import tomli
 import pytest
-import tomllib
 from dotmap import DotMap
 from typer.testing import CliRunner
 from quantcrypt.internal import utils
@@ -20,7 +20,7 @@ from quantcrypt.internal.cli.main import app
 @pytest.fixture(name="project", scope="module")
 def fixture_project() -> DotMap:
 	path = utils.search_upwards("pyproject.toml")
-	contents = tomllib.loads(path.read_text())
+	contents = tomli.loads(path.read_text())
 	return DotMap(contents["project"])
 
 
