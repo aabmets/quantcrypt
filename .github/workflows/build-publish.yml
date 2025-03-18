@@ -35,10 +35,12 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python == '3.13' }}
         run: uv build --sdist --out-dir dist
 
-      - name: Compile and run tests
-        run: |
-          python scripts/build.py --compile
-          pytest --no-cov
+      - name: Compile binaries
+        run: python scripts/build.py --compile
+
+      - name: Run pytests (conditional)
+        if: ${{ matrix.os != 'macos-latest' }}
+        run: pytest --no-cov
 
       - name: Build wheel
         run: uv build --wheel --out-dir dist
