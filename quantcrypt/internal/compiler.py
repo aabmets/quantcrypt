@@ -110,18 +110,6 @@ class Target:
         header_file = self.source_dir / "api.h"
         return f'#include "{header_file.as_posix()}"'
 
-    def _add_linux_compiler_args(self, extra_flags: list[str]) -> None:
-        arch = platform.machine().lower()
-        extra_flags.append("-s")
-        if arch in const.AMDArches:
-            for flag in self.required_flags:
-                extra_flags.append(f"-m{flag.lower()}")
-        elif arch in const.ARMArches:
-            march_flag = "-march=armv8.5-a"
-            for flag in self.required_flags:
-                march_flag += f"+{flag.lower()}"
-            extra_flags.append(march_flag)
-
     @property
     def compiler_args(self) -> list[str]:  # pragma: no cover
         opsys = platform.system().lower()
@@ -140,7 +128,17 @@ class Target:
                 extra_flags.append(f"/arch:{flag.upper()}")
             return ["/O2", "/MD", "/nologo", *extra_flags]
         elif opsys == "linux":
-            self._add_linux_compiler_args(extra_flags)
+            extra_flags.append("-s")
+            if arch in const.AMDArches:
+                for flag in self.required_flags:
+                    extra_flags.append(f"-m{flag.lower()}")
+            elif arch in const.ARMArches:
+                march_flag = "-march=armv8.5-a"
+                for flag in self.required_flags:
+                    march_flag += f"+{flag.lower()}"
+                extra_flags.append(march_flag)
+        elif opsys == "darwin":
+            pass
 
         unix_flags.extend(extra_flags)
         return unix_flags
