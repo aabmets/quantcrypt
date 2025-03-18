@@ -53,6 +53,8 @@ Most popular choices are either PyCharm or VS Code with Python-specific plugins.
 
 ### Install
 
+To install QuantCrypt with its default dependencies (no compiler), use one of the following commands:
+
 Using [UV](https://docs.astral.sh/uv/) _(recommended)_:  
 ```shell
 uv add quantcrypt
@@ -69,16 +71,31 @@ pip install quantcrypt
 ```
 
 
+If you want to re-compile PQA binaries on your own machine, you can install QuantCrypt with 
+optional dependencies by appending `[compiler]` to one of the install commands outlined above. 
+
+QuantCrypt publishes prebuilt wheels with precompiled binaries to the PyPI registry.
+If your platform supports one of the prebuilt wheels, then you don't need to install 
+QuantCrypt with the compiler option to be able to use the library.
+
+_**Note:**_ If you do decide to re-compile the PQA binaries, then you will need to install 
+platform-specific build tools yourself, as QuantCrypt is unable to provide these for you.
+
+_**Note:**_ If you attempt to import the compiler module programmatically when optional dependencies 
+are missing, you will receive an import error. 
+
+
 ### Script Imports
 
 ```python
 from quantcrypt import (
-    kem,     # Key Encapsulation Mechanism algos   - public-key cryptography
-    dss,     # Digital Signature Scheme algos      - secret-key signatures
-    cipher,  # The Krypton Cipher                  - symmetric cipher based on AES-256
-    kdf,     # Argon2 helpers + KMAC-KDF           - key derivation functions
-    errors,  # All errors QuantCrypt may raise     - also available from other modules
-    utils    # Helper utilities from all modules   - gathered into one module
+    kem,      # Key Encapsulation Mechanism algos   - public-key cryptography
+    dss,      # Digital Signature Scheme algos      - secret-key signatures
+    cipher,   # The Krypton Cipher                  - symmetric cipher based on AES-256
+    kdf,      # Argon2 helpers + KMAC-KDF           - key derivation functions
+    errors,   # All errors QuantCrypt may raise     - also available from other modules
+    utils,    # Helper utilities from all modules   - gathered into one module
+    compiler  # Tools for compiling PQA binaries    - requires optional dependencies
 )
 ```
 
@@ -102,6 +119,10 @@ qclib verify --help
 qclib remove --help
 qclib compile --help
 ```
+
+_**Note:**_ The `compile` CLI command becomes available when QuantCrypt 
+has been installed with optional dependencies for the compiler.
+
 
 ## Security Statement
 
