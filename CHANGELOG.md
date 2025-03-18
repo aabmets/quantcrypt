@@ -5,7 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [0.4.2] - 2024-02-05 - _latest_
+### [1.0.0] - 2025-03-18 - _latest_
+
+- Major refactor of large parts of the codebase and also pytests.
+- Replaced Kyber and Dilithium classes with MLKEM_* and MLDSA_* classes. Other breaking changes as well.
+- QuantCrypt now supports wider variety of PQC algorithms from the PQClean project.
+- Reworked compiler directly into the QuantCrypt library, so it becomes possible to compile PQA binaries on platforms for which binary wheels are not available on PyPI registry.
+- Added compile command to CLI. This command becomes available when QuantCrypt has been installed with optional dependencies required by the compiler component.
+- QuantCrypt now correctly builds binary wheels on GitHub Actions for all supported Python versions on Windows, Linux and MacOS platforms.
+
+### [0.4.2] - 2024-02-05
 
 - Restored --version and --info options to qclib CLI command
 
@@ -63,6 +72,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[1.0.0]: https://github.com/aabmets/quantcrypt/compare/0.4.2...1.0.0
 [0.4.2]: https://github.com/aabmets/quantcrypt/compare/0.4.0...0.4.2
 [0.4.0]: https://github.com/aabmets/quantcrypt/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/aabmets/quantcrypt/compare/0.3.3...0.3.4
