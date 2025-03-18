@@ -141,7 +141,7 @@ path = "scripts/build.py"
 skip = ["*win32", "*i686", "pp*"]
 build-frontend = "build[uv]"
 before-build = "uv sync --active --frozen --group develop && python scripts/build.py"
-test-command = "pytest {project}/tests"
+test-command = "pytest {project}/tests --no-cov"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
