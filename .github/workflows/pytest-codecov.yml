@@ -24,7 +24,7 @@ jobs:
 
       - name: Run commands
         run: |
-          uv sync --all-extras --frozen
+          uv sync --group develop --frozen
           qclib compile -N
           pytest
 
