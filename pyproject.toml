@@ -56,12 +56,11 @@ compiler = [
 
 [dependency-groups]
 develop = [
-   "build>=1.1.1",
    "cffi>=1.17.0",
-   "cibuildwheel[uv]>=2.20.0",
    "coverage>=7.6.0",
    "devtools-cli>=0.14.0",
    "hatchling>=1.24.0",
+   "packaging>=24.2",
    "pytest>=8.3.0",
    "pytest-cov>=6.0.0",
    "pytest-xdist>=3.6.1",
@@ -136,18 +135,3 @@ artifacts = [
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "scripts/build.py"
-
-[tool.cibuildwheel]
-skip = ["*win32", "*i686", "pp*"]
-build-frontend = "build[uv]"
-before-build = "uv sync --active --frozen --group develop && python scripts/build.py"
-test-command = "pytest {project}/tests --no-cov"
-
-[tool.cibuildwheel.windows]
-archs = ["AMD64"]
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64"]
-
-[tool.cibuildwheel.linux]
-archs = ["x86_64"]

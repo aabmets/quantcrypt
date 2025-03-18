@@ -167,6 +167,3 @@ quantcrypt/pqclean/crypto_sign
 
 # Compiled PQClean binaries
 quantcrypt/internal/bin/
-
-# Built wheels
-wheelhouse
