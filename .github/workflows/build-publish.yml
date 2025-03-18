@@ -1,0 +1,67 @@
+name: Build Wheels and Publish to PyPI
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python: [ 3.10, 3.11, 3.12, 3.13 ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Setup UV package manager
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python }}
+          version: "latest"
+
+      - name: Run commands
+        run: |
+          uv sync --frozen --group develop
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" && "${{ matrix.python }}" == "3.13" ]]; then
+            uv build --sdist --out-dir dist
+          fi
+          python scripts/build.py --compile
+          pytest --no-cov
+          uv build --wheel --out-dir dist
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-${{ matrix.os }}-${{ matrix.python }}-${{ strategy.job-index }}
+          path: |
+            ./dist/*.whl
+            ./dist/*.tar.gz
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: release
+      url: https://pypi.org/project/quantcrypt/
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download built packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
