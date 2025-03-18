@@ -71,15 +71,16 @@ pip install quantcrypt
 ```
 
 
-If you want to re-compile PQA binaries on your own machine, you can install QuantCrypt with 
+If you want to recompile PQA binaries on your own machine, you can install QuantCrypt with 
 optional dependencies by appending `[compiler]` to one of the install commands outlined above. 
 
 QuantCrypt publishes prebuilt wheels with precompiled binaries to the PyPI registry.
 If your platform supports one of the prebuilt wheels, then you don't need to install 
 QuantCrypt with the compiler option to be able to use the library.
 
-_**Note:**_ If you do decide to re-compile the PQA binaries, then you will need to install 
-platform-specific build tools yourself, as QuantCrypt is unable to provide these for you.
+_**Note:**_ If you do decide to recompile PQA binaries, you will need to install platform-specific `C/C++` build 
+tools like [Visual Studio](https://visualstudio.microsoft.com/), [Xcode](https://developer.apple.com/xcode/) or 
+[GNU Make](https://www.gnu.org/software/make/) _(non-exhaustive list)_.
 
 _**Note:**_ If you attempt to import the compiler module programmatically when optional dependencies 
 are missing, you will receive an import error. 
