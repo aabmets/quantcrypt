@@ -123,11 +123,14 @@ class Target:
             if arch in const.AMDArches:
                 for flag in self.required_flags:
                     extra_flags.append(f"-m{flag.lower()}")
-            elif arch in const.ARMArches and opsys == "linux":
-                extra_flag = "-march=armv8.5-a"
-                for flag in self.required_flags:
-                    extra_flag += f"+{flag.lower()}"
-                extra_flags.append(extra_flag)
+            elif arch in const.ARMArches:
+                if opsys == "darwin":
+                    extra_flags.append("-mfloat-abi=hard")
+                else:
+                    extra_flag = "-march=armv8.5-a"
+                    for flag in self.required_flags:
+                        extra_flag += f"+{flag.lower()}"
+                    extra_flags.append(extra_flag)
             return [
                 "-s", "-fdata-sections", "-ffunction-sections",
                 "-O3", "-flto", "-std=c99", *extra_flags,
