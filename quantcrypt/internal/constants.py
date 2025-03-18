@@ -10,10 +10,11 @@
 #
 
 from __future__ import annotations
-from itertools import product
 from enum import Enum
+from typing import Any
 from pathlib import Path
 from functools import cache
+from itertools import product
 from dataclasses import dataclass
 
 
@@ -28,7 +29,8 @@ __all__ = [
     "KryptonFileSuffix",
     "AMDArches",
     "ARMArches",
-    "PQCleanRepoArchiveURL"
+    "PQCleanRepoArchiveURL",
+    "ExcludedCombinations"
 ]
 
 
@@ -189,3 +191,7 @@ SignatureFileSuffix = ".sig"
 AMDArches = ["x86_64", "amd64", "x86-64", "x64", "intel64"]
 ARMArches = ["arm_8", "arm64", "aarch64", "armv8", "armv8-a"]
 PQCleanRepoArchiveURL = "https://github.com/PQClean/PQClean/archive/448c71a8f590343e681d0d0cec94f29947b0ff18.zip"
+ExcludedCombinations: list[tuple[Any, Any]] = [
+    ("darwin", PQAVariant.OPT_AMD),
+    ("darwin", PQAVariant.OPT_ARM)
+]

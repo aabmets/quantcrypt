@@ -155,7 +155,7 @@ def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
 def check_opsys_support(spf: PQASupportedPlatform) -> str | None:
     for opsys in spf.operating_systems:
         if platform.system().lower() == opsys.lower():
-            return opsys
+            return opsys.lower()
     return None
 
 
@@ -187,6 +187,9 @@ def check_platform_support(
             opsys = check_opsys_support(spf)
             if not opsys:
                 return None, None
+            for x, y in const.ExcludedCombinations:
+                if x == opsys and y == variant:  # pragma: no cover
+                    return None, None
         if spf.required_flags:  # pragma: no branch
             required_flags = spf.required_flags
 
