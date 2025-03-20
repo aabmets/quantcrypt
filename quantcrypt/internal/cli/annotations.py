@@ -19,6 +19,7 @@ __all__ = [
     "CompileAlgos",
     "RemoveAlgos",
     "KeepAlgos",
+    "OnlyRef",
     "WithOpt",
     "Version",
     "DryRun",
@@ -71,6 +72,14 @@ KeepAlgos = Annotated[bool, Option(
     "--keep", "-k", show_default=False, help=' '.join([
         "Inverts the meaning of the algorithm names which to remove from the library,",
         "keeping the named algorithms and removing everything else instead."
+    ])
+)]
+
+OnlyRef = Annotated[bool, Option(
+    "--only-ref", "-r", show_default=False, help=' '.join([
+        "Can be used together with the --keep option to keep only the clean reference binaries",
+        "of algorithms. Useful for when QuantCrypt is being used within virtualized environments",
+        "which do not support specialized CPU instructions."
     ])
 )]
 

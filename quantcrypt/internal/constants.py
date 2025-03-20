@@ -133,9 +133,10 @@ class AlgoSpecsList(list):
         ]
 
     def filter(self, armor_names: list[str], invert: bool = False) -> list[AlgoSpec]:
+        armor_names = [n.upper() for n in armor_names]
         return [
             spec for spec, name in product(self, armor_names)
-            if (not invert and spec.armor_name() == name.upper())
+            if (not invert and spec.armor_name() == name)
             or (invert and spec.armor_name() not in armor_names)
         ]
 
