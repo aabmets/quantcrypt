@@ -152,17 +152,11 @@ def read_algo_metadata(spec: const.AlgoSpec) -> PQAMetaData:
     return PQAMetaData(**data)
 
 
-def check_opsys_support(spf: PQASupportedPlatform, variant: const.PQAVariant) -> str | None:
-    os_name = ''
+def check_opsys_support(spf: PQASupportedPlatform) -> str | None:
     for opsys in spf.operating_systems:
-        _os_name = opsys.lower()
-        if platform.system().lower() == _os_name:
-            os_name = _os_name
-    if os_name:
-        for x, y in const.ExcludedCombinations:
-            if x == os_name and y == variant:  # pragma: no cover
-                return None
-    return os_name or None
+        if platform.system().lower() == opsys.lower():
+            return opsys.lower()
+    return None
 
 
 def check_arch_support(impl: PQAImplementation) -> PQASupportedPlatform | None:
@@ -189,11 +183,14 @@ def check_platform_support(
         spf = check_arch_support(impl)
         if not spf:
             return None, None
-        elif spf.operating_systems:
-            opsys = check_opsys_support(spf, variant)
+        if spf.operating_systems:
+            opsys = check_opsys_support(spf)
             if not opsys:
                 return None, None
-        elif spf.required_flags:  # pragma: no branch
+            for x, y in const.ExcludedCombinations:
+                if x == opsys and y == variant:  # pragma: no cover
+                    return None, None
+        if spf.required_flags:  # pragma: no branch
             required_flags = spf.required_flags
 
     pqclean_dir = find_pqclean_dir(src_must_exist=True)
