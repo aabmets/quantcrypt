@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.org/project/devtools-cli/), **do not edit manually**._
 
 
-### [1.0.0] - 2025-03-18 - _latest_
+### [1.0.1] - 2025-03-20 - _latest_
+
+- CLI command 'remove' now supports new option '--only-ref'
+- Fixed SonarCloud complaints and improved pytest coverage
+
+### [1.0.0] - 2025-03-18
 
 - Major refactor of large parts of the codebase and also pytests.
 - Replaced Kyber and Dilithium classes with MLKEM_* and MLDSA_* classes. Other breaking changes as well.
@@ -72,6 +77,7 @@ _NOTE: This changelog is generated and managed by [devtools-cli](https://pypi.or
 - Renamed MemSize class in KDF module to MemCost and changed its interface
 - Added CLI command `qclib` with options `--info` and `--version`
 
+[1.0.1]: https://github.com/aabmets/quantcrypt/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/aabmets/quantcrypt/compare/0.4.2...1.0.0
 [0.4.2]: https://github.com/aabmets/quantcrypt/compare/0.4.0...0.4.2
 [0.4.0]: https://github.com/aabmets/quantcrypt/compare/0.3.4...0.4.0
