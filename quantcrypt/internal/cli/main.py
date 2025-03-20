@@ -40,7 +40,7 @@ def find_command_modules() -> Generator[ModuleType, None, None]:
     for filepath in import_dir.rglob("*.py"):
         if filepath.name == "compile.py":
             required_packages = ["cffi", "setuptools", "yaml", "requests"]
-            if not all(find_spec(pkg) is not None for pkg in required_packages):
+            if not all(find_spec(pkg) is not None for pkg in required_packages):  # pragma: no cover
                 continue
         relative_path = filepath.resolve().relative_to(package_path)
         module_path = '.'.join(relative_path.with_suffix('').parts)

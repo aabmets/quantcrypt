@@ -12,7 +12,7 @@
 from pathlib import Path
 from unittest.mock import patch
 from quantcrypt.internal import constants as const
-from quantcrypt.internal.compiler import Compiler
+from quantcrypt.compiler import Compiler
 
 
 def test_compiler_run(alt_tmp_path):
