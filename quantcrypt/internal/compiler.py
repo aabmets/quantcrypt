@@ -26,7 +26,7 @@ from itertools import product
 from dataclasses import dataclass
 from contextlib import contextmanager
 from quantcrypt.internal import constants as const
-from quantcrypt.internal import pqclean, errors, utils
+from quantcrypt.internal import pqclean, utils
 
 
 @dataclass(frozen=True)
@@ -112,13 +112,16 @@ class Target:
 
     def _windows_compiler_args(self) -> list[str]:  # pragma: no cover
         extra_flags: list[str] = []
+        compiler_args = ["/O2", "/MD", "/nologo"]
         for flag in self.required_flags:
             extra_flags.append(f"/arch:{flag.upper()}")
-        return ["/O2", "/MD", "/nologo", *extra_flags]
+        compiler_args.extend(extra_flags)
+        return compiler_args
 
     def _linux_compiler_args(self) -> list[str]:  # pragma: no cover
         arch = platform.machine().lower()
-        extra_flags = [
+        extra_flags: list[str] = []
+        compiler_args = [
             "-fdata-sections", "-ffunction-sections",
             "-O3", "-flto", "-std=c99", "-s"
         ]
@@ -130,7 +133,8 @@ class Target:
             for flag in self.required_flags:
                 march_flag += f"+{flag.lower()}"
             extra_flags.append(march_flag)
-        return extra_flags
+        compiler_args.extend(extra_flags)
+        return compiler_args
 
     @staticmethod
     def _darwin_compiler_args() -> list[str]:  # pragma: no cover
