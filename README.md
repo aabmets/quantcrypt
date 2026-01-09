@@ -20,6 +20,12 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=aabmets_quantcrypt&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=aabmets_quantcrypt)
 
 
+## NOTICE: Intent of Archival
+
+This project will be marked as read-only together with the PQClean project in July of 2026.  
+Please migrate your code to any alternative implementations, if any exist at all for Python.  
+Please refer to issue [PQClean/PQClean#604](https://github.com/PQClean/PQClean/issues/604) for more information.
+
 ## Description
 
 QuantCrypt is a cross-platform Python library for Post-Quantum Cryptography using precompiled PQClean binaries. 
